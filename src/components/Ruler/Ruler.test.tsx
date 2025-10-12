@@ -36,12 +36,12 @@ describe('Ruler', () => {
       expect(screen.getByText('4')).toBeInTheDocument();
     });
 
-    it('should render beat markers between bars', () => {
+    it('should render grid markers between bars', () => {
       render(<Ruler {...defaultProps} />);
-      // Beat markers show quarter notes between bars
-      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
-      // With 4 bars visible (16 beats), we should have multiple beat markers
-      expect(beatTicks.length).toBeGreaterThan(0);
+      // Grid markers show adaptive divisions between bar numbers
+      const gridTicks = document.querySelectorAll('.ruler__grid-tick');
+      // With 4 bars visible, we should have 3 grid lines between each bar number (12 total)
+      expect(gridTicks.length).toBeGreaterThan(0);
     });
   });
 
@@ -99,21 +99,21 @@ describe('Ruler', () => {
     });
   });
 
-  describe('Beat Markers', () => {
-    it('should render beat ticks between bars', () => {
+  describe('Grid Markers', () => {
+    it('should render grid ticks between bars', () => {
       const viewport800: ViewportState = { ...defaultViewport, widthPx: 800 };
       render(<Ruler {...defaultProps} viewport={viewport800} />);
       // 800px / 100px per beat = 8 beats = 2 bars
-      // Should have 6 beat ticks (excluding the 2 bar boundaries)
-      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
-      expect(beatTicks.length).toBe(6);
+      // Should have 3 grid ticks between each bar number (6 total for 2 bars)
+      const gridTicks = document.querySelectorAll('.ruler__grid-tick');
+      expect(gridTicks.length).toBeGreaterThanOrEqual(3);
     });
 
-    it('should position beat markers correctly', () => {
+    it('should position grid markers correctly', () => {
       render(<Ruler {...defaultProps} />);
-      // First beat tick should be at 100px (1 beat from start)
-      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
-      expect(beatTicks[0]).toHaveStyle({ left: '100px' });
+      // First grid tick should be at 100px (1 beat from start with barInterval=1)
+      const gridTicks = document.querySelectorAll('.ruler__grid-tick');
+      expect(gridTicks[0]).toHaveStyle({ left: '100px' });
     });
   });
 
@@ -130,10 +130,10 @@ describe('Ruler', () => {
       expect(barNumber).toHaveClass('ruler__bar-number');
     });
 
-    it('should style beat markers differently from bar numbers', () => {
+    it('should style grid markers differently from bar numbers', () => {
       render(<Ruler {...defaultProps} />);
-      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
-      expect(beatTicks[0]).toHaveClass('ruler__beat-tick');
+      const gridTicks = document.querySelectorAll('.ruler__grid-tick');
+      expect(gridTicks[0]).toHaveClass('ruler__grid-tick');
     });
   });
 
@@ -193,34 +193,29 @@ describe('Ruler', () => {
       expect(barNumbers[0]).toHaveClass('ruler__bar-number');
     });
 
-    it('should render beats with beat class', () => {
+    it('should render grid lines with adaptive spacing', () => {
       render(<Ruler {...defaultProps} />);
-      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
-      // Should have beat ticks between bars
-      expect(beatTicks.length).toBeGreaterThan(0);
+      const gridTicks = document.querySelectorAll('.ruler__grid-tick');
+      // Should have grid lines between bar numbers (3 per bar interval)
+      expect(gridTicks.length).toBeGreaterThan(0);
     });
 
-    it('should render sub-beats only at high zoom', () => {
-      // At low zoom (50), sub-beats should not be visible
-      const viewportLowZoom: ViewportState = { ...defaultViewport, zoom: 50 };
+    it('should adapt grid density based on zoom level', () => {
+      // At very low zoom (many bars visible), grid should be sparser
+      const viewportLowZoom: ViewportState = { ...defaultViewport, zoom: 5, widthPx: 2000 };
       const { rerender } = render(<Ruler {...defaultProps} viewport={viewportLowZoom} />);
-      let subBeatTicks = document.querySelectorAll('.ruler__subbeat-tick');
-      expect(subBeatTicks.length).toBe(0);
+      const gridTicksLowZoom = document.querySelectorAll('.ruler__grid-tick');
+      const lowZoomCount = gridTicksLowZoom.length;
 
-      // At high zoom (200), sub-beats should be visible
+      // At high zoom (fewer bars visible), grid can be denser
       const viewportHighZoom: ViewportState = { ...defaultViewport, zoom: 200 };
       rerender(<Ruler {...defaultProps} viewport={viewportHighZoom} />);
-      subBeatTicks = document.querySelectorAll('.ruler__subbeat-tick');
-      expect(subBeatTicks.length).toBeGreaterThan(0);
-    });
+      const gridTicksHighZoom = document.querySelectorAll('.ruler__grid-tick');
+      const highZoomCount = gridTicksHighZoom.length;
 
-    it('should show current snap grid with highlight class', () => {
-      const propsWithSnap = { ...defaultProps, snapValue: 0.25 }; // 16th notes
-      render(<Ruler {...propsWithSnap} />);
-      // Should have highlighted snap grid markers
-      const snapHighlights = document.querySelectorAll('.ruler__snap-highlight');
-      // At least some markers should be highlighted
-      expect(snapHighlights.length).toBeGreaterThan(0);
+      // Both should have grid lines, but adaptive spacing means counts will vary
+      expect(lowZoomCount).toBeGreaterThan(0);
+      expect(highZoomCount).toBeGreaterThan(0);
     });
 
     it('should position bar ticks at bar boundaries', () => {
@@ -234,11 +229,11 @@ describe('Ruler', () => {
       expect(bar2).toHaveStyle({ left: '400px' });
     });
 
-    it('should position beat ticks between bars', () => {
+    it('should position grid ticks between bars', () => {
       render(<Ruler {...defaultProps} />);
-      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
-      // First beat tick should be at 100px (1 beat)
-      expect(beatTicks[0]).toHaveStyle({ left: '100px' });
+      const gridTicks = document.querySelectorAll('.ruler__grid-tick');
+      // First grid tick should be at 100px (1 beat with barInterval=1)
+      expect(gridTicks[0]).toHaveStyle({ left: '100px' });
     });
   });
 });

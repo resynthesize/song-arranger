@@ -17,11 +17,11 @@ interface RulerProps {
 const BEATS_PER_BAR = 4; // 4/4 time signature
 
 const Ruler = ({ viewport, snapValue, onPositionClick }: RulerProps) => {
-  // Calculate visible bars, beats, sub-beats, and adaptive marker intervals
-  const { bars, beatTicks, subBeatTicks, snapHighlights } = useMemo(() => {
+  // Calculate visible bars and adaptive grid lines
+  const { bars, gridLines } = useMemo(() => {
     // Handle zero width gracefully
     if (viewport.widthPx === 0) {
-      return { bars: [], beatTicks: [], subBeatTicks: [], snapHighlights: [] };
+      return { bars: [], gridLines: [] };
     }
 
     // Calculate visible range in beats using viewport
@@ -49,81 +49,37 @@ const Ruler = ({ viewport, snapValue, onPositionClick }: RulerProps) => {
     // else: show every bar
 
     const barsArray: Array<{ barNumber: number; position: number }> = [];
-    const beatTicksArray: Array<{ position: number; beat: number }> = [];
-    const subBeatTicksArray: Array<{ position: number }> = [];
-    const snapHighlightsArray: Array<{ position: number }> = [];
+    const gridLinesArray: Array<{ position: number }> = [];
 
-    // Show sub-beats (16ths) only at high zoom levels (>150)
-    const showSubBeats = viewport.zoom > 150;
+    // Calculate grid interval: always 4 divisions between consecutive bar numbers
+    // This is the beat distance between each grid line
+    const gridIntervalBeats = (barInterval * BEATS_PER_BAR) / 4;
 
-    // Generate bar numbers
-    for (let bar = startBar; bar <= endBar + barInterval; bar++) {
+    // Generate bar numbers and their associated grid lines
+    // Start from the first bar that matches the interval and increment by barInterval
+    const firstIntervalBar = Math.floor(startBar / barInterval) * barInterval;
+    for (let bar = firstIntervalBar; bar <= endBar + barInterval; bar += barInterval) {
       const barNumber = bar + 1; // Bars start at 1
       const barBeat = bar * BEATS_PER_BAR;
 
-      // Add bar marker if it matches the interval
-      if ((bar % barInterval) === 0) {
-        const x = beatsToViewportPx(barBeat, viewport); // Position relative to viewport
-        barsArray.push({ barNumber, position: x });
-      }
-    }
+      const x = beatsToViewportPx(barBeat, viewport); // Position relative to viewport
+      barsArray.push({ barNumber, position: x });
 
-    // Generate beat ticks (quarter notes) - only show when zoomed in enough
-    // At low zoom levels, beat ticks would be too dense
-    const showBeatTicks = viewport.zoom >= 5; // Show beats at 5px/beat or higher
+      // Generate 3 grid lines between this bar and the next numbered bar
+      // (the 4th division is the next bar number itself)
+      for (let i = 1; i < 4; i++) {
+        const gridBeat = barBeat + (i * gridIntervalBeats);
+        const gridX = beatsToViewportPx(gridBeat, viewport);
 
-    if (showBeatTicks) {
-      const startBeatFloor = Math.floor(startBeat);
-      const endBeatCeil = Math.ceil(endBeat);
-      for (let beat = startBeatFloor; beat <= endBeatCeil; beat++) {
-        // Skip if this beat is a bar downbeat
-        if (beat % BEATS_PER_BAR !== 0) {
-          const x = beatsToViewportPx(beat, viewport);
-          if (x >= 0 && x <= viewport.widthPx) {
-            beatTicksArray.push({ position: x, beat });
-          }
+        // Only add if within visible range
+        if (gridBeat >= startBeat && gridBeat <= endBeat) {
+          gridLinesArray.push({ position: gridX });
         }
       }
     }
 
-    // Generate sub-beat ticks (16th notes) if zoomed in enough
-    if (showSubBeats) {
-      const subBeatInterval = 0.25; // 16th notes
-      const startSubBeat = Math.floor(startBeat / subBeatInterval) * subBeatInterval;
-      const endSubBeat = Math.ceil(endBeat / subBeatInterval) * subBeatInterval;
-
-      for (let subBeat = startSubBeat; subBeat <= endSubBeat; subBeat += subBeatInterval) {
-        // Skip if this is a beat or bar boundary
-        const isBeat = Math.abs(subBeat % 1) < 0.01;
-        if (!isBeat) {
-          const x = beatsToViewportPx(subBeat, viewport);
-          if (x >= 0 && x <= viewport.widthPx) {
-            subBeatTicksArray.push({ position: x });
-          }
-        }
-      }
-    }
-
-    // Generate snap grid highlights
-    if (snapValue > 0 && snapValue < 1) {
-      const startSnap = Math.floor(startBeat / snapValue) * snapValue;
-      const endSnap = Math.ceil(endBeat / snapValue) * snapValue;
-
-      for (let snap = startSnap; snap <= endSnap; snap += snapValue) {
-        const x = beatsToViewportPx(snap, viewport);
-        if (x >= 0 && x <= viewport.widthPx) {
-          snapHighlightsArray.push({ position: x });
-        }
-      }
-    }
-
-    return {
-      bars: barsArray,
-      beatTicks: beatTicksArray,
-      subBeatTicks: subBeatTicksArray,
-      snapHighlights: snapHighlightsArray
-    };
-  }, [viewport, snapValue]);
+    return { bars: barsArray, gridLines: gridLinesArray };
+  }, [viewport]);
 
   const handleClick = (pixelX: number) => {
     if (onPositionClick) {
@@ -138,42 +94,9 @@ const Ruler = ({ viewport, snapValue, onPositionClick }: RulerProps) => {
       {/* Header space to align with lane headers */}
       <div className="ruler__header" />
 
-      {/* Content area with bar numbers and tick markers */}
+      {/* Content area with bar numbers and grid markers */}
       <div className="ruler__content">
-        {/* Snap grid highlights - render first so they appear behind */}
-        {snapHighlights.map(({ position }, index) => (
-          <div
-            key={`snap-${index.toString()}`}
-            className="ruler__snap-highlight"
-            style={{ left: `${position.toString()}px` }}
-          />
-        ))}
-
-        {/* Sub-beat ticks (16ths) - dimmest */}
-        {subBeatTicks.map(({ position }, index) => (
-          <div
-            key={`subbeat-${index.toString()}`}
-            className="ruler__subbeat-tick"
-            style={{ left: `${position.toString()}px` }}
-            onClick={() => { handleClick(position); }}
-          >
-            │
-          </div>
-        ))}
-
-        {/* Beat ticks - medium brightness */}
-        {beatTicks.map(({ position, beat }) => (
-          <div
-            key={`beat-${beat.toString()}`}
-            className="ruler__beat-tick"
-            style={{ left: `${position.toString()}px` }}
-            onClick={() => { handleClick(position); }}
-          >
-            │
-          </div>
-        ))}
-
-        {/* Bar numbers - brightest */}
+        {/* Bar numbers */}
         {bars.map(({ barNumber, position }) => (
           <div
             key={`bar-${barNumber.toString()}`}
@@ -183,6 +106,18 @@ const Ruler = ({ viewport, snapValue, onPositionClick }: RulerProps) => {
             onClick={() => { handleClick(position); }}
           >
             {barNumber}
+          </div>
+        ))}
+
+        {/* Grid markers - always 4 divisions between bar numbers */}
+        {gridLines.map(({ position }, index) => (
+          <div
+            key={`grid-${index.toString()}`}
+            className="ruler__grid-tick"
+            style={{ left: `${position.toString()}px` }}
+            onClick={() => { handleClick(position); }}
+          >
+            │
           </div>
         ))}
       </div>
