@@ -1,0 +1,56 @@
+/**
+ * Song Arranger - Retro Terminal Theme
+ * Terminal green color palette with CSS variables
+ */
+
+:root {
+  /* Color Palette - Terminal Green */
+  --color-bg: #000000;
+  --color-primary: #00ff00;
+  --color-secondary: #008800;
+  --color-highlight: #66ff66;
+  --color-grid: #003300;
+
+  /* Typography */
+  --font-primary: 'VT323', monospace;
+  --font-secondary: 'Share Tech Mono', monospace;
+  --font-fallback: 'Courier', monospace;
+
+  /* Font Sizes (using VT323 which requires larger sizes) */
+  --font-size-small: 16px;
+  --font-size-base: 20px;
+  --font-size-large: 24px;
+  --font-size-xlarge: 32px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* CRT Effects (Foundation - to be implemented) */
+  --scanline-opacity: 0.1;
+  --glow-intensity: 2px;
+  --phosphor-glow: 0 0 var(--glow-intensity) var(--color-primary);
+
+  /* Z-Index Layers */
+  --z-base: 1;
+  --z-controls: 10;
+  --z-modal: 100;
+  --z-tooltip: 1000;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+}
+
+/* Respect user preferences for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-base: 0ms;
+    --transition-slow: 0ms;
+  }
+}

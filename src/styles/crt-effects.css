@@ -1,0 +1,64 @@
+/**
+ * Song Arranger - CRT Effects
+ * Foundation for scanlines and phosphor glow effects
+ * Effects are toggleable for accessibility
+ */
+
+/*
+ * CRT Effect Container
+ * Apply this class to enable CRT effects on an element
+ */
+.crt-effect {
+  position: relative;
+}
+
+/*
+ * Scanlines Effect
+ * Creates horizontal lines to simulate CRT display
+ * TODO: Implement with pseudo-element overlay when needed
+ */
+.crt-effect.scanlines::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: var(--z-modal);
+  /* Scanline implementation to be added */
+}
+
+/*
+ * Phosphor Glow Effect
+ * Adds green glow to text and elements
+ */
+.glow-text {
+  text-shadow: var(--phosphor-glow);
+}
+
+.glow-box {
+  box-shadow: var(--phosphor-glow);
+}
+
+/*
+ * Utility class to disable CRT effects
+ * Use when user prefers reduced motion or accessibility mode
+ */
+.no-crt-effects {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+.no-crt-effects::before,
+.no-crt-effects::after {
+  display: none !important;
+}
+
+/*
+ * Additional CRT effects to be implemented:
+ * - Screen curvature (border-radius + transform)
+ * - RGB split/chromatic aberration
+ * - Flicker animation
+ * - Screen burn-in effects
+ */
