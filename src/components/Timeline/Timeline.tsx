@@ -3,8 +3,9 @@
  * Main timeline container with lanes and clips
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { useViewport } from '@/hooks/useViewport';
 import Lane from '../Lane';
 import Ruler from '../Ruler';
 import {
@@ -29,7 +30,7 @@ import {
   setEditingLane,
   clearEditingLane,
 } from '@/store/slices/lanesSlice';
-import { zoomIn, zoomOut, setPlayheadPosition } from '@/store/slices/timelineSlice';
+import { setPlayheadPosition, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
 import { snapToGrid } from '@/utils/snap';
 import type { ID, Position, Duration } from '@/types';
 import './Timeline.css';
@@ -37,12 +38,16 @@ import './Timeline.css';
 const Timeline = () => {
   const dispatch = useAppDispatch();
   const timelineRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // Use viewport hook for pan/zoom interactions
+  const { viewport, handleZoomIn, handleZoomOut } = useViewport({
+    containerRef: timelineRef,
+    wheelZoomEnabled: true,
+    panEnabled: true,
+  });
 
   // Select data from Redux
-  const zoom = useAppSelector((state) => state.timeline.zoom);
-  const snapValue = useAppSelector((state) => state.timeline.snapValue);
+  const effectiveSnapValue = useAppSelector(selectEffectiveSnapValue);
   const lanes = useAppSelector((state) => state.lanes.lanes);
   const clips = useAppSelector((state) => state.clips.clips);
   const selectedClipIds = useAppSelector(
@@ -135,7 +140,7 @@ const Timeline = () => {
   const handleLaneDoubleClick = useCallback(
     (laneId: ID, position: Position) => {
       // Snap to grid based on current snap value
-      const snappedPosition = snapToGrid(position, snapValue);
+      const snappedPosition = snapToGrid(position, effectiveSnapValue);
       dispatch(
         addClip({
           laneId,
@@ -144,7 +149,7 @@ const Timeline = () => {
         })
       );
     },
-    [dispatch, snapValue]
+    [dispatch, effectiveSnapValue]
   );
 
   // Handle clip label change
@@ -205,40 +210,11 @@ const Timeline = () => {
   // Handle ruler click to move playhead
   const handleRulerClick = useCallback(
     (position: Position) => {
-      const snappedPosition = snapToGrid(position, snapValue);
+      const snappedPosition = snapToGrid(position, effectiveSnapValue);
       dispatch(setPlayheadPosition(snappedPosition));
     },
-    [dispatch, snapValue]
+    [dispatch, effectiveSnapValue]
   );
-
-  // Track container width and scroll position for ruler
-  useEffect(() => {
-    const timeline = timelineRef.current;
-    if (!timeline) return;
-
-    const updateDimensions = () => {
-      const rect = timeline.getBoundingClientRect();
-      setContainerWidth(rect.width);
-      setScrollLeft(timeline.scrollLeft);
-    };
-
-    // Initial dimensions
-    updateDimensions();
-
-    // Update on resize
-    window.addEventListener('resize', updateDimensions);
-
-    // Update on scroll
-    const handleScroll = () => {
-      setScrollLeft(timeline.scrollLeft);
-    };
-    timeline.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('resize', updateDimensions);
-      timeline.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -258,15 +234,15 @@ const Timeline = () => {
         dispatch(clearSelection());
       }
 
-      // Zoom shortcuts
+      // Zoom shortcuts - use viewport hook handlers
       if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
         e.preventDefault();
-        dispatch(zoomIn());
+        handleZoomIn();
       }
 
       if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
         e.preventDefault();
-        dispatch(zoomOut());
+        handleZoomOut();
       }
     };
 
@@ -274,48 +250,7 @@ const Timeline = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [dispatch, selectedClipIds]);
-
-  // Handle mousewheel zoom with focal point
-  useEffect(() => {
-    const timeline = timelineRef.current;
-    if (!timeline) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      // Only zoom if Ctrl/Cmd key is held (standard zoom gesture)
-      if (!e.ctrlKey && !e.metaKey) return;
-
-      e.preventDefault();
-
-      // Store scroll position before zoom
-      const scrollLeft = timeline.scrollLeft;
-      const mouseX = e.clientX - timeline.getBoundingClientRect().left;
-
-      // Calculate position in beats (focal point)
-      const beatPositionAtMouse = (scrollLeft + mouseX) / zoom;
-
-      // Zoom in or out based on wheel delta
-      if (e.deltaY < 0) {
-        dispatch(zoomIn());
-      } else if (e.deltaY > 0) {
-        dispatch(zoomOut());
-      }
-
-      // Note: Focal point scrolling adjustment happens in next render
-      // We'll use requestAnimationFrame to adjust scroll after zoom state updates
-      requestAnimationFrame(() => {
-        const newZoom = zoom; // This will be updated by Redux in next render
-        // Calculate new scroll position to keep focal point under mouse
-        const newScrollLeft = beatPositionAtMouse * newZoom - mouseX;
-        timeline.scrollLeft = Math.max(0, newScrollLeft);
-      });
-    };
-
-    timeline.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      timeline.removeEventListener('wheel', handleWheel);
-    };
-  }, [dispatch, zoom]);
+  }, [dispatch, selectedClipIds, handleZoomIn, handleZoomOut]);
 
   return (
     <div className="timeline" data-testid="timeline" ref={timelineRef}>
@@ -326,10 +261,8 @@ const Timeline = () => {
       ) : (
         <>
           <Ruler
-            zoom={zoom}
-            snapValue={snapValue}
-            containerWidth={containerWidth}
-            scrollLeft={scrollLeft}
+            viewport={viewport}
+            snapValue={effectiveSnapValue}
             onPositionClick={handleRulerClick}
           />
           <div className="timeline__lanes">
@@ -339,8 +272,8 @@ const Timeline = () => {
                 id={lane.id}
                 name={lane.name}
                 clips={clips}
-                zoom={zoom}
-                snapValue={snapValue}
+                viewport={viewport}
+                snapValue={effectiveSnapValue}
                 selectedClipIds={selectedClipIds}
                 isEditing={editingLaneId === lane.id}
                 onNameChange={handleNameChange}

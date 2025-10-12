@@ -12,6 +12,28 @@ import lanesReducer from '@/store/slices/lanesSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
 import clipsReducer from '@/store/slices/clipsSlice';
 import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
+import type { ViewportState } from '@/types';
+
+// Default viewport for tests
+const defaultViewport: ViewportState = {
+  offsetBeats: 0,
+  zoom: 100,
+  widthPx: 1600,
+  heightPx: 600,
+};
+
+// Helper to create timeline state with viewport structure
+const createTimelineState = (overrides = {}) => {
+  return {
+    viewport: { ...defaultViewport },
+    playheadPosition: 0,
+    isPlaying: false,
+    tempo: 120,
+    snapValue: 1,
+    snapMode: 'fixed' as const,
+    ...overrides,
+  };
+};
 
 // Helper to create a test store with initial state
 const createTestStore = (preloadedState = {}) => {
@@ -41,7 +63,7 @@ describe('HUD', () => {
 
   it('should display BPM value from timeline state', () => {
     renderWithStore(<HUD />, {
-      timeline: { tempo: 140, zoom: 100, playheadPosition: 0, isPlaying: false, snapValue: 1 },
+      timeline: createTimelineState({ tempo: 140 }),
     });
 
     expect(screen.getByText(/140/)).toBeInTheDocument();
@@ -50,7 +72,7 @@ describe('HUD', () => {
 
   it('should display zoom level', () => {
     renderWithStore(<HUD />, {
-      timeline: { tempo: 120, zoom: 200, playheadPosition: 0, isPlaying: false, snapValue: 1 },
+      timeline: createTimelineState({ viewport: { ...defaultViewport, zoom: 200 } }),
     });
 
     expect(screen.getByText(/ZOOM/i)).toBeInTheDocument();
@@ -59,7 +81,7 @@ describe('HUD', () => {
 
   it('should display snap value with musical notation', () => {
     renderWithStore(<HUD />, {
-      timeline: { tempo: 120, zoom: 100, playheadPosition: 0, isPlaying: false, snapValue: 1 },
+      timeline: createTimelineState({ snapValue: 1 }),
     });
 
     expect(screen.getByText(/SNAP/i)).toBeInTheDocument();
@@ -68,7 +90,7 @@ describe('HUD', () => {
 
   it('should display playhead position in beats', () => {
     renderWithStore(<HUD />, {
-      timeline: { tempo: 120, zoom: 100, playheadPosition: 8.5, isPlaying: false, snapValue: 1 },
+      timeline: createTimelineState({ playheadPosition: 8.5 }),
     });
 
     expect(screen.getByText(/TIME/i)).toBeInTheDocument();
@@ -77,7 +99,7 @@ describe('HUD', () => {
 
   it('should display playhead position in bars:beats format', () => {
     renderWithStore(<HUD />, {
-      timeline: { tempo: 120, zoom: 100, playheadPosition: 8.5, isPlaying: false, snapValue: 1 },
+      timeline: createTimelineState({ playheadPosition: 8.5 }),
     });
 
     // 8.5 beats = bar 3, beat 1 (zero-indexed: bar 2)
@@ -160,7 +182,7 @@ describe('HUD', () => {
 
   it('should format playhead position to 2 decimal places', () => {
     renderWithStore(<HUD />, {
-      timeline: { tempo: 120, zoom: 100, playheadPosition: 10.123456, isPlaying: false, snapValue: 1 },
+      timeline: createTimelineState({ playheadPosition: 10.123456 }),
     });
 
     expect(screen.getByText(/10.12/)).toBeInTheDocument();
@@ -168,7 +190,7 @@ describe('HUD', () => {
 
   it('should handle zero playhead position', () => {
     renderWithStore(<HUD />, {
-      timeline: { tempo: 120, zoom: 100, playheadPosition: 0, isPlaying: false, snapValue: 1 },
+      timeline: createTimelineState({ playheadPosition: 0 }),
     });
 
     expect(screen.getByText(/1:1/)).toBeInTheDocument(); // Bar 1, beat 1
@@ -177,14 +199,14 @@ describe('HUD', () => {
 
   it('should display different snap values correctly', () => {
     const { rerender } = renderWithStore(<HUD />, {
-      timeline: { tempo: 120, zoom: 100, playheadPosition: 0, isPlaying: false, snapValue: 0.25 },
+      timeline: createTimelineState({ snapValue: 0.25 }),
     });
 
     expect(screen.getByText(/1\/16/)).toBeInTheDocument();
 
     // Update snap value
     const store = createTestStore({
-      timeline: { tempo: 120, zoom: 100, playheadPosition: 0, isPlaying: false, snapValue: 4 },
+      timeline: createTimelineState({ snapValue: 4 }),
     });
 
     rerender(<Provider store={store}><HUD /></Provider>);

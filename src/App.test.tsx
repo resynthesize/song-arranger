@@ -45,7 +45,7 @@ describe('App', () => {
       </Provider>
     );
 
-    expect(screen.getByText('SONG ARRANGER')).toBeInTheDocument();
+    expect(screen.getByTestId('menu-bar')).toBeInTheDocument();
   });
 
   it('should render timeline', () => {
@@ -81,7 +81,7 @@ describe('App', () => {
       </Provider>
     );
 
-    expect(screen.getByText('+ ADD LANE')).toBeInTheDocument();
+    expect(screen.getByText('+ LANE')).toBeInTheDocument();
   });
 
   it('should show empty state when no lanes', () => {

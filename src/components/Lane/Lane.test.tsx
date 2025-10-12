@@ -6,7 +6,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Lane from './Lane';
-import type { Clip } from '@/types';
+import type { Clip, ViewportState } from '@/types';
 
 describe('Lane', () => {
   const mockClips: Clip[] = [
@@ -20,11 +20,18 @@ describe('Lane', () => {
     },
   ];
 
+  const defaultViewport: ViewportState = {
+    offsetBeats: 0,
+    zoom: 100,
+    widthPx: 1600,
+    heightPx: 600,
+  };
+
   const defaultProps = {
     id: 'lane-1',
     name: 'Kick',
     clips: mockClips,
-    zoom: 100,
+    viewport: defaultViewport,
     snapValue: 1,
     selectedClipIds: [],
     isEditing: false,
@@ -161,7 +168,7 @@ describe('Lane', () => {
 
   it('should calculate click position in beats', () => {
     const onDoubleClick = jest.fn();
-    render(<Lane {...defaultProps} zoom={100} onDoubleClick={onDoubleClick} />);
+    render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
 
     const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -180,7 +187,8 @@ describe('Lane', () => {
 
     laneContent.getBoundingClientRect = mockGetBoundingClientRect;
 
-    // Simulate double-click at x=500, which is 400px from left = 4 beats (400 / 100)
+    // Simulate double-click at x=500, which is 400px from left
+    // With viewport.offsetBeats=0 and viewport.zoom=100, position = 0 + 400/100 = 4 beats
     const dblClickEvent = new MouseEvent('dblclick', {
       bubbles: true,
       clientX: 500,

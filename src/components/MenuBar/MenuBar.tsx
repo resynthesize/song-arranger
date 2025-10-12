@@ -5,7 +5,8 @@
 
 import { useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { setTempo, setSnapValue, zoomIn, zoomOut } from '@/store/slices/timelineSlice';
+import { setTempo, setSnapValue, setSnapMode, zoomIn, zoomOut, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
+import { calculateGridSnap } from '@/utils/snap';
 import { addLane } from '@/store/slices/lanesSlice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
 import { TerminalButton } from '../TerminalButton';
@@ -14,7 +15,9 @@ import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
 import './MenuBar.css';
 
 // Snap value options with musical notation
-const SNAP_OPTIONS: Array<{ value: number; label: string }> = [
+// 'grid' is a special value that enables dynamic grid-based snapping
+const SNAP_OPTIONS: Array<{ value: number | 'grid'; label: string }> = [
+  { value: 'grid', label: 'Grid' },
   { value: 0.25, label: '1/16' },
   { value: 0.5, label: '1/8' },
   { value: 1, label: '1/4' },
@@ -22,12 +25,24 @@ const SNAP_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 4, label: '1 Bar' },
 ];
 
+// Format beats to bars:beats notation
+const formatBarsBeats = (beats: number): string => {
+  const beatsPerBar = 4;
+  const bar = Math.floor(beats / beatsPerBar) + 1;
+  const beat = Math.floor(beats % beatsPerBar) + 1;
+  return `${bar.toString()}:${beat.toString()}`;
+};
+
 const MenuBar = () => {
   const dispatch = useAppDispatch();
   const tempo = useAppSelector((state) => state.timeline.tempo);
+  const snapMode = useAppSelector((state) => state.timeline.snapMode);
   const snapValue = useAppSelector((state) => state.timeline.snapValue);
-  const zoom = useAppSelector((state) => state.timeline.zoom);
+  const effectiveSnapValue = useAppSelector(selectEffectiveSnapValue);
+  const zoom = useAppSelector((state) => state.timeline.viewport.zoom);
+  const playheadPosition = useAppSelector((state) => state.timeline.playheadPosition);
   const laneCount = useAppSelector((state) => state.lanes.lanes.length);
+  const clipCount = useAppSelector((state) => state.clips.clips.length);
   const selectedCount = useAppSelector(
     (state) => state.selection.selectedClipIds.length
   );
@@ -57,7 +72,14 @@ const MenuBar = () => {
     (item: TerminalMenuItem) => {
       const option = SNAP_OPTIONS.find((opt) => opt.value.toString() === item.id);
       if (option) {
-        dispatch(setSnapValue(option.value));
+        if (option.value === 'grid') {
+          // Enable grid snap mode
+          dispatch(setSnapMode('grid'));
+        } else {
+          // Set fixed snap value
+          dispatch(setSnapMode('fixed'));
+          dispatch(setSnapValue(option.value));
+        }
       }
     },
     [dispatch]
@@ -73,7 +95,9 @@ const MenuBar = () => {
 
   // Get current snap label for display
   const currentSnapLabel =
-    SNAP_OPTIONS.find((opt) => opt.value === snapValue)?.label || '1/4';
+    snapMode === 'grid'
+      ? 'Grid'
+      : SNAP_OPTIONS.find((opt) => opt.value === snapValue)?.label || '1/4';
 
   // Create menu items for snap options
   const snapMenuItems: TerminalMenuItem[] = SNAP_OPTIONS.map((option) => ({
@@ -81,17 +105,57 @@ const MenuBar = () => {
     label: option.label,
   }));
 
+  // Format position for display
+  const barsBeatsFormatted = formatBarsBeats(playheadPosition);
+
   return (
     <div className="menu-bar" data-testid="menu-bar">
-      <div className="menu-bar__section">
-        <h1 className="menu-bar__title">SONG ARRANGER</h1>
+      {/* Compact info display */}
+      <div className="menu-bar__info">
+        <span className="menu-bar__info-item">
+          <span className="menu-bar__info-label">BPM</span>
+          <span className="menu-bar__info-value">{tempo}</span>
+        </span>
+        <span className="menu-bar__separator">|</span>
+        <span className="menu-bar__info-item">
+          <span className="menu-bar__info-label">POS</span>
+          <span className="menu-bar__info-value">{barsBeatsFormatted}</span>
+        </span>
+        <span className="menu-bar__separator">|</span>
+        <span className="menu-bar__info-item">
+          <span className="menu-bar__info-label">ZOOM</span>
+          <span className="menu-bar__info-value">{zoom < 1 ? zoom.toFixed(2) : zoom.toString()}px</span>
+        </span>
+        <span className="menu-bar__separator">|</span>
+        <span className="menu-bar__info-item">
+          <span className="menu-bar__info-label">SNAP</span>
+          <span className="menu-bar__info-value">{currentSnapLabel}</span>
+        </span>
+        <span className="menu-bar__separator">|</span>
+        <span className="menu-bar__info-item">
+          <span className="menu-bar__info-label">L</span>
+          <span className="menu-bar__info-value">{laneCount}</span>
+        </span>
+        <span className="menu-bar__separator">|</span>
+        <span className="menu-bar__info-item">
+          <span className="menu-bar__info-label">C</span>
+          <span className="menu-bar__info-value">{clipCount}</span>
+        </span>
+        <span className="menu-bar__separator">|</span>
+        <span className="menu-bar__info-item">
+          <span className="menu-bar__info-label">S</span>
+          <span className="menu-bar__info-value">{selectedCount}</span>
+        </span>
+        <span className="menu-bar__separator">|</span>
+        <span className="menu-bar__info-item">
+          <span className="menu-bar__info-label">CRT</span>
+          <span className="menu-bar__info-value">{crtEffectsEnabled ? 'ON' : 'OFF'}</span>
+        </span>
       </div>
 
-      <div className="menu-bar__section">
+      {/* Compact controls */}
+      <div className="menu-bar__controls">
         <div className="menu-bar__control">
-          <label htmlFor="tempo-input" className="menu-bar__label">
-            TEMPO
-          </label>
           <TerminalInput
             id="tempo-input"
             type="number"
@@ -99,13 +163,12 @@ const MenuBar = () => {
             onChange={handleTempoChange}
             min={20}
             max={300}
-            style={{ width: '80px' }}
+            style={{ width: '60px' }}
+            title="Tempo (BPM)"
           />
-          <span className="menu-bar__unit">BPM</span>
         </div>
 
         <div className="menu-bar__control">
-          <label className="menu-bar__label">SNAP</label>
           <TerminalMenu
             items={snapMenuItems}
             trigger={<span>{currentSnapLabel}</span>}
@@ -113,8 +176,7 @@ const MenuBar = () => {
           />
         </div>
 
-        <div className="menu-bar__control">
-          <label className="menu-bar__label">ZOOM</label>
+        <div className="menu-bar__control menu-bar__control--zoom">
           <TerminalButton
             onClick={handleZoomOut}
             size="sm"
@@ -123,7 +185,6 @@ const MenuBar = () => {
           >
             -
           </TerminalButton>
-          <span className="menu-bar__zoom-display">{zoom}px/beat</span>
           <TerminalButton
             onClick={handleZoomIn}
             size="sm"
@@ -134,19 +195,13 @@ const MenuBar = () => {
           </TerminalButton>
         </div>
 
-        <TerminalButton onClick={handleAddLane}>
-          + ADD LANE
+        <TerminalButton onClick={handleAddLane} size="sm">
+          + LANE
         </TerminalButton>
 
-        <TerminalButton onClick={handleToggleCRT}>
-          CRT: {crtEffectsEnabled ? 'ON' : 'OFF'}
+        <TerminalButton onClick={handleToggleCRT} size="sm">
+          CRT
         </TerminalButton>
-      </div>
-
-      <div className="menu-bar__section menu-bar__section--status">
-        <span className="menu-bar__status">
-          LANES: {laneCount} | SELECTED: {selectedCount}
-        </span>
       </div>
     </div>
   );

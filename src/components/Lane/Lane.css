@@ -61,6 +61,7 @@
   background: var(--color-bg);
   min-width: 0;
   cursor: crosshair;
+  overflow: hidden; /* Clip content to prevent clips from overlapping lane header */
 }
 
 /* Grid canvas for dynamic grid lines */

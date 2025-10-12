@@ -98,3 +98,10 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
   direction: 'ltr',
   imageSmoothingEnabled: true,
 })) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
+// Mock ResizeObserver for viewport tests
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));

@@ -5,6 +5,11 @@
 
 import reducer, {
   setZoom,
+  zoomIn,
+  zoomOut,
+  setViewportOffset,
+  panViewport,
+  setViewportDimensions,
   setPlayheadPosition,
   play,
   pause,
@@ -12,16 +17,23 @@ import reducer, {
   togglePlayPause,
   setTempo,
   setSnapValue,
+  setSnapMode,
 } from './timelineSlice';
 import type { TimelineState } from '@/types';
 
 describe('timelineSlice', () => {
   const initialState: TimelineState = {
-    zoom: 100,
+    viewport: {
+      offsetBeats: 0,
+      zoom: 100,
+      widthPx: 1600,
+      heightPx: 600,
+    },
     playheadPosition: 0,
     isPlaying: false,
     tempo: 120,
     snapValue: 1,
+    snapMode: 'fixed',
   };
 
   it('should return the initial state', () => {
@@ -31,17 +43,88 @@ describe('timelineSlice', () => {
   describe('setZoom', () => {
     it('should set zoom level', () => {
       const newState = reducer(initialState, setZoom(200));
-      expect(newState.zoom).toBe(200);
+      expect(newState.viewport.zoom).toBe(200);
     });
 
     it('should clamp zoom to minimum value', () => {
-      const newState = reducer(initialState, setZoom(0.5));
-      expect(newState.zoom).toBe(1);
+      const newState = reducer(initialState, setZoom(0.1));
+      expect(newState.viewport.zoom).toBe(0.25);
     });
 
     it('should clamp zoom to maximum value', () => {
       const newState = reducer(initialState, setZoom(1000));
-      expect(newState.zoom).toBe(800);
+      expect(newState.viewport.zoom).toBe(800);
+    });
+  });
+
+  describe('zoomIn', () => {
+    it('should zoom to next discrete level', () => {
+      const state = { ...initialState, viewport: { ...initialState.viewport, zoom: 100 } };
+      const newState = reducer(state, zoomIn());
+      expect(newState.viewport.zoom).toBe(200);
+    });
+
+    it('should stop at maximum zoom level', () => {
+      const state = { ...initialState, viewport: { ...initialState.viewport, zoom: 800 } };
+      const newState = reducer(state, zoomIn());
+      expect(newState.viewport.zoom).toBe(800);
+    });
+  });
+
+  describe('zoomOut', () => {
+    it('should zoom to previous discrete level', () => {
+      const state = { ...initialState, viewport: { ...initialState.viewport, zoom: 100 } };
+      const newState = reducer(state, zoomOut());
+      expect(newState.viewport.zoom).toBe(50);
+    });
+
+    it('should stop at minimum zoom level', () => {
+      const state = { ...initialState, viewport: { ...initialState.viewport, zoom: 0.25 } };
+      const newState = reducer(state, zoomOut());
+      expect(newState.viewport.zoom).toBe(0.25);
+    });
+  });
+
+  describe('setViewportOffset', () => {
+    it('should set viewport offset', () => {
+      const newState = reducer(initialState, setViewportOffset(100));
+      expect(newState.viewport.offsetBeats).toBe(100);
+    });
+
+    it('should not allow negative offset', () => {
+      const newState = reducer(initialState, setViewportOffset(-50));
+      expect(newState.viewport.offsetBeats).toBe(0);
+    });
+  });
+
+  describe('panViewport', () => {
+    it('should pan viewport by delta', () => {
+      const state = { ...initialState, viewport: { ...initialState.viewport, offsetBeats: 100 } };
+      const newState = reducer(state, panViewport(50));
+      expect(newState.viewport.offsetBeats).toBe(150);
+    });
+
+    it('should pan viewport backward', () => {
+      const state = { ...initialState, viewport: { ...initialState.viewport, offsetBeats: 100 } };
+      const newState = reducer(state, panViewport(-30));
+      expect(newState.viewport.offsetBeats).toBe(70);
+    });
+
+    it('should not allow negative offset when panning backward', () => {
+      const state = { ...initialState, viewport: { ...initialState.viewport, offsetBeats: 20 } };
+      const newState = reducer(state, panViewport(-50));
+      expect(newState.viewport.offsetBeats).toBe(0);
+    });
+  });
+
+  describe('setViewportDimensions', () => {
+    it('should set viewport dimensions', () => {
+      const newState = reducer(
+        initialState,
+        setViewportDimensions({ widthPx: 1920, heightPx: 1080 })
+      );
+      expect(newState.viewport.widthPx).toBe(1920);
+      expect(newState.viewport.heightPx).toBe(1080);
     });
   });
 
@@ -140,6 +223,19 @@ describe('timelineSlice', () => {
     it('should allow zero snap value (no snapping)', () => {
       const newState = reducer(initialState, setSnapValue(0));
       expect(newState.snapValue).toBe(0);
+    });
+  });
+
+  describe('setSnapMode', () => {
+    it('should set snap mode to grid', () => {
+      const newState = reducer(initialState, setSnapMode('grid'));
+      expect(newState.snapMode).toBe('grid');
+    });
+
+    it('should set snap mode to fixed', () => {
+      const state = { ...initialState, snapMode: 'grid' as const };
+      const newState = reducer(state, setSnapMode('fixed'));
+      expect(newState.snapMode).toBe('fixed');
     });
   });
 });

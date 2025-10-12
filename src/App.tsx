@@ -6,7 +6,6 @@
 import { useState } from 'react';
 import { useAppSelector } from './store/hooks';
 import BootSequence from './components/BootSequence';
-import HUD from './components/HUD';
 import MenuBar from './components/MenuBar';
 import Timeline from './components/Timeline';
 import CRTEffects from './components/CRTEffects';
@@ -29,7 +28,6 @@ function App() {
 
   return (
     <div className={`app ${crtEffectsEnabled ? '' : 'no-crt-effects'}`}>
-      <HUD />
       <MenuBar />
       <Timeline />
       <CRTEffects />

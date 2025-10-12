@@ -4,7 +4,8 @@
  */
 
 import { useState, useRef, useEffect, MouseEvent, KeyboardEvent } from 'react';
-import type { ID, Position, Duration } from '@/types';
+import type { ID, Position, Duration, ViewportState } from '@/types';
+import { beatsToViewportPx } from '@/utils/viewport';
 import { snapToGrid } from '@/utils/snap';
 import './Clip.css';
 
@@ -12,7 +13,7 @@ interface ClipProps {
   id: ID;
   position: Position;
   duration: Duration;
-  zoom: number;
+  viewport: ViewportState;
   snapValue: number;
   isSelected: boolean;
   label?: string;
@@ -29,7 +30,7 @@ const Clip = ({
   id,
   position,
   duration,
-  zoom,
+  viewport,
   snapValue,
   isSelected,
   label,
@@ -51,9 +52,9 @@ const Clip = ({
   const dragStartDuration = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Convert beats to pixels
-  const leftPx = position * zoom;
-  const widthPx = duration * zoom;
+  // Convert beats to viewport-relative pixels
+  const leftPx = beatsToViewportPx(position, viewport);
+  const widthPx = duration * viewport.zoom;
 
   const handleMouseDown = (e: MouseEvent) => {
     if (e.button !== 0) return; // Only left click
@@ -132,7 +133,7 @@ const Clip = ({
     const handleMouseMove = (e: globalThis.MouseEvent) => {
       const deltaX = e.clientX - dragStartX.current;
       const deltaY = e.clientY - dragStartY.current;
-      const deltaBeats = deltaX / zoom;
+      const deltaBeats = deltaX / viewport.zoom;
 
       if (isDragging) {
         // Calculate new position and snap it (same approach as resize)
@@ -178,7 +179,7 @@ const Clip = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, id, zoom, snapValue, onMove, onResize, onVerticalDrag]);
+  }, [isDragging, isResizing, id, viewport.zoom, snapValue, onMove, onResize, onVerticalDrag]);
 
   // Display label: custom label > lane name > nothing
   const displayLabel = label || laneName;

@@ -37,3 +37,39 @@ export function snapToGrid(position: number, snapValue: number): number {
 export function getSnapIncrement(snapValue: number): number {
   return snapValue;
 }
+
+/**
+ * Calculate the dynamic grid snap value based on zoom level
+ * This matches the ruler's bar number interval, divided by 4 to create
+ * 4 evenly-spaced grid markers between consecutive bar numbers.
+ * @param zoom - Pixels per beat
+ * @param containerWidth - Optional container width (defaults to 1600px reference)
+ * @returns The grid snap interval in beats
+ */
+export function calculateGridSnap(zoom: number, containerWidth: number = 1600): number {
+  const BEATS_PER_BAR = 4;
+
+  // Calculate visible range in beats and bars
+  const beatsVisible = containerWidth / zoom;
+  const barsVisible = beatsVisible / BEATS_PER_BAR;
+
+  // Determine bar number interval based on visible bars
+  // This matches the logic in Ruler.tsx
+  let barInterval = 1;
+  if (barsVisible > 128) {
+    barInterval = 16; // Very zoomed out: every 16 bars
+  } else if (barsVisible > 64) {
+    barInterval = 8; // Every 8 bars
+  } else if (barsVisible > 32) {
+    barInterval = 4; // Every 4 bars
+  } else if (barsVisible > 16) {
+    barInterval = 2; // Every 2 bars
+  }
+  // else: show every bar (barInterval = 1)
+
+  // Calculate grid snap: divide the interval between bar numbers into 4 parts
+  // If barInterval = 8 bars (32 beats between numbers), grid snap = 8 beats
+  const gridSnapBeats = barInterval * BEATS_PER_BAR / 4;
+
+  return gridSnapBeats;
+}

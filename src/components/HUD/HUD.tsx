@@ -37,7 +37,7 @@ const getSnapLabel = (snapValue: number): string => {
 
 const HUD = () => {
   const tempo = useAppSelector((state) => state.timeline.tempo);
-  const zoom = useAppSelector((state) => state.timeline.zoom);
+  const zoom = useAppSelector((state) => state.timeline.viewport.zoom);
   const snapValue = useAppSelector((state) => state.timeline.snapValue);
   const playheadPosition = useAppSelector((state) => state.timeline.playheadPosition);
   const clipCount = useAppSelector((state) => state.clips.clips.length);

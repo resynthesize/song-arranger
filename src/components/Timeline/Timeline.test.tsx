@@ -108,11 +108,17 @@ describe('Timeline', () => {
   it('should apply zoom from Redux state', () => {
     const store = createMockStore({
       timeline: {
-        zoom: 200,
+        viewport: {
+          offsetBeats: 0,
+          zoom: 200,
+          widthPx: 1600,
+          heightPx: 600,
+        },
         playheadPosition: 0,
         isPlaying: false,
         tempo: 120,
         snapValue: 1,
+        snapMode: 'fixed',
       },
       lanes: {
         lanes: [{ id: 'lane-1', name: 'Kick' }],

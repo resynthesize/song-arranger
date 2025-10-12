@@ -35,10 +35,6 @@ Song Arranger is a web-based timeline tool for sketching song structures with a 
 
    - Detailed point 1
    - Detailed point 2
-
-   🤖 Generated with Claude Code
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
    ```
 
 4. **Branch Management:**

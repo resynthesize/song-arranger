@@ -6,13 +6,21 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Clip from './Clip';
+import type { ViewportState } from '@/types';
 
 describe('Clip', () => {
+  const defaultViewport: ViewportState = {
+    offsetBeats: 0,
+    zoom: 100,
+    widthPx: 1600,
+    heightPx: 600,
+  };
+
   const defaultProps = {
     id: 'clip-1',
     position: 0,
     duration: 4,
-    zoom: 100,
+    viewport: defaultViewport,
     snapValue: 1,
     isSelected: false,
     onSelect: jest.fn(),
@@ -92,11 +100,13 @@ describe('Clip', () => {
   });
 
   it('should scale width based on zoom level', () => {
-    const { rerender } = render(<Clip {...defaultProps} zoom={50} />);
+    const viewport50: ViewportState = { ...defaultViewport, zoom: 50 };
+    const { rerender } = render(<Clip {...defaultProps} viewport={viewport50} />);
     const clip = screen.getByTestId('clip-clip-1');
     expect(clip).toHaveStyle({ width: '200px' }); // 4 beats * 50 zoom
 
-    rerender(<Clip {...defaultProps} zoom={200} />);
+    const viewport200: ViewportState = { ...defaultViewport, zoom: 200 };
+    rerender(<Clip {...defaultProps} viewport={viewport200} />);
     expect(clip).toHaveStyle({ width: '800px' }); // 4 beats * 200 zoom
   });
 });

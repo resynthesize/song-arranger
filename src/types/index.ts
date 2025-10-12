@@ -39,14 +39,30 @@ export interface Lane {
 }
 
 /**
+ * Snap mode type
+ */
+export type SnapMode = 'fixed' | 'grid';
+
+/**
+ * Viewport State - represents the visible area of the timeline
+ */
+export interface ViewportState {
+  offsetBeats: number; // Start of visible timeline in beats
+  zoom: number; // Pixels per beat
+  widthPx: number; // Viewport width in pixels
+  heightPx: number; // Viewport height in pixels
+}
+
+/**
  * Timeline State
  */
 export interface TimelineState {
-  zoom: number; // Pixels per beat
+  viewport: ViewportState; // Viewport state for infinite scroll
   playheadPosition: Position; // Current playback position in beats
   isPlaying: boolean;
   tempo: number; // BPM (beats per minute)
   snapValue: number; // Snap interval in beats (e.g., 0.25 for 1/16th note, 1 for quarter note)
+  snapMode: SnapMode; // 'fixed' for manual snap values, 'grid' for dynamic grid-based snapping
 }
 
 /**

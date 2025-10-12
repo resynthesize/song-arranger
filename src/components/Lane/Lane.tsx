@@ -3,16 +3,17 @@
  * Horizontal lane that contains clips
  */
 
-import { useRef, useEffect, KeyboardEvent, MouseEvent } from 'react';
+import { useRef, useEffect, useMemo, KeyboardEvent, MouseEvent } from 'react';
 import Clip from '../Clip';
-import type { ID, Clip as ClipType, Position, Duration } from '@/types';
+import type { ID, Clip as ClipType, Position, Duration, ViewportState } from '@/types';
+import { beatsToViewportPx, isRangeVisible } from '@/utils/viewport';
 import './Lane.css';
 
 interface LaneProps {
   id: ID;
   name: string;
   clips: ClipType[];
-  zoom: number;
+  viewport: ViewportState;
   snapValue: number;
   selectedClipIds: ID[];
   isEditing: boolean;
@@ -32,7 +33,7 @@ const Lane = ({
   id,
   name,
   clips,
-  zoom,
+  viewport,
   snapValue,
   selectedClipIds,
   isEditing,
@@ -54,6 +55,16 @@ const Lane = ({
   // Filter clips to only show those in this lane
   const laneClips = clips.filter((clip) => clip.laneId === id);
 
+  // Virtual rendering: only render clips visible in the viewport
+  // Use a margin of 200px to render clips slightly off-screen for smooth scrolling
+  const visibleClips = useMemo(() => {
+    return laneClips.filter((clip) => {
+      const clipStart = clip.position;
+      const clipEnd = clip.position + clip.duration;
+      return isRangeVisible(clipStart, clipEnd, viewport, 200);
+    });
+  }, [laneClips, viewport]);
+
   // Auto-focus input when editing starts
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -62,7 +73,7 @@ const Lane = ({
     }
   }, [isEditing]);
 
-  // Draw adaptive grid lines on canvas
+  // Draw adaptive grid lines on canvas - matches ruler's 4-division grid system
   useEffect(() => {
     const canvas = gridCanvasRef.current;
     const container = contentRef.current;
@@ -79,9 +90,17 @@ const Lane = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Calculate how many bars are visible (determines grid line density)
-    const barWidth = 4 * zoom; // 4 beats = 1 bar
-    const barsVisible = Math.ceil(canvas.width / barWidth);
+    const BEATS_PER_BAR = 4;
+
+    // Calculate visible range in beats using viewport
+    const startBeat = viewport.offsetBeats;
+    const beatsVisible = viewport.widthPx / viewport.zoom;
+    const endBeat = startBeat + beatsVisible;
+
+    // Calculate visible bars
+    const startBar = Math.floor(startBeat / BEATS_PER_BAR);
+    const endBar = Math.ceil(endBeat / BEATS_PER_BAR);
+    const barsVisible = endBar - startBar;
 
     // Determine bar line interval (same logic as ruler)
     let barInterval = 1;
@@ -95,67 +114,47 @@ const Lane = ({
       barInterval = 2; // Every 2 bars
     }
 
-    // Determine whether to show beat lines and sub-beat lines
-    const showBeats = barsVisible < 32;
-    const showSubBeats = zoom >= 200;
+    // Calculate grid interval: always 4 divisions between consecutive bar numbers
+    const gridIntervalBeats = (barInterval * BEATS_PER_BAR) / 4;
 
-    const numBars = Math.ceil(canvas.width / barWidth) + 1;
+    // Draw bar lines and grid lines (same logic as Ruler)
+    for (let bar = startBar; bar <= endBar + barInterval; bar++) {
+      const barBeat = bar * BEATS_PER_BAR;
 
-    // Draw bar lines - brighter and thicker
-    ctx.strokeStyle = '#00ff00';
-    ctx.globalAlpha = 0.35;
-    ctx.lineWidth = 2;
-    for (let i = 0; i <= numBars; i++) {
-      // Only draw if it matches the interval
-      if (i % barInterval === 0) {
-        const x = i * barWidth;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
+      // Add bar line if it matches the interval
+      if ((bar % barInterval) === 0) {
+        const x = beatsToViewportPx(barBeat, viewport); // Position relative to viewport
+
+        // Draw bar line (numbered bars in ruler) - brighter and thicker
+        if (x >= 0 && x <= canvas.width) {
+          ctx.strokeStyle = '#00ff00';
+          ctx.globalAlpha = 0.35;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        }
+
+        // Generate 3 grid lines between this bar and the next numbered bar
+        ctx.strokeStyle = '#003300';
+        ctx.globalAlpha = 0.2;
+        ctx.lineWidth = 1;
+        for (let i = 1; i < 4; i++) {
+          const gridBeat = barBeat + (i * gridIntervalBeats);
+          const gridX = beatsToViewportPx(gridBeat, viewport);
+
+          // Only draw if within visible range
+          if (gridBeat >= startBeat && gridBeat <= endBeat && gridX >= 0 && gridX <= canvas.width) {
+            ctx.beginPath();
+            ctx.moveTo(gridX, 0);
+            ctx.lineTo(gridX, canvas.height);
+            ctx.stroke();
+          }
+        }
       }
     }
-
-    // Draw beat lines (quarters) - dimmer and thinner
-    if (showBeats) {
-      ctx.strokeStyle = '#003300';
-      ctx.globalAlpha = 0.2;
-      ctx.lineWidth = 1;
-
-      const beatWidth = zoom; // 1 beat
-      const numBeats = Math.ceil(canvas.width / beatWidth) + 1;
-      for (let i = 0; i <= numBeats; i++) {
-        const x = i * beatWidth;
-        // Skip if this is a bar line (already drawn)
-        if (i % 4 === 0 && (Math.floor(i / 4) % barInterval === 0)) continue;
-
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-    }
-
-    // Draw sub-beat lines (1/16th notes) - very dim
-    if (showSubBeats) {
-      ctx.strokeStyle = '#002200';
-      ctx.globalAlpha = 0.1;
-      ctx.lineWidth = 1;
-
-      const sixteenthWidth = zoom * 0.25; // 1/16th note
-      const numSixteenths = Math.ceil(canvas.width / sixteenthWidth) + 1;
-      for (let i = 0; i <= numSixteenths; i++) {
-        const x = i * sixteenthWidth;
-        // Skip if this is a beat line (already drawn)
-        if (i % 4 === 0) continue;
-
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-    }
-  }, [zoom, snapValue]);
+  }, [viewport, snapValue]);
 
   // Re-draw grid when window resizes
   useEffect(() => {
@@ -206,7 +205,7 @@ const Lane = ({
     if (contentRef.current) {
       const rect = contentRef.current.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
-      const positionInBeats = clickX / zoom;
+      const positionInBeats = viewport.offsetBeats + clickX / viewport.zoom;
       onDoubleClick(id, positionInBeats);
     }
   };
@@ -239,13 +238,13 @@ const Lane = ({
           className="lane__grid"
           data-testid={`lane-${id}-grid`}
         />
-        {laneClips.map((clip) => (
+        {visibleClips.map((clip) => (
           <Clip
             key={clip.id}
             id={clip.id}
             position={clip.position}
             duration={clip.duration}
-            zoom={zoom}
+            viewport={viewport}
             snapValue={snapValue}
             isSelected={selectedClipIds.includes(clip.id)}
             label={clip.label}
