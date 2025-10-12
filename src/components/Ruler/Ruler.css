@@ -30,18 +30,20 @@
   overflow: hidden;
 }
 
-/* Bar Numbers */
+/* Bar Numbers - Brightest, most prominent */
 .ruler__bar-number {
   position: absolute;
   top: 0;
   padding: var(--spacing-xs) var(--spacing-sm);
   font-family: var(--font-primary);
-  font-size: var(--font-size-md);
-  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: #00ff00; /* Brightest green */
   cursor: pointer;
   transition: color var(--transition-fast);
   line-height: 1;
   pointer-events: auto;
+  text-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
 }
 
 .ruler__bar-number:hover {
@@ -49,7 +51,64 @@
   text-shadow: var(--phosphor-glow-sm);
 }
 
-/* Grid Tick Markers - always 4 divisions between bar numbers */
+/* Beat Tick Markers - Medium brightness */
+.ruler__beat-tick {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--spacing-xs);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-md);
+  color: #008800; /* Medium green */
+  opacity: 0.8;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+  pointer-events: auto;
+  line-height: 1;
+}
+
+.ruler__beat-tick:hover {
+  opacity: 1;
+  color: var(--color-secondary);
+}
+
+/* Sub-beat Tick Markers (16ths) - Dimmest, only at high zoom */
+.ruler__subbeat-tick {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--spacing-xs);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: #004400; /* Dim green */
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+  pointer-events: auto;
+  line-height: 1;
+}
+
+.ruler__subbeat-tick:hover {
+  opacity: 0.6;
+  color: var(--color-grid);
+}
+
+/* Snap grid highlights - subtle background glow */
+.ruler__snap-highlight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(0, 255, 0, 0.15);
+  pointer-events: none;
+  box-shadow: 0 0 4px rgba(0, 255, 0, 0.2);
+}
+
+/* Legacy grid tick - keep for backwards compatibility */
 .ruler__grid-tick {
   position: absolute;
   top: 0;

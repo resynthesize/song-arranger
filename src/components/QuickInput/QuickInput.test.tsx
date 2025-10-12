@@ -27,8 +27,8 @@ describe('QuickInput', () => {
         />
       );
 
-      expect(screen.getByText(/tempo/i)).toBeInTheDocument();
-      expect(screen.getByText(/BPM/i)).toBeInTheDocument();
+      expect(screen.getByText('SET TEMPO')).toBeInTheDocument();
+      expect(screen.getByLabelText('Tempo (BPM)')).toBeInTheDocument();
       expect(screen.getByDisplayValue('120')).toBeInTheDocument();
     });
 
@@ -42,8 +42,8 @@ describe('QuickInput', () => {
         />
       );
 
-      expect(screen.getByText(/zoom/i)).toBeInTheDocument();
-      expect(screen.getByText(/px\/beat/i)).toBeInTheDocument();
+      expect(screen.getByText('SET ZOOM LEVEL')).toBeInTheDocument();
+      expect(screen.getByLabelText('Zoom (px/beat)')).toBeInTheDocument();
       expect(screen.getByDisplayValue('5')).toBeInTheDocument();
     });
 
@@ -57,8 +57,8 @@ describe('QuickInput', () => {
         />
       );
 
-      expect(screen.getByText(/snap grid/i)).toBeInTheDocument();
-      expect(screen.getByText(/beats/i)).toBeInTheDocument();
+      expect(screen.getByText('SET SNAP GRID')).toBeInTheDocument();
+      expect(screen.getByLabelText('Snap value (beats)')).toBeInTheDocument();
       expect(screen.getByDisplayValue('1')).toBeInTheDocument();
     });
 
@@ -72,8 +72,8 @@ describe('QuickInput', () => {
         />
       );
 
-      expect(screen.getByText(/clip length/i)).toBeInTheDocument();
-      expect(screen.getByText(/beats/i)).toBeInTheDocument();
+      expect(screen.getByText('SET CLIP LENGTH')).toBeInTheDocument();
+      expect(screen.getByLabelText('Length (beats)')).toBeInTheDocument();
       expect(screen.getByDisplayValue('4')).toBeInTheDocument();
     });
 
@@ -87,8 +87,8 @@ describe('QuickInput', () => {
         />
       );
 
-      expect(screen.getByText(/jump to position/i)).toBeInTheDocument();
-      expect(screen.getByText(/bar:beat/i)).toBeInTheDocument();
+      expect(screen.getByText('JUMP TO POSITION')).toBeInTheDocument();
+      expect(screen.getByLabelText('Position (bar:beat)')).toBeInTheDocument();
       expect(screen.getByDisplayValue('1:1')).toBeInTheDocument();
     });
 

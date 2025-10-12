@@ -150,6 +150,83 @@ const clipsSlice = createSlice({
         }
       });
     },
+
+    duplicateClipsWithOffset: (state, action: PayloadAction<ID[]>) => {
+      const clipIds = action.payload;
+      const clipIdsSet = new Set(clipIds);
+      const clipsToDuplicate = state.clips.filter((c) => clipIdsSet.has(c.id));
+
+      clipsToDuplicate.forEach((clip) => {
+        const newClip: Clip = {
+          ...clip,
+          id: `clip-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+          position: clip.position + clip.duration, // Offset by duration
+        };
+        state.clips.push(newClip);
+      });
+    },
+
+    splitClip: (
+      state,
+      action: PayloadAction<{ clipId: ID; position: Position }>
+    ) => {
+      const { clipId, position } = action.payload;
+      const clip = state.clips.find((c) => c.id === clipId);
+
+      if (clip && position > clip.position && position < clip.position + clip.duration) {
+        // Create second half
+        const newClip: Clip = {
+          ...clip,
+          id: `clip-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+          position,
+          duration: clip.duration - (position - clip.position),
+        };
+
+        // Truncate first half
+        clip.duration = position - clip.position;
+
+        state.clips.push(newClip);
+      }
+    },
+
+    setClipsDuration: (
+      state,
+      action: PayloadAction<{ clipIds: ID[]; duration: Duration }>
+    ) => {
+      const { clipIds, duration } = action.payload;
+      const clipIdsSet = new Set(clipIds);
+
+      state.clips.forEach((clip) => {
+        if (clipIdsSet.has(clip.id)) {
+          clip.duration = Math.max(MIN_DURATION, duration);
+        }
+      });
+    },
+
+    trimClipStart: (
+      state,
+      action: PayloadAction<{ clipId: ID; amount: number }>
+    ) => {
+      const { clipId, amount } = action.payload;
+      const clip = state.clips.find((c) => c.id === clipId);
+
+      if (clip && amount < clip.duration - MIN_DURATION) {
+        clip.position += amount;
+        clip.duration -= amount;
+      }
+    },
+
+    trimClipEnd: (
+      state,
+      action: PayloadAction<{ clipId: ID; amount: number }>
+    ) => {
+      const { clipId, amount } = action.payload;
+      const clip = state.clips.find((c) => c.id === clipId);
+
+      if (clip) {
+        clip.duration = Math.max(MIN_DURATION, clip.duration - amount);
+      }
+    },
   },
 });
 
@@ -165,6 +242,11 @@ export const {
   duplicateClip,
   duplicateClips,
   updateClipLane,
+  duplicateClipsWithOffset,
+  splitClip,
+  setClipsDuration,
+  trimClipStart,
+  trimClipEnd,
 } = clipsSlice.actions;
 
 export default clipsSlice.reducer;

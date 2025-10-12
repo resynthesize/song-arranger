@@ -3,7 +3,7 @@
  * Terminal-styled input field with monospace font and green on black
  */
 
-import React, { useId } from 'react';
+import React, { useId, forwardRef } from 'react';
 import './TerminalInput.css';
 
 export interface TerminalInputProps
@@ -14,7 +14,7 @@ export interface TerminalInputProps
   fullWidth?: boolean;
 }
 
-export const TerminalInput: React.FC<TerminalInputProps> = ({
+export const TerminalInput = forwardRef<HTMLInputElement, TerminalInputProps>(({
   label,
   error,
   size = 'md',
@@ -23,7 +23,7 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
   className = '',
   id,
   ...props
-}) => {
+}, ref) => {
   const generatedId = useId();
   const inputId = id || generatedId;
   const errorId = `${inputId}-error`;
@@ -53,6 +53,7 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
         </label>
       )}
       <input
+        ref={ref}
         id={inputId}
         className={inputClasses}
         disabled={disabled}
@@ -68,4 +69,6 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
       )}
     </div>
   );
-};
+});
+
+TerminalInput.displayName = 'TerminalInput';

@@ -42,8 +42,48 @@ const selectionSlice = createSlice({
       state.selectedClipIds = Array.from(new Set(action.payload));
     },
 
+    selectAllClips: (state, action: PayloadAction<ID[]>) => {
+      // Select all clips - payload contains all clip IDs
+      state.selectedClipIds = action.payload;
+    },
+
     clearSelection: (state) => {
       state.selectedClipIds = [];
+    },
+
+    cycleSelection: (state, action: PayloadAction<{ clipIds: ID[]; direction: 'forward' | 'backward' }>) => {
+      const { clipIds, direction } = action.payload;
+
+      if (clipIds.length === 0) {
+        state.selectedClipIds = [];
+        return;
+      }
+
+      // If nothing selected, select first/last
+      if (state.selectedClipIds.length === 0) {
+        state.selectedClipIds = [direction === 'forward' ? clipIds[0] : clipIds[clipIds.length - 1]];
+        return;
+      }
+
+      // Find current selection index
+      const currentId = state.selectedClipIds[0];
+      const currentIndex = clipIds.indexOf(currentId);
+
+      if (currentIndex === -1) {
+        // Current selection not in list, select first/last
+        state.selectedClipIds = [direction === 'forward' ? clipIds[0] : clipIds[clipIds.length - 1]];
+        return;
+      }
+
+      // Cycle to next/previous
+      let nextIndex;
+      if (direction === 'forward') {
+        nextIndex = (currentIndex + 1) % clipIds.length;
+      } else {
+        nextIndex = (currentIndex - 1 + clipIds.length) % clipIds.length;
+      }
+
+      state.selectedClipIds = [clipIds[nextIndex]];
     },
   },
 });
@@ -53,7 +93,9 @@ export const {
   deselectClip,
   toggleClipSelection,
   selectMultipleClips,
+  selectAllClips,
   clearSelection,
+  cycleSelection,
 } = selectionSlice.actions;
 
 export default selectionSlice.reducer;

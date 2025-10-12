@@ -1,0 +1,59 @@
+/**
+ * QuickInput Component Styles
+ */
+
+.quick-input-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+}
+
+.quick-input-container {
+  min-width: 400px;
+  max-width: 90%;
+}
+
+.quick-input-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+}
+
+.quick-input-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm, 8px);
+  background-color: rgba(0, 255, 0, 0.05);
+  border: 1px solid var(--color-secondary, #008800);
+  font-family: var(--font-mono, 'VT323', monospace);
+}
+
+.quick-input-label {
+  color: var(--color-secondary, #008800);
+  font-size: 1rem;
+}
+
+.quick-input-current {
+  color: var(--color-primary, #00ff00);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.quick-input-actions {
+  display: flex;
+  gap: var(--spacing-sm, 8px);
+  justify-content: flex-end;
+}
+
+.quick-input-actions > button {
+  flex: 1;
+  max-width: 150px;
+}

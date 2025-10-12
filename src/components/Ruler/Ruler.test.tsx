@@ -36,13 +36,12 @@ describe('Ruler', () => {
       expect(screen.getByText('4')).toBeInTheDocument();
     });
 
-    it('should render grid markers between bars', () => {
+    it('should render beat markers between bars', () => {
       render(<Ruler {...defaultProps} />);
-      // Grid markers are always 4 divisions between consecutive bar numbers
-      // With barInterval = 1 (every bar), we should have 4 grid markers per bar
-      const gridMarkers = document.querySelectorAll('.ruler__grid-tick');
-      // With 4 bars visible, expect multiple grid markers
-      expect(gridMarkers.length).toBeGreaterThan(0);
+      // Beat markers show quarter notes between bars
+      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
+      // With 4 bars visible (16 beats), we should have multiple beat markers
+      expect(beatTicks.length).toBeGreaterThan(0);
     });
   });
 
@@ -100,23 +99,21 @@ describe('Ruler', () => {
     });
   });
 
-  describe('Grid Markers', () => {
-    it('should render 4 grid divisions between bar numbers', () => {
+  describe('Beat Markers', () => {
+    it('should render beat ticks between bars', () => {
       const viewport800: ViewportState = { ...defaultViewport, widthPx: 800 };
       render(<Ruler {...defaultProps} viewport={viewport800} />);
       // 800px / 100px per beat = 8 beats = 2 bars
-      // With barInterval = 1, there should be 4 grid markers per bar (excluding bar numbers)
-      const gridMarkers = document.querySelectorAll('.ruler__grid-tick');
-      // With 2 bars visible, expect at least 4 grid markers
-      expect(gridMarkers.length).toBeGreaterThanOrEqual(4);
+      // Should have 6 beat ticks (excluding the 2 bar boundaries)
+      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
+      expect(beatTicks.length).toBe(6);
     });
 
-    it('should position grid markers correctly', () => {
+    it('should position beat markers correctly', () => {
       render(<Ruler {...defaultProps} />);
-      // With barInterval = 1 (every bar), grid interval is 1 beat
-      // First grid marker should be at 100px (1 beat)
-      const gridMarkers = document.querySelectorAll('.ruler__grid-tick');
-      expect(gridMarkers[0]).toHaveStyle({ left: '100px' });
+      // First beat tick should be at 100px (1 beat from start)
+      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
+      expect(beatTicks[0]).toHaveStyle({ left: '100px' });
     });
   });
 
@@ -133,10 +130,10 @@ describe('Ruler', () => {
       expect(barNumber).toHaveClass('ruler__bar-number');
     });
 
-    it('should style grid markers differently from bar numbers', () => {
+    it('should style beat markers differently from bar numbers', () => {
       render(<Ruler {...defaultProps} />);
-      const gridMarkers = document.querySelectorAll('.ruler__grid-tick');
-      expect(gridMarkers[0]).toHaveClass('ruler__grid-tick');
+      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
+      expect(beatTicks[0]).toHaveClass('ruler__beat-tick');
     });
   });
 
@@ -184,6 +181,64 @@ describe('Ruler', () => {
       // Should render many bars
       const bars = screen.getAllByTestId(/^ruler-bar-/);
       expect(bars.length).toBeGreaterThan(10);
+    });
+  });
+
+  describe('Visual Hierarchy', () => {
+    it('should render bars (downbeats) with bar class', () => {
+      render(<Ruler {...defaultProps} />);
+      const barNumbers = document.querySelectorAll('.ruler__bar-number');
+      expect(barNumbers.length).toBeGreaterThan(0);
+      // Bar numbers should have the bar class
+      expect(barNumbers[0]).toHaveClass('ruler__bar-number');
+    });
+
+    it('should render beats with beat class', () => {
+      render(<Ruler {...defaultProps} />);
+      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
+      // Should have beat ticks between bars
+      expect(beatTicks.length).toBeGreaterThan(0);
+    });
+
+    it('should render sub-beats only at high zoom', () => {
+      // At low zoom (50), sub-beats should not be visible
+      const viewportLowZoom: ViewportState = { ...defaultViewport, zoom: 50 };
+      const { rerender } = render(<Ruler {...defaultProps} viewport={viewportLowZoom} />);
+      let subBeatTicks = document.querySelectorAll('.ruler__subbeat-tick');
+      expect(subBeatTicks.length).toBe(0);
+
+      // At high zoom (200), sub-beats should be visible
+      const viewportHighZoom: ViewportState = { ...defaultViewport, zoom: 200 };
+      rerender(<Ruler {...defaultProps} viewport={viewportHighZoom} />);
+      subBeatTicks = document.querySelectorAll('.ruler__subbeat-tick');
+      expect(subBeatTicks.length).toBeGreaterThan(0);
+    });
+
+    it('should show current snap grid with highlight class', () => {
+      const propsWithSnap = { ...defaultProps, snapValue: 0.25 }; // 16th notes
+      render(<Ruler {...propsWithSnap} />);
+      // Should have highlighted snap grid markers
+      const snapHighlights = document.querySelectorAll('.ruler__snap-highlight');
+      // At least some markers should be highlighted
+      expect(snapHighlights.length).toBeGreaterThan(0);
+    });
+
+    it('should position bar ticks at bar boundaries', () => {
+      render(<Ruler {...defaultProps} />);
+      // Bar 1 should be at 0px (start of timeline)
+      const bar1 = screen.getByTestId('ruler-bar-1');
+      expect(bar1).toHaveStyle({ left: '0px' });
+
+      // Bar 2 should be at 400px (4 beats * 100px per beat)
+      const bar2 = screen.getByTestId('ruler-bar-2');
+      expect(bar2).toHaveStyle({ left: '400px' });
+    });
+
+    it('should position beat ticks between bars', () => {
+      render(<Ruler {...defaultProps} />);
+      const beatTicks = document.querySelectorAll('.ruler__beat-tick');
+      // First beat tick should be at 100px (1 beat)
+      expect(beatTicks[0]).toHaveStyle({ left: '100px' });
     });
   });
 });

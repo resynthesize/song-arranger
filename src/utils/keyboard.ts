@@ -7,10 +7,44 @@
  * Keyboard action types
  */
 export type KeyboardAction =
+  // Clip operations
   | 'delete'
   | 'duplicate'
+  | 'duplicateOffset'
   | 'edit'
   | 'changeColor'
+  | 'split'
+  | 'join'
+  // Selection
+  | 'selectAll'
+  | 'deselectAll'
+  | 'cycleForward'
+  | 'cycleBackward'
+  // Playhead navigation
+  | 'stop'
+  | 'jumpToStart'
+  | 'jumpToEnd'
+  | 'movePlayheadLeft'
+  | 'movePlayheadRight'
+  | 'movePlayheadPrevClip'
+  | 'movePlayheadNextClip'
+  // Clip duration
+  | 'setDuration1'
+  | 'setDuration2'
+  | 'setDuration3'
+  | 'setDuration4'
+  | 'setDuration5'
+  | 'setDuration6'
+  | 'setDuration7'
+  | 'setDuration8'
+  | 'setDuration9'
+  | 'trimStart'
+  | 'trimEnd'
+  | 'adjustTempoUp'
+  | 'adjustTempoDown'
+  // View
+  | 'frameSelection'
+  | 'frameAll'
   | 'undo'
   | 'redo'
   | 'navigateUp'
@@ -18,7 +52,9 @@ export type KeyboardAction =
   | 'zoomIn'
   | 'zoomOut'
   | 'togglePlay'
-  | 'help';
+  | 'help'
+  | 'settings'
+  | 'commandPalette';
 
 /**
  * Keyboard shortcut definition
@@ -63,6 +99,12 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     description: 'Duplicate selected clips'
   },
   {
+    key: 'D',
+    shiftKey: true,
+    action: 'duplicateOffset',
+    description: 'Duplicate and offset by duration'
+  },
+  {
     key: 'e',
     action: 'edit',
     description: 'Edit clip label'
@@ -71,6 +113,162 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     key: 'c',
     action: 'changeColor',
     description: 'Change clip color'
+  },
+  {
+    key: 's',
+    action: 'split',
+    description: 'Split clip at playhead'
+  },
+  {
+    key: 'j',
+    action: 'join',
+    description: 'Join adjacent selected clips'
+  },
+
+  // Selection
+  {
+    key: 'a',
+    ctrlKey: true,
+    action: 'selectAll',
+    description: 'Select all clips'
+  },
+  {
+    key: 'A',
+    ctrlKey: true,
+    shiftKey: true,
+    action: 'deselectAll',
+    description: 'Deselect all'
+  },
+  {
+    key: 'Tab',
+    action: 'cycleForward',
+    description: 'Cycle through clips in current lane'
+  },
+  {
+    key: 'Tab',
+    shiftKey: true,
+    action: 'cycleBackward',
+    description: 'Cycle backwards through clips'
+  },
+
+  // Playhead navigation
+  {
+    key: 'Enter',
+    action: 'stop',
+    description: 'Stop and return to start'
+  },
+  {
+    key: 'Home',
+    action: 'jumpToStart',
+    description: 'Jump to start'
+  },
+  {
+    key: 'End',
+    action: 'jumpToEnd',
+    description: 'Jump to end'
+  },
+  {
+    key: 'ArrowLeft',
+    shiftKey: true,
+    action: 'movePlayheadLeft',
+    description: 'Move playhead left by 1 bar'
+  },
+  {
+    key: 'ArrowRight',
+    shiftKey: true,
+    action: 'movePlayheadRight',
+    description: 'Move playhead right by 1 bar'
+  },
+  {
+    key: 'ArrowLeft',
+    ctrlKey: true,
+    action: 'movePlayheadPrevClip',
+    description: 'Move playhead to previous clip boundary'
+  },
+  {
+    key: 'ArrowRight',
+    ctrlKey: true,
+    action: 'movePlayheadNextClip',
+    description: 'Move playhead to next clip boundary'
+  },
+
+  // Clip duration (require selection)
+  {
+    key: '1',
+    action: 'setDuration1',
+    description: 'Set clip duration to 1 bar'
+  },
+  {
+    key: '2',
+    action: 'setDuration2',
+    description: 'Set clip duration to 2 bars'
+  },
+  {
+    key: '3',
+    action: 'setDuration3',
+    description: 'Set clip duration to 3 bars'
+  },
+  {
+    key: '4',
+    action: 'setDuration4',
+    description: 'Set clip duration to 4 bars'
+  },
+  {
+    key: '5',
+    action: 'setDuration5',
+    description: 'Set clip duration to 5 bars'
+  },
+  {
+    key: '6',
+    action: 'setDuration6',
+    description: 'Set clip duration to 6 bars'
+  },
+  {
+    key: '7',
+    action: 'setDuration7',
+    description: 'Set clip duration to 7 bars'
+  },
+  {
+    key: '8',
+    action: 'setDuration8',
+    description: 'Set clip duration to 8 bars'
+  },
+  {
+    key: '9',
+    action: 'setDuration9',
+    description: 'Set clip duration to 9 bars'
+  },
+  {
+    key: ',',
+    action: 'trimStart',
+    description: 'Trim clip start by snap value'
+  },
+  {
+    key: '.',
+    action: 'trimEnd',
+    description: 'Trim clip end by snap value'
+  },
+  {
+    key: '+',
+    action: 'adjustTempoUp',
+    description: 'Increase tempo'
+  },
+  {
+    key: '-',
+    action: 'adjustTempoDown',
+    description: 'Decrease tempo'
+  },
+
+  // View
+  {
+    key: 'f',
+    action: 'frameSelection',
+    description: 'Frame selection (zoom to fit selected clips)'
+  },
+  {
+    key: 'a',
+    action: 'frameAll',
+    description: 'Frame all (zoom to fit entire arrangement)'
   },
 
   // Undo/Redo
@@ -119,11 +317,24 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     description: 'Play/Pause'
   },
 
-  // Help
+  // Help and Settings
   {
     key: '?',
     action: 'help',
     description: 'Show help'
+  },
+  {
+    key: ',',
+    ctrlKey: true,
+    action: 'settings',
+    description: 'Open settings'
+  },
+  {
+    key: 'p',
+    ctrlKey: true,
+    shiftKey: true,
+    action: 'commandPalette',
+    description: 'Open command palette'
   },
 ];
 
@@ -164,39 +375,47 @@ export const getShortcutsForContext = (
 ): KeyboardShortcut[] => {
   const shortcuts: KeyboardShortcut[] = [];
 
-  // Always include global shortcuts
-  shortcuts.push(
-    ...ALL_SHORTCUTS.filter(s =>
-      s.action === 'zoomIn' ||
-      s.action === 'zoomOut' ||
-      s.action === 'togglePlay' ||
-      s.action === 'undo' ||
-      s.action === 'redo' ||
-      s.action === 'navigateUp' ||
-      s.action === 'navigateDown' ||
-      s.action === 'help'
-    )
-  );
+  // Global shortcuts (always available)
+  const globalActions: KeyboardAction[] = [
+    'zoomIn', 'zoomOut', 'togglePlay', 'undo', 'redo',
+    'navigateUp', 'navigateDown', 'help', 'settings',
+    'commandPalette', 'stop', 'jumpToStart', 'jumpToEnd',
+    'movePlayheadLeft', 'movePlayheadRight',
+    'movePlayheadPrevClip', 'movePlayheadNextClip',
+    'adjustTempoUp', 'adjustTempoDown', 'frameAll'
+  ];
 
-  // Add clip-specific shortcuts if clips are selected
-  if (context.hasSelection && !context.isEditing) {
-    shortcuts.push(
-      ...ALL_SHORTCUTS.filter(s =>
-        s.action === 'delete' ||
-        s.action === 'duplicate' ||
-        s.action === 'edit' ||
-        s.action === 'changeColor'
-      )
-    );
+  shortcuts.push(...ALL_SHORTCUTS.filter(s => globalActions.includes(s.action)));
+
+  // Selection shortcuts (when not editing)
+  if (!context.isEditing) {
+    shortcuts.push(...ALL_SHORTCUTS.filter(s =>
+      s.action === 'selectAll' || s.action === 'deselectAll'
+    ));
   }
 
-  // When editing, exclude shortcuts that conflict with text input
+  // Clip-specific shortcuts (require selection and not editing)
+  if (context.hasSelection && !context.isEditing) {
+    const clipActions: KeyboardAction[] = [
+      'delete', 'duplicate', 'duplicateOffset', 'edit', 'changeColor',
+      'split', 'join', 'cycleForward', 'cycleBackward',
+      'setDuration1', 'setDuration2', 'setDuration3', 'setDuration4',
+      'setDuration5', 'setDuration6', 'setDuration7', 'setDuration8',
+      'setDuration9', 'trimStart', 'trimEnd', 'frameSelection'
+    ];
+    shortcuts.push(...ALL_SHORTCUTS.filter(s => clipActions.includes(s.action)));
+  }
+
+  // When editing, exclude shortcuts that use alphanumeric keys without modifiers
   if (context.isEditing) {
-    return shortcuts.filter(s =>
-      s.action !== 'duplicate' &&
-      s.action !== 'edit' &&
-      s.action !== 'changeColor'
-    );
+    return shortcuts.filter(s => {
+      // Allow global shortcuts with modifiers (Ctrl+Z, Ctrl+Shift+Z, etc.)
+      if (s.ctrlKey || s.metaKey) return true;
+
+      // Exclude shortcuts that use alphanumeric keys or symbols without modifiers
+      const excludedKeys = /^[a-z0-9,.\-+]$/i;
+      return !excludedKeys.test(s.key);
+    });
   }
 
   return shortcuts;
@@ -255,4 +474,11 @@ export const findMatchingShortcut = (
 ): KeyboardShortcut | undefined => {
   const availableShortcuts = getShortcutsForContext(context);
   return availableShortcuts.find(shortcut => matchesShortcut(event, shortcut));
+};
+
+/**
+ * Get all shortcuts (for documentation)
+ */
+export const getAllShortcuts = (): KeyboardShortcut[] => {
+  return [...ALL_SHORTCUTS];
 };

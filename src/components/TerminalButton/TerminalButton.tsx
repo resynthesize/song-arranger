@@ -3,7 +3,7 @@
  * Terminal-styled button with ASCII borders and glow effects
  */
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import './TerminalButton.css';
 
 export interface TerminalButtonProps
@@ -15,7 +15,7 @@ export interface TerminalButtonProps
   fullWidth?: boolean;
 }
 
-export const TerminalButton: React.FC<TerminalButtonProps> = ({
+export const TerminalButton = forwardRef<HTMLButtonElement, TerminalButtonProps>(({
   children,
   variant = 'primary',
   size = 'md',
@@ -25,7 +25,7 @@ export const TerminalButton: React.FC<TerminalButtonProps> = ({
   className = '',
   type = 'button',
   ...props
-}) => {
+}, ref) => {
   const classes = [
     'terminal-button',
     `terminal-button--${variant}`,
@@ -40,6 +40,7 @@ export const TerminalButton: React.FC<TerminalButtonProps> = ({
 
   return (
     <button
+      ref={ref}
       type={type}
       className={classes}
       disabled={disabled}
@@ -55,4 +56,6 @@ export const TerminalButton: React.FC<TerminalButtonProps> = ({
       </span>
     </button>
   );
-};
+});
+
+TerminalButton.displayName = 'TerminalButton';
