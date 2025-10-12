@@ -11,9 +11,23 @@
   border-bottom: var(--border-width-base) solid var(--color-secondary);
   z-index: var(--z-controls);
   overflow: hidden;
-  position: relative;
   user-select: none;
-  padding-left: 150px; /* Match lane header width */
+  display: flex;
+}
+
+/* Ruler header space to align with lane headers */
+.ruler__header {
+  width: 150px;
+  flex-shrink: 0;
+  background: var(--color-bg);
+  border-right: var(--border-width-base) solid var(--color-secondary);
+}
+
+/* Ruler content area where bar numbers and beats are positioned */
+.ruler__content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
 }
 
 /* Bar Numbers */

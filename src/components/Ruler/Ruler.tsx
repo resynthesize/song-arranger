@@ -54,32 +54,38 @@ const Ruler = ({ zoom, containerWidth, onPositionClick }: RulerProps) => {
 
   return (
     <div className="ruler" data-testid="ruler" role="none">
-      {/* Bar numbers */}
-      {bars.map(({ barNumber, position }) => (
-        <div
-          key={`bar-${barNumber.toString()}`}
-          className="ruler__bar-number"
-          data-testid={`ruler-bar-${barNumber.toString()}`}
-          style={{ left: `${position.toString()}px` }}
-          onClick={() => { handleClick(position); }}
-        >
-          {barNumber}
-        </div>
-      ))}
+      {/* Header space to align with lane headers */}
+      <div className="ruler__header" />
 
-      {/* Beat markers */}
-      {beats.map(({ barNumber, beat, position }) => (
-        <div
-          key={`beat-${barNumber.toString()}-${beat.toString()}`}
-          className="ruler__beat-tick"
-          data-testid={`ruler-beat-${barNumber.toString()}-${beat.toString()}`}
-          style={{ left: `${position.toString()}px` }}
-          onClick={() => { handleClick(position); }}
-          title={`Bar ${barNumber.toString()}, Beat ${beat.toString()}`}
-        >
-          │
-        </div>
-      ))}
+      {/* Content area with bar numbers and beat markers */}
+      <div className="ruler__content">
+        {/* Bar numbers */}
+        {bars.map(({ barNumber, position }) => (
+          <div
+            key={`bar-${barNumber.toString()}`}
+            className="ruler__bar-number"
+            data-testid={`ruler-bar-${barNumber.toString()}`}
+            style={{ left: `${position.toString()}px` }}
+            onClick={() => { handleClick(position); }}
+          >
+            {barNumber}
+          </div>
+        ))}
+
+        {/* Beat markers */}
+        {beats.map(({ barNumber, beat, position }) => (
+          <div
+            key={`beat-${barNumber.toString()}-${beat.toString()}`}
+            className="ruler__beat-tick"
+            data-testid={`ruler-beat-${barNumber.toString()}-${beat.toString()}`}
+            style={{ left: `${position.toString()}px` }}
+            onClick={() => { handleClick(position); }}
+            title={`Bar ${barNumber.toString()}, Beat ${beat.toString()}`}
+          >
+            │
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
