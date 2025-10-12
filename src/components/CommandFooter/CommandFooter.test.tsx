@@ -89,7 +89,7 @@ describe('CommandFooter', () => {
   it('should display help shortcut', () => {
     render(<CommandFooter hasSelection={false} selectionCount={0} isEditing={false} />);
 
-    expect(screen.getByText('?')).toBeInTheDocument();
+    expect(screen.getByText('Shift+/')).toBeInTheDocument();
     expect(screen.getByText('Show help')).toBeInTheDocument();
   });
 

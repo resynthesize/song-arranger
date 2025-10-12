@@ -327,7 +327,8 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
 
   // Help and Settings
   {
-    key: '?',
+    key: '/',
+    shiftKey: true,
     action: 'help',
     description: 'Show help'
   },
@@ -341,6 +342,11 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     key: 'p',
     ctrlKey: true,
     shiftKey: true,
+    action: 'commandPalette',
+    description: 'Open command palette'
+  },
+  {
+    key: 'F12',
     action: 'commandPalette',
     description: 'Open command palette'
   },

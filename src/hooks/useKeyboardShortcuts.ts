@@ -49,6 +49,9 @@ export const useKeyboardShortcuts = () => {
 
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showQuickInput, setShowQuickInput] = useState(false);
+  const [quickInputCommand, setQuickInputCommand] = useState<'tempo' | 'zoom' | 'snap' | 'length' | 'position' | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -300,8 +303,7 @@ export const useKeyboardShortcuts = () => {
           break;
 
         case 'commandPalette':
-          // TODO: Implement command palette
-          console.log('Command palette (not yet implemented)');
+          setShowCommandPalette(true);
           break;
 
         default:
@@ -323,5 +325,11 @@ export const useKeyboardShortcuts = () => {
     setShowHelp,
     showSettings,
     setShowSettings,
+    showCommandPalette,
+    setShowCommandPalette,
+    showQuickInput,
+    setShowQuickInput,
+    quickInputCommand,
+    setQuickInputCommand,
   };
 };

@@ -16,6 +16,8 @@ import CRTEffects from './components/CRTEffects';
 import TerminalNoise from './components/TerminalNoise';
 import Help from './components/Help';
 import Minimap from './components/Minimap';
+import { CommandPalette } from './components/CommandPalette';
+import { QuickInput } from './components/QuickInput';
 import { setViewportOffset } from './store/slices/timelineSlice';
 import './App.css';
 
@@ -33,7 +35,7 @@ function App() {
   const clips = useAppSelector((state) => state.clips.clips);
 
   // Initialize keyboard shortcuts and get modal states
-  const { showHelp, setShowHelp, showSettings, setShowSettings } = useKeyboardShortcuts();
+  const { showHelp, setShowHelp, showSettings, setShowSettings, showCommandPalette, setShowCommandPalette, showQuickInput, setShowQuickInput, quickInputCommand } = useKeyboardShortcuts();
 
   // Calculate total timeline length
   const timelineLength = clips.reduce((max, clip) => {
@@ -81,6 +83,22 @@ function App() {
       <CRTEffects />
       <TerminalNoise />
       <Help isOpen={showHelp} onClose={() => setShowHelp(false)} />
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+      />
+      {showQuickInput && quickInputCommand && (
+        <QuickInput
+          command={quickInputCommand}
+          currentValue={0}
+          onSubmit={(value) => {
+            // TODO: Handle quick input submission
+            console.log(`QuickInput submit: ${quickInputCommand} = ${value}`);
+            setShowQuickInput(false);
+          }}
+          onCancel={() => setShowQuickInput(false)}
+        />
+      )}
       <Minimap
         lanes={lanes}
         clips={clips}
