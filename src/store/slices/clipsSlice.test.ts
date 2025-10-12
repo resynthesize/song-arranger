@@ -21,6 +21,7 @@ import type { ClipsState, Clip } from '@/types';
 describe('clipsSlice', () => {
   const initialState: ClipsState = {
     clips: [],
+    editingClipId: null,
   };
 
   const clip1: Clip = {
@@ -47,6 +48,7 @@ describe('clipsSlice', () => {
 
   const stateWithClips: ClipsState = {
     clips: [clip1, clip2, clip3],
+    editingClipId: null,
   };
 
   it('should return the initial state', () => {

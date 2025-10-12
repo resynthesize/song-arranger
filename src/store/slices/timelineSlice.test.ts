@@ -256,10 +256,10 @@ describe('timelineSlice', () => {
       expect(newState.verticalZoom).toBe(90);
     });
 
-    it('should clamp vertical zoom to 50% minimum', () => {
-      const state = { ...initialState, verticalZoom: 50 };
+    it('should clamp vertical zoom to 15% minimum', () => {
+      const state = { ...initialState, verticalZoom: 15 };
       const newState = reducer(state, { type: 'timeline/verticalZoomOut' });
-      expect(newState.verticalZoom).toBe(50);
+      expect(newState.verticalZoom).toBe(15);
     });
 
     it('should clamp vertical zoom to 150% maximum', () => {
@@ -274,8 +274,8 @@ describe('timelineSlice', () => {
     });
 
     it('should clamp direct vertical zoom setting', () => {
-      const newState1 = reducer(initialState, { type: 'timeline/setVerticalZoom', payload: 30 });
-      expect(newState1.verticalZoom).toBe(50);
+      const newState1 = reducer(initialState, { type: 'timeline/setVerticalZoom', payload: 10 });
+      expect(newState1.verticalZoom).toBe(15);
 
       const newState2 = reducer(initialState, { type: 'timeline/setVerticalZoom', payload: 200 });
       expect(newState2.verticalZoom).toBe(150);

@@ -14,7 +14,7 @@ const MIN_ZOOM = ZOOM_LEVELS[0];
 const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 
 // Vertical zoom constants
-const MIN_VERTICAL_ZOOM = 50; // 50% - 40px lane height
+const MIN_VERTICAL_ZOOM = 15; // 15% - 12px lane height (fits ~30-50 tracks)
 const MAX_VERTICAL_ZOOM = 150; // 150% - 120px lane height
 const VERTICAL_ZOOM_STEP = 10; // Zoom in/out by 10% at a time
 
