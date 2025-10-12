@@ -34,10 +34,17 @@ import {
   clearSelection,
   selectAllClips,
   cycleSelection,
+  selectClip,
   navigateUp as navigateUpAction,
   navigateDown as navigateDownAction,
 } from '@/store/slices/selectionSlice';
 import { selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
+import {
+  findNearestClipEast,
+  findNearestClipWest,
+  findNearestClipNorth,
+  findNearestClipSouth,
+} from '@/utils/navigation';
 
 /**
  * Hook to handle global keyboard shortcuts
@@ -307,11 +314,61 @@ export const useKeyboardShortcuts = () => {
           break;
 
         case 'navigateUp':
-          dispatch(navigateUpAction(lanes.map(l => l.id)));
+          if (selectedClipIds.length > 0) {
+            // Navigate to clip above
+            const currentClip = clips.find(c => c.id === selectedClipIds[0]);
+            if (currentClip) {
+              const nearestClip = findNearestClipNorth(currentClip, clips, lanes);
+              if (nearestClip) {
+                dispatch(selectClip(nearestClip.id));
+              }
+            }
+          } else {
+            // Navigate to previous lane
+            dispatch(navigateUpAction(lanes.map(l => l.id)));
+          }
           break;
 
         case 'navigateDown':
-          dispatch(navigateDownAction(lanes.map(l => l.id)));
+          if (selectedClipIds.length > 0) {
+            // Navigate to clip below
+            const currentClip = clips.find(c => c.id === selectedClipIds[0]);
+            if (currentClip) {
+              const nearestClip = findNearestClipSouth(currentClip, clips, lanes);
+              if (nearestClip) {
+                dispatch(selectClip(nearestClip.id));
+              }
+            }
+          } else {
+            // Navigate to next lane
+            dispatch(navigateDownAction(lanes.map(l => l.id)));
+          }
+          break;
+
+        case 'navigateLeft':
+          if (selectedClipIds.length > 0) {
+            // Navigate to clip on left (same lane)
+            const currentClip = clips.find(c => c.id === selectedClipIds[0]);
+            if (currentClip) {
+              const nearestClip = findNearestClipWest(currentClip, clips);
+              if (nearestClip) {
+                dispatch(selectClip(nearestClip.id));
+              }
+            }
+          }
+          break;
+
+        case 'navigateRight':
+          if (selectedClipIds.length > 0) {
+            // Navigate to clip on right (same lane)
+            const currentClip = clips.find(c => c.id === selectedClipIds[0]);
+            if (currentClip) {
+              const nearestClip = findNearestClipEast(currentClip, clips);
+              if (nearestClip) {
+                dispatch(selectClip(nearestClip.id));
+              }
+            }
+          }
           break;
 
         case 'edit':

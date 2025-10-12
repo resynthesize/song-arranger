@@ -49,6 +49,8 @@ export type KeyboardAction =
   | 'redo'
   | 'navigateUp'
   | 'navigateDown'
+  | 'navigateLeft'
+  | 'navigateRight'
   | 'zoomIn'
   | 'zoomOut'
   | 'verticalZoomIn'
@@ -293,12 +295,22 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
   {
     key: 'ArrowUp',
     action: 'navigateUp',
-    description: 'Navigate up'
+    description: 'Navigate up / to clip above'
   },
   {
     key: 'ArrowDown',
     action: 'navigateDown',
-    description: 'Navigate down'
+    description: 'Navigate down / to clip below'
+  },
+  {
+    key: 'ArrowLeft',
+    action: 'navigateLeft',
+    description: 'Navigate to clip on left'
+  },
+  {
+    key: 'ArrowRight',
+    action: 'navigateRight',
+    description: 'Navigate to clip on right'
   },
 
   // Zoom
@@ -409,7 +421,7 @@ export const getShortcutsForContext = (
   const globalActions: KeyboardAction[] = [
     'zoomIn', 'zoomOut', 'verticalZoomIn', 'verticalZoomOut',
     'togglePlay', 'toggleMinimap', 'undo', 'redo',
-    'navigateUp', 'navigateDown', 'help', 'settings',
+    'navigateUp', 'navigateDown', 'navigateLeft', 'navigateRight', 'help', 'settings',
     'commandPalette', 'stop', 'jumpToStart', 'jumpToEnd',
     'movePlayheadLeft', 'movePlayheadRight',
     'movePlayheadPrevClip', 'movePlayheadNextClip',
