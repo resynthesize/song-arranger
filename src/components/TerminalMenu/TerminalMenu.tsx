@@ -122,7 +122,7 @@ export const TerminalMenu: React.FC<TerminalMenuProps> = ({
 
       {isOpen && (
         <div ref={menuRef} className="terminal-menu__dropdown" role="menu">
-          {items.map((item, index) => {
+          {items.map((item) => {
             if (item.separator) {
               return (
                 <div
@@ -148,8 +148,14 @@ export const TerminalMenu: React.FC<TerminalMenuProps> = ({
                   .join(' ')}
                 role="menuitem"
                 aria-disabled={item.disabled}
-                onClick={() => handleItemClick(item)}
-                onMouseEnter={() => !item.disabled && setHighlightedIndex(selectableIndex)}
+                onClick={() => {
+                  handleItemClick(item);
+                }}
+                onMouseEnter={() => {
+                  if (!item.disabled) {
+                    setHighlightedIndex(selectableIndex);
+                  }
+                }}
               >
                 {item.label}
               </div>

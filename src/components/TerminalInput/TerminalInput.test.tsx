@@ -168,7 +168,9 @@ describe('TerminalInput', () => {
         return (
           <TerminalInput
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              setValue(e.target.value);
+            }}
           />
         );
       };

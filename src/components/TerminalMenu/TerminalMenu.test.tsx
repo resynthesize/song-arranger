@@ -46,7 +46,7 @@ describe('TerminalMenu', () => {
 
     it('should close menu when clicking outside', async () => {
       const user = userEvent.setup();
-      const { container } = render(
+      render(
         <div>
           <TerminalMenu items={mockItems} trigger="Menu" />
           <div data-testid="outside">Outside</div>
@@ -174,7 +174,7 @@ describe('TerminalMenu', () => {
   });
 
   describe('Accessibility', () => {
-    it('should have proper ARIA attributes on trigger', async () => {
+    it('should have proper ARIA attributes on trigger', () => {
       render(<TerminalMenu items={mockItems} trigger="Menu" />);
       const trigger = screen.getByRole('button', { name: /menu/i });
 
