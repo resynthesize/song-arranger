@@ -20,6 +20,7 @@ interface ClipProps {
   isSelected: boolean;
   label?: string;
   laneName?: string;
+  color?: string;
   externalVerticalDragDeltaY?: number;
   onSelect: (clipId: ID, isMultiSelect: boolean) => void;
   onMove: (clipId: ID, newPosition: Position, delta: number) => void;
@@ -41,6 +42,7 @@ const Clip = ({
   isSelected,
   label,
   laneName,
+  color,
   externalVerticalDragDeltaY,
   onSelect,
   onMove,
@@ -259,6 +261,7 @@ const Clip = ({
         width: `${widthPx.toString()}px`,
         transform: effectiveVerticalDragDeltaY !== 0 ? `translateY(${effectiveVerticalDragDeltaY}px)` : undefined,
         zIndex: effectiveVerticalDragDeltaY !== 0 ? 1000 : undefined,
+        ...(color ? { '--clip-color': color } as React.CSSProperties : {}),
       }}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}

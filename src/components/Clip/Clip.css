@@ -7,7 +7,7 @@
   position: absolute;
   height: 60px;
   background: var(--color-bg-elevated);
-  border: var(--border-width-base) solid var(--color-secondary);
+  border: var(--border-width-base) solid var(--clip-color, var(--color-secondary));
   cursor: pointer;
   user-select: none;
   transition: border-color var(--transition-fast),
@@ -16,8 +16,21 @@
   align-items: stretch;
 }
 
+/* Background tint using the lane color */
+.clip[style*="--clip-color"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--clip-color);
+  opacity: 0.1;
+  pointer-events: none;
+}
+
 .clip:hover {
-  border-color: var(--color-primary);
+  border-color: var(--clip-color, var(--color-primary));
   box-shadow: var(--phosphor-glow-sm);
 }
 

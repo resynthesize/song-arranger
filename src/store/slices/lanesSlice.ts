@@ -30,6 +30,7 @@ const lanesSlice = createSlice({
       state.lanes.push({
         id: `lane-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
         name: laneName,
+        color: '#00ff00', // Default green terminal color
       });
     },
 
@@ -68,6 +69,17 @@ const lanesSlice = createSlice({
     clearEditingLane: (state) => {
       state.editingLaneId = null;
     },
+
+    setLaneColor: (
+      state,
+      action: PayloadAction<{ laneId: ID; color: string }>
+    ) => {
+      const { laneId, color } = action.payload;
+      const lane = state.lanes.find((l) => l.id === laneId);
+      if (lane) {
+        lane.color = color;
+      }
+    },
   },
 });
 
@@ -77,6 +89,7 @@ export const {
   renameLane,
   setEditingLane,
   clearEditingLane,
+  setLaneColor,
 } = lanesSlice.actions;
 
 export default lanesSlice.reducer;

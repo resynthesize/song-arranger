@@ -233,4 +233,39 @@ describe('Clip', () => {
       expect(clip).not.toHaveStyle({ transform: 'translateY(100px)' });
     });
   });
+
+  describe('Color rendering', () => {
+    it('should apply lane color as border and background', () => {
+      render(<Clip {...defaultProps} color="#ff0000" />);
+      const clip = screen.getByTestId('clip-clip-1');
+
+      // Check that color is applied as CSS variable
+      expect(clip).toHaveStyle({
+        '--clip-color': '#ff0000',
+      });
+    });
+
+    it('should use default color if no color prop provided', () => {
+      render(<Clip {...defaultProps} />);
+      const clip = screen.getByTestId('clip-clip-1');
+
+      // Should not have custom color variable
+      expect(clip.style.getPropertyValue('--clip-color')).toBe('');
+    });
+
+    it('should update color when prop changes', () => {
+      const { rerender } = render(<Clip {...defaultProps} color="#00ff00" />);
+      const clip = screen.getByTestId('clip-clip-1');
+
+      expect(clip).toHaveStyle({
+        '--clip-color': '#00ff00',
+      });
+
+      rerender(<Clip {...defaultProps} color="#0000ff" />);
+
+      expect(clip).toHaveStyle({
+        '--clip-color': '#0000ff',
+      });
+    });
+  });
 });

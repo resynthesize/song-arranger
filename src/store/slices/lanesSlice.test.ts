@@ -9,6 +9,7 @@ import reducer, {
   renameLane,
   setEditingLane,
   clearEditingLane,
+  setLaneColor,
 } from './lanesSlice';
 import type { LanesState } from '@/types';
 
@@ -126,6 +127,44 @@ describe('lanesSlice', () => {
       const editingState = { ...stateWithLanes, editingLaneId: 'lane-2' };
       const newState = reducer(editingState, clearEditingLane());
       expect(newState.editingLaneId).toBeNull();
+    });
+  });
+
+  describe('setLaneColor', () => {
+    it('should set lane color by id', () => {
+      const newState = reducer(
+        stateWithLanes,
+        setLaneColor({ laneId: 'lane-1', color: '#00ff00' })
+      );
+      expect(newState.lanes[0]?.color).toBe('#00ff00');
+    });
+
+    it('should update existing lane color', () => {
+      const stateWithColor: LanesState = {
+        lanes: [
+          { id: 'lane-1', name: 'Kick', color: '#00ff00' },
+          { id: 'lane-2', name: 'Snare' },
+        ],
+        editingLaneId: null,
+      };
+      const newState = reducer(
+        stateWithColor,
+        setLaneColor({ laneId: 'lane-1', color: '#ff0000' })
+      );
+      expect(newState.lanes[0]?.color).toBe('#ff0000');
+    });
+
+    it('should do nothing if lane not found', () => {
+      const newState = reducer(
+        stateWithLanes,
+        setLaneColor({ laneId: 'non-existent', color: '#00ff00' })
+      );
+      expect(newState.lanes).toEqual(stateWithLanes.lanes);
+    });
+
+    it('should add a new lane with default color', () => {
+      const newState = reducer(initialState, addLane({ name: 'Bass' }));
+      expect(newState.lanes[0]?.color).toBe('#00ff00');
     });
   });
 });

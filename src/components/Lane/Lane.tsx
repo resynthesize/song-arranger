@@ -6,6 +6,7 @@
 import { useRef, useEffect, useMemo, useState, KeyboardEvent, MouseEvent } from 'react';
 import Clip from '../Clip';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
+import ColorPicker from '../ColorPicker';
 import type { ID, Clip as ClipType, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx, isRangeVisible } from '@/utils/viewport';
 import './Lane.css';
@@ -13,6 +14,7 @@ import './Lane.css';
 interface LaneProps {
   id: ID;
   name: string;
+  color?: string;
   clips: ClipType[];
   viewport: ViewportState;
   snapValue: number;
@@ -20,6 +22,7 @@ interface LaneProps {
   verticalDragState: { deltaY: number; draggedClipId: ID } | null;
   isEditing: boolean;
   onNameChange: (laneId: ID, newName: string) => void;
+  onColorChange?: (laneId: ID, color: string) => void;
   onStartEditing: (laneId: ID) => void;
   onStopEditing: () => void;
   onRemove: (laneId: ID) => void;
@@ -37,6 +40,7 @@ interface LaneProps {
 const Lane = ({
   id,
   name,
+  color,
   clips,
   viewport,
   snapValue,
@@ -44,6 +48,7 @@ const Lane = ({
   verticalDragState,
   isEditing,
   onNameChange,
+  onColorChange,
   onStartEditing,
   onStopEditing,
   onRemove,
@@ -61,6 +66,7 @@ const Lane = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const gridCanvasRef = useRef<HTMLCanvasElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; position: number } | null>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   // Filter clips to only show those in this lane
   const laneClips = clips.filter((clip) => clip.laneId === id);
@@ -261,6 +267,15 @@ const Lane = ({
   return (
     <div className="lane" data-testid={`lane-${id}`}>
       <div className="lane__header">
+        <button
+          className="lane__color-swatch"
+          onClick={() => setShowColorPicker(true)}
+          title="Change lane color"
+          data-testid={`lane-${id}-color-swatch`}
+          style={{ color: color || '#00ff00' }}
+        >
+          █
+        </button>
         {isEditing ? (
           <input
             ref={inputRef}
@@ -315,6 +330,7 @@ const Lane = ({
               externalVerticalDragDeltaY={externalVerticalDragDeltaY}
               label={clip.label}
               laneName={name}
+              color={color}
               onSelect={onClipSelect}
               onMove={onClipMove}
               onResize={onClipResize}
@@ -333,6 +349,15 @@ const Lane = ({
           y={contextMenu.y}
           items={contextMenuItems}
           onClose={() => setContextMenu(null)}
+        />
+      )}
+      {showColorPicker && onColorChange && (
+        <ColorPicker
+          selectedColor={color || '#00ff00'}
+          onSelectColor={(newColor) => {
+            onColorChange(id, newColor);
+          }}
+          onClose={() => setShowColorPicker(false)}
         />
       )}
     </div>

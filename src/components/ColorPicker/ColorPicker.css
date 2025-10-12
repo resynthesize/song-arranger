@@ -1,0 +1,101 @@
+/**
+ * Song Arranger - ColorPicker Styles
+ * Retro terminal-styled color picker
+ */
+
+.color-picker {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.color-picker__content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.color-picker__palette {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.color-picker__row {
+  display: flex;
+  gap: 4px;
+}
+
+.color-picker__swatch {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-secondary, #008800);
+  background: transparent;
+  cursor: pointer;
+  font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
+  font-size: 20px;
+  color: var(--color-primary, #00ff00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.1s;
+  padding: 0;
+}
+
+.color-picker__swatch:hover {
+  border-color: var(--color-primary, #00ff00);
+  box-shadow: 0 0 4px var(--color-primary, #00ff00);
+}
+
+.color-picker__swatch:focus {
+  outline: none;
+  border-color: var(--color-highlight, #66ff66);
+  box-shadow: 0 0 6px var(--color-highlight, #66ff66);
+}
+
+.color-picker__swatch--selected {
+  border-color: var(--color-primary, #00ff00);
+  border-width: 2px;
+  box-shadow: 0 0 6px var(--color-primary, #00ff00);
+}
+
+.color-picker__preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-top: 1px solid var(--color-grid, #003300);
+  font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
+  font-size: 20px;
+  color: var(--color-primary, #00ff00);
+}
+
+.color-picker__preview-label {
+  opacity: 0.8;
+}
+
+.color-picker__preview-swatch {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.color-picker__preview-hex {
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.color-picker__instructions {
+  text-align: center;
+  font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
+  font-size: 18px;
+  color: var(--color-primary, #00ff00);
+  opacity: 0.7;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-grid, #003300);
+}

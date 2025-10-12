@@ -30,6 +30,7 @@ import {
   setEditingLane,
   clearEditingLane,
   removeLane,
+  setLaneColor,
 } from '@/store/slices/lanesSlice';
 import { setPlayheadPosition, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
 import { snapToGrid, snapToGridFloor } from '@/utils/snap';
@@ -90,6 +91,14 @@ const Timeline = () => {
   const handleStopEditing = useCallback(() => {
     dispatch(clearEditingLane());
   }, [dispatch]);
+
+  // Handle lane color changes
+  const handleColorChange = useCallback(
+    (laneId: ID, color: string) => {
+      dispatch(setLaneColor({ laneId, color }));
+    },
+    [dispatch]
+  );
 
   // Handle lane removal
   const handleRemoveLane = useCallback(
@@ -508,6 +517,7 @@ const Timeline = () => {
                 key={lane.id}
                 id={lane.id}
                 name={lane.name}
+                color={lane.color}
                 clips={clips}
                 viewport={viewport}
                 snapValue={effectiveSnapValue}
@@ -515,6 +525,7 @@ const Timeline = () => {
                 verticalDragState={verticalDragState}
                 isEditing={editingLaneId === lane.id}
                 onNameChange={handleNameChange}
+                onColorChange={handleColorChange}
                 onStartEditing={handleStartEditing}
                 onStopEditing={handleStopEditing}
                 onRemove={handleRemoveLane}
