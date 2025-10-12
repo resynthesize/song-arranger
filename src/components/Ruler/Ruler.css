@@ -13,13 +13,13 @@
   overflow: hidden;
   position: relative;
   user-select: none;
+  padding-left: 150px; /* Match lane header width */
 }
 
 /* Bar Numbers */
 .ruler__bar-number {
   position: absolute;
   top: 0;
-  transform: translateX(-50%);
   padding: var(--spacing-xs) var(--spacing-sm);
   font-family: var(--font-primary);
   font-size: var(--font-size-md);
@@ -43,7 +43,6 @@
   display: flex;
   align-items: flex-end;
   padding-bottom: var(--spacing-xs);
-  transform: translateX(-50%);
   font-family: var(--font-primary);
   font-size: var(--font-size-base);
   color: var(--color-grid);

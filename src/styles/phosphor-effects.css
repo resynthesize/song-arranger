@@ -3,16 +3,16 @@
  * CRT-style phosphor glow and pixel-perfect rendering
  */
 
-/* Pixel-Perfect Font Rendering - Force crisp edges */
+/* Pixel-Perfect Font Rendering - Balanced for legibility */
 body,
 * {
-  /* Disable font smoothing for authentic terminal look */
-  -webkit-font-smoothing: none;
+  /* Subtle antialiasing for better legibility */
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-smooth: never;
+  font-smooth: auto;
 
-  /* Force pixel-aligned rendering */
-  text-rendering: optimizeSpeed;
+  /* Optimize for sharp text rendering */
+  text-rendering: geometricPrecision;
   -webkit-text-stroke: 0;
 
   /* Ensure crisp borders and elements */

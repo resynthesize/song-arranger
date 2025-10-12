@@ -61,11 +61,11 @@
   --border-width-thick: 3px;
 
   /* CRT Effects - Enhanced Phosphor Glow System */
-  --scanline-opacity: 0.1;
-  --glow-intensity-sm: 2px;
-  --glow-intensity-md: 4px;
-  --glow-intensity-lg: 8px;
-  --glow-intensity-xl: 12px;
+  --scanline-opacity: 0.04;
+  --glow-intensity-sm: 1px;
+  --glow-intensity-md: 2px;
+  --glow-intensity-lg: 4px;
+  --glow-intensity-xl: 6px;
 
   /* Multi-layer phosphor glow for authentic CRT bloom */
   --phosphor-glow-sm:
