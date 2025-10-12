@@ -23,6 +23,21 @@ const CRTEffects = () => {
 
       {/* Curvature overlay - barrel distortion effect */}
       <div className="crt-curvature" data-testid="crt-curvature" />
+
+      {/* Vignette - darker corners */}
+      <div className="crt-vignette" data-testid="crt-vignette" />
+
+      {/* RGB separation - chromatic aberration */}
+      <div className="crt-rgb-separation" data-testid="crt-rgb-separation" />
+
+      {/* Rolling interference - horizontal line effect */}
+      <div className="crt-interference" data-testid="crt-interference" />
+
+      {/* Brightness variation - center brighter */}
+      <div className="crt-brightness" data-testid="crt-brightness" />
+
+      {/* Burn-in simulation - ghost images */}
+      <div className="crt-burnin" data-testid="crt-burnin" />
     </div>
   );
 };

@@ -1,0 +1,174 @@
+/**
+ * Song Arranger - Enhanced Phosphor Effects
+ * CRT-style phosphor glow and pixel-perfect rendering
+ */
+
+/* Pixel-Perfect Font Rendering - Force crisp edges */
+body,
+* {
+  /* Disable font smoothing for authentic terminal look */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: never;
+
+  /* Force pixel-aligned rendering */
+  text-rendering: optimizeSpeed;
+  -webkit-text-stroke: 0;
+
+  /* Ensure crisp borders and elements */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Enhanced phosphor glow utilities */
+.phosphor-glow-sm {
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.phosphor-glow-md {
+  text-shadow: var(--phosphor-glow-md);
+}
+
+.phosphor-glow-lg {
+  text-shadow: var(--phosphor-glow-lg);
+}
+
+.phosphor-glow-xl {
+  text-shadow: var(--phosphor-glow-xl);
+}
+
+/* Box shadow glow for elements */
+.box-glow-sm {
+  box-shadow: var(--box-glow-sm);
+}
+
+.box-glow-md {
+  box-shadow: var(--box-glow-md);
+}
+
+.box-glow-lg {
+  box-shadow: var(--box-glow-lg);
+}
+
+.box-glow-xl {
+  box-shadow: var(--box-glow-xl);
+}
+
+/* Phosphor persistence - brief afterglow on state changes */
+.phosphor-persist {
+  transition:
+    color var(--phosphor-persistence) ease-out,
+    background-color var(--phosphor-persistence) ease-out,
+    border-color var(--phosphor-persistence) ease-out,
+    box-shadow var(--phosphor-persistence) ease-out,
+    text-shadow var(--phosphor-persistence) ease-out;
+}
+
+/* Intensity variation classes */
+.phosphor-dim {
+  color: var(--color-dim);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.phosphor-normal {
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-md);
+}
+
+.phosphor-bright {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-lg);
+}
+
+.phosphor-ultra-bright {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-xl);
+  animation: phosphor-bloom 2s ease-in-out infinite;
+}
+
+/* Bloom animation for ultra-bright elements */
+@keyframes phosphor-bloom {
+  0%, 100% {
+    text-shadow: var(--phosphor-glow-xl);
+    filter: brightness(1);
+  }
+  50% {
+    text-shadow: var(--phosphor-glow-lg);
+    filter: brightness(0.9);
+  }
+}
+
+/* Color bleeding effect - subtle glow spread */
+.phosphor-bleed::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 255, 0, 0.15) 0%,
+    rgba(0, 255, 0, 0.05) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Enhanced glow for interactive elements */
+.interactive-glow {
+  position: relative;
+  text-shadow: var(--phosphor-glow-md);
+  transition: text-shadow var(--transition-fast);
+}
+
+.interactive-glow:hover,
+.interactive-glow:focus {
+  text-shadow: var(--phosphor-glow-lg);
+}
+
+.interactive-glow:active {
+  text-shadow: var(--phosphor-glow-xl);
+}
+
+/* Selected state with enhanced glow */
+.selected-glow {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-lg);
+  box-shadow: var(--box-glow-lg);
+  border-color: var(--color-highlight);
+}
+
+/* Disable all glow effects when CRT is off */
+.app.no-crt-effects .phosphor-glow-sm,
+.app.no-crt-effects .phosphor-glow-md,
+.app.no-crt-effects .phosphor-glow-lg,
+.app.no-crt-effects .phosphor-glow-xl,
+.app.no-crt-effects .interactive-glow,
+.app.no-crt-effects .selected-glow,
+.app.no-crt-effects .phosphor-dim,
+.app.no-crt-effects .phosphor-normal,
+.app.no-crt-effects .phosphor-bright,
+.app.no-crt-effects .phosphor-ultra-bright {
+  text-shadow: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.app.no-crt-effects .phosphor-bleed::after {
+  display: none;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .phosphor-persist {
+    transition: none;
+  }
+
+  .phosphor-ultra-bright,
+  .interactive-glow {
+    animation: none;
+    transition: none;
+  }
+}

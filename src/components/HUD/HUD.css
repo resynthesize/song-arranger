@@ -1,0 +1,169 @@
+/**
+ * Song Arranger - HUD Component Styles
+ * Terminal-styled information-dense heads-up display with enhanced phosphor glow
+ */
+
+.hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-bg);
+  border-bottom: var(--border-width-base) solid var(--color-secondary);
+  z-index: var(--z-controls);
+  user-select: none;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-tight);
+}
+
+/* ASCII box-drawing borders with enhanced phosphor glow */
+.hud__border {
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  white-space: pre;
+  overflow: hidden;
+  padding: 0 var(--spacing-sm);
+  text-shadow: var(--phosphor-glow-sm);
+  letter-spacing: -1px;
+}
+
+.hud__border--top {
+  margin-top: 2px;
+}
+
+.hud__border--bottom {
+  margin-bottom: 2px;
+}
+
+/* Main content area */
+.hud__content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+/* Individual info sections */
+.hud__section {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+}
+
+/* Labels for each metric */
+.hud__label {
+  color: var(--color-secondary);
+  font-weight: var(--font-weight-bold);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+/* Values with different brightness levels */
+.hud__value {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  text-shadow: var(--phosphor-glow-md);
+  transition: text-shadow var(--transition-fast);
+}
+
+/* Bright values - extra glow for important metrics */
+.hud__value--bright {
+  color: var(--color-highlight);
+  text-shadow:
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary);
+  animation: phosphor-pulse 2s ease-in-out infinite;
+}
+
+/* Dim values - less important info */
+.hud__value--dim {
+  color: var(--color-dim);
+  text-shadow: var(--phosphor-glow-sm);
+  font-size: var(--font-size-sm);
+}
+
+/* Vertical separators */
+.hud__separator {
+  color: var(--color-grid);
+  text-shadow: var(--phosphor-glow-sm);
+  user-select: none;
+}
+
+/* Phosphor pulse animation for bright values */
+@keyframes phosphor-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 var(--glow-intensity-md) var(--color-primary),
+      0 0 var(--glow-intensity-lg) var(--color-primary);
+  }
+  50% {
+    text-shadow:
+      0 0 var(--glow-intensity-sm) var(--color-primary),
+      0 0 var(--glow-intensity-md) var(--color-primary);
+  }
+}
+
+/* Hover effects on sections */
+.hud__section:hover .hud__value {
+  text-shadow:
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-highlight);
+}
+
+/* When CRT effects are disabled, reduce glow intensity */
+.app.no-crt-effects .hud__value,
+.app.no-crt-effects .hud__label,
+.app.no-crt-effects .hud__border,
+.app.no-crt-effects .hud__separator {
+  text-shadow: none;
+  animation: none;
+}
+
+.app.no-crt-effects .hud__value--bright {
+  animation: none;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .hud__value--bright {
+    animation: none;
+  }
+
+  .hud__value {
+    transition: none;
+  }
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1200px) {
+  .hud__content {
+    gap: var(--spacing-sm);
+  }
+
+  .hud__section {
+    gap: var(--spacing-xs);
+  }
+
+  .hud {
+    font-size: var(--font-size-sm);
+  }
+
+  .hud__border {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Very small screens - stack sections */
+@media (max-width: 768px) {
+  .hud__border {
+    display: none;
+  }
+
+  .hud__content {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+}

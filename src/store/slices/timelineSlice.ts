@@ -8,8 +8,8 @@ import type { TimelineState, Position } from '@/types';
 
 // Discrete zoom levels for better UX
 const ZOOM_LEVELS = [25, 50, 100, 200, 400] as const; // pixels per beat
-const MIN_ZOOM = ZOOM_LEVELS[0] ?? 25;
-const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1] ?? 400;
+const MIN_ZOOM = ZOOM_LEVELS[0];
+const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 
 const initialState: TimelineState = {
   zoom: 100, // 100 pixels per beat (default)

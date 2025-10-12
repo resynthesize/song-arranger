@@ -27,6 +27,15 @@ describe('App', () => {
     });
   };
 
+  beforeEach(() => {
+    // Skip boot sequence for tests
+    localStorage.setItem('skipBootSequence', 'true');
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
   it('should render app with menu bar', () => {
     const store = createTestStore();
 

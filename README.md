@@ -31,10 +31,8 @@ See [CLAUDE.md](./CLAUDE.md) for development practices and guidelines.
 
 ## Project Status
 
-🚧 In active development - see [Linear project](https://linear.app/gamedevs/project/song-arranger-f4f223461148) for current progress.
+In active development - see [Linear project](https://linear.app/gamedevs/project/song-arranger-f4f223461148) for current progress.
 
 ## License
 
 TBD
-# Test
-4b2fb4c GAM-5: Test Linear integration with different format

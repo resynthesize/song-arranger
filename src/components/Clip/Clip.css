@@ -23,8 +23,16 @@
 
 .clip--selected {
   border-color: var(--color-highlight);
-  box-shadow: var(--phosphor-glow-md);
+  box-shadow: var(--box-glow-lg);
   z-index: var(--z-controls);
+  transition:
+    box-shadow var(--phosphor-persistence) ease-out,
+    border-color var(--phosphor-persistence) ease-out;
+}
+
+.clip--selected .clip__corner {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-lg);
 }
 
 .clip--dragging,

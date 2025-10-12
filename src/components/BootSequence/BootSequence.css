@@ -1,0 +1,141 @@
+/**
+ * Song Arranger - BootSequence Component Styles
+ * Vintage terminal boot sequence aesthetic
+ */
+
+.boot-sequence {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-bg);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-primary);
+  color: var(--color-primary);
+  animation: boot-fade-in 200ms ease-out;
+}
+
+@keyframes boot-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.boot-sequence__container {
+  max-width: 800px;
+  width: 100%;
+  padding: var(--spacing-2xl);
+}
+
+.boot-sequence__messages {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+  text-shadow: var(--phosphor-glow-md);
+  min-height: 400px;
+}
+
+.boot-sequence__line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xs);
+  animation: boot-line-appear 150ms ease-out;
+}
+
+@keyframes boot-line-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.boot-sequence__text {
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-md);
+}
+
+.boot-sequence__status {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-lg);
+  font-weight: var(--font-weight-bold);
+  margin-left: var(--spacing-md);
+}
+
+.boot-sequence__cursor {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-lg);
+  animation: boot-cursor-blink 1s step-end infinite;
+  display: inline-block;
+}
+
+@keyframes boot-cursor-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.boot-sequence__footer {
+  margin-top: var(--spacing-3xl);
+  text-align: center;
+  border-top: var(--border-width-thin) solid var(--color-grid);
+  padding-top: var(--spacing-lg);
+}
+
+.boot-sequence__hint {
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  text-shadow: var(--phosphor-glow-sm);
+  animation: boot-hint-pulse 2s ease-in-out infinite;
+}
+
+@keyframes boot-hint-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Disable animations with reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .boot-sequence,
+  .boot-sequence__line {
+    animation: none;
+  }
+
+  .boot-sequence__cursor,
+  .boot-sequence__hint {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .boot-sequence__container {
+    padding: var(--spacing-lg);
+  }
+
+  .boot-sequence__messages {
+    font-size: var(--font-size-base);
+    min-height: 300px;
+  }
+
+  .boot-sequence__hint {
+    font-size: var(--font-size-xs);
+  }
+}

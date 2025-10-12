@@ -1,0 +1,49 @@
+/**
+ * Song Arranger - TerminalNoise Component Styles
+ * Subtle character glitches for authentic terminal feel
+ */
+
+.terminal-noise {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: calc(var(--z-modal) - 1);
+  overflow: hidden;
+}
+
+.terminal-noise__glitch {
+  position: absolute;
+  color: var(--color-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  text-shadow: var(--phosphor-glow-md);
+  animation: glitch-flicker 100ms ease-out;
+  pointer-events: none;
+  user-select: none;
+}
+
+@keyframes glitch-flicker {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Disable with reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .terminal-noise__glitch {
+    animation: none;
+    display: none;
+  }
+}

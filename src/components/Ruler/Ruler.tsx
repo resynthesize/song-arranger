@@ -57,11 +57,11 @@ const Ruler = ({ zoom, containerWidth, onPositionClick }: RulerProps) => {
       {/* Bar numbers */}
       {bars.map(({ barNumber, position }) => (
         <div
-          key={`bar-${barNumber}`}
+          key={`bar-${barNumber.toString()}`}
           className="ruler__bar-number"
-          data-testid={`ruler-bar-${barNumber}`}
-          style={{ left: `${position}px` }}
-          onClick={() => handleClick(position)}
+          data-testid={`ruler-bar-${barNumber.toString()}`}
+          style={{ left: `${position.toString()}px` }}
+          onClick={() => { handleClick(position); }}
         >
           {barNumber}
         </div>
@@ -70,12 +70,12 @@ const Ruler = ({ zoom, containerWidth, onPositionClick }: RulerProps) => {
       {/* Beat markers */}
       {beats.map(({ barNumber, beat, position }) => (
         <div
-          key={`beat-${barNumber}-${beat}`}
+          key={`beat-${barNumber.toString()}-${beat.toString()}`}
           className="ruler__beat-tick"
-          data-testid={`ruler-beat-${barNumber}-${beat}`}
-          style={{ left: `${position}px` }}
-          onClick={() => handleClick(position)}
-          title={`Bar ${barNumber}, Beat ${beat}`}
+          data-testid={`ruler-beat-${barNumber.toString()}-${beat.toString()}`}
+          style={{ left: `${position.toString()}px` }}
+          onClick={() => { handleClick(position); }}
+          title={`Bar ${barNumber.toString()}, Beat ${beat.toString()}`}
         >
           │
         </div>

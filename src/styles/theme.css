@@ -60,15 +60,43 @@
   --border-width-base: 2px;
   --border-width-thick: 3px;
 
-  /* CRT Effects */
+  /* CRT Effects - Enhanced Phosphor Glow System */
   --scanline-opacity: 0.1;
   --glow-intensity-sm: 2px;
   --glow-intensity-md: 4px;
-  --glow-intensity-lg: 6px;
-  --phosphor-glow-sm: 0 0 var(--glow-intensity-sm) var(--color-primary);
-  --phosphor-glow-md: 0 0 var(--glow-intensity-md) var(--color-primary);
-  --phosphor-glow-lg: 0 0 var(--glow-intensity-lg) var(--color-primary);
+  --glow-intensity-lg: 8px;
+  --glow-intensity-xl: 12px;
+
+  /* Multi-layer phosphor glow for authentic CRT bloom */
+  --phosphor-glow-sm:
+    0 0 var(--glow-intensity-sm) var(--color-primary);
+  --phosphor-glow-md:
+    0 0 var(--glow-intensity-sm) var(--color-primary),
+    0 0 var(--glow-intensity-md) var(--color-primary);
+  --phosphor-glow-lg:
+    0 0 var(--glow-intensity-sm) var(--color-primary),
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary);
+  --phosphor-glow-xl:
+    0 0 var(--glow-intensity-sm) var(--color-primary),
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary),
+    0 0 var(--glow-intensity-xl) var(--color-highlight);
   --phosphor-glow: var(--phosphor-glow-sm);
+
+  /* Phosphor persistence - brief afterglow duration */
+  --phosphor-persistence: 150ms;
+
+  /* Box shadow glow for interactive elements */
+  --box-glow-sm: 0 0 var(--glow-intensity-sm) var(--color-primary);
+  --box-glow-md: 0 0 var(--glow-intensity-md) var(--color-primary);
+  --box-glow-lg:
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary);
+  --box-glow-xl:
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary),
+    0 0 var(--glow-intensity-xl) var(--color-highlight);
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 255, 0, 0.1);
