@@ -18,6 +18,10 @@ import {
 import {
   zoomIn,
   zoomOut,
+  zoomInFocused,
+  zoomOutFocused,
+  verticalZoomIn,
+  verticalZoomOut,
   togglePlayPause,
   toggleMinimap,
   stop,
@@ -251,11 +255,29 @@ export const useKeyboardShortcuts = () => {
         }
 
         case 'zoomIn':
-          dispatch(zoomIn());
+          if (selectedClipIds.length > 0) {
+            // Zoom focused on center of selected clips
+            const selectedClips = clips.filter(c => selectedClipIds.includes(c.id));
+            const minPos = Math.min(...selectedClips.map(c => c.position));
+            const maxPos = Math.max(...selectedClips.map(c => c.position + c.duration));
+            const centerBeats = (minPos + maxPos) / 2;
+            dispatch(zoomInFocused(centerBeats));
+          } else {
+            dispatch(zoomIn());
+          }
           break;
 
         case 'zoomOut':
-          dispatch(zoomOut());
+          if (selectedClipIds.length > 0) {
+            // Zoom focused on center of selected clips
+            const selectedClips = clips.filter(c => selectedClipIds.includes(c.id));
+            const minPos = Math.min(...selectedClips.map(c => c.position));
+            const maxPos = Math.max(...selectedClips.map(c => c.position + c.duration));
+            const centerBeats = (minPos + maxPos) / 2;
+            dispatch(zoomOutFocused(centerBeats));
+          } else {
+            dispatch(zoomOut());
+          }
           break;
 
         case 'togglePlay':
@@ -264,6 +286,14 @@ export const useKeyboardShortcuts = () => {
 
         case 'toggleMinimap':
           dispatch(toggleMinimap());
+          break;
+
+        case 'verticalZoomIn':
+          dispatch(verticalZoomIn());
+          break;
+
+        case 'verticalZoomOut':
+          dispatch(verticalZoomOut());
           break;
 
         case 'undo':

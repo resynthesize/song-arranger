@@ -68,6 +68,7 @@ const Timeline = () => {
     (state) => state.selection.selectedClipIds
   );
   const editingLaneId = useAppSelector((state) => state.lanes.editingLaneId);
+  const verticalZoom = useAppSelector((state) => state.timeline.verticalZoom);
 
   // Keep clips in a ref so callbacks can access them without changing reference
   const clipsRef = useRef(clips);
@@ -523,6 +524,7 @@ const Timeline = () => {
                 snapValue={effectiveSnapValue}
                 selectedClipIds={selectedClipIds}
                 verticalDragState={verticalDragState}
+                verticalZoom={verticalZoom}
                 isEditing={editingLaneId === lane.id}
                 onNameChange={handleNameChange}
                 onColorChange={handleColorChange}

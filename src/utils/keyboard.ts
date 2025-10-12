@@ -51,6 +51,8 @@ export type KeyboardAction =
   | 'navigateDown'
   | 'zoomIn'
   | 'zoomOut'
+  | 'verticalZoomIn'
+  | 'verticalZoomOut'
   | 'togglePlay'
   | 'toggleMinimap'
   | 'help'
@@ -310,6 +312,20 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     action: 'zoomIn',
     description: 'Zoom in'
   },
+  {
+    key: '[',
+    ctrlKey: true,
+    shiftKey: true,
+    action: 'verticalZoomOut',
+    description: 'Decrease lane height'
+  },
+  {
+    key: ']',
+    ctrlKey: true,
+    shiftKey: true,
+    action: 'verticalZoomIn',
+    description: 'Increase lane height'
+  },
 
   // Playback
   {
@@ -391,7 +407,8 @@ export const getShortcutsForContext = (
 
   // Global shortcuts (always available)
   const globalActions: KeyboardAction[] = [
-    'zoomIn', 'zoomOut', 'togglePlay', 'toggleMinimap', 'undo', 'redo',
+    'zoomIn', 'zoomOut', 'verticalZoomIn', 'verticalZoomOut',
+    'togglePlay', 'toggleMinimap', 'undo', 'redo',
     'navigateUp', 'navigateDown', 'help', 'settings',
     'commandPalette', 'stop', 'jumpToStart', 'jumpToEnd',
     'movePlayheadLeft', 'movePlayheadRight',

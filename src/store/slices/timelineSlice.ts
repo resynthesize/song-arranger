@@ -78,6 +78,42 @@ const timelineSlice = createSlice({
       state.viewport.zoom = getPreviousZoomLevel(state.viewport.zoom);
     },
 
+    /**
+     * Zoom in while keeping a focus point at the same screen position
+     * @param focusBeats - The beat position to keep stable (typically center of selection)
+     */
+    zoomInFocused: (state, action: PayloadAction<number>) => {
+      const focusBeats = action.payload;
+      const oldZoom = state.viewport.zoom;
+      const newZoom = getNextZoomLevel(oldZoom);
+
+      // Calculate where the focus point is on screen before zoom
+      const focusScreenPx = (focusBeats - state.viewport.offsetBeats) * oldZoom;
+
+      // After zoom, adjust offset so focus point stays at same screen position
+      // focusScreenPx = (focusBeats - newOffset) * newZoom
+      // newOffset = focusBeats - (focusScreenPx / newZoom)
+      state.viewport.zoom = newZoom;
+      state.viewport.offsetBeats = Math.max(0, focusBeats - (focusScreenPx / newZoom));
+    },
+
+    /**
+     * Zoom out while keeping a focus point at the same screen position
+     * @param focusBeats - The beat position to keep stable (typically center of selection)
+     */
+    zoomOutFocused: (state, action: PayloadAction<number>) => {
+      const focusBeats = action.payload;
+      const oldZoom = state.viewport.zoom;
+      const newZoom = getPreviousZoomLevel(oldZoom);
+
+      // Calculate where the focus point is on screen before zoom
+      const focusScreenPx = (focusBeats - state.viewport.offsetBeats) * oldZoom;
+
+      // After zoom, adjust offset so focus point stays at same screen position
+      state.viewport.zoom = newZoom;
+      state.viewport.offsetBeats = Math.max(0, focusBeats - (focusScreenPx / newZoom));
+    },
+
     setViewportOffset: (state, action: PayloadAction<number>) => {
       state.viewport.offsetBeats = Math.max(0, action.payload);
     },
@@ -191,6 +227,8 @@ export const {
   setZoom,
   zoomIn,
   zoomOut,
+  zoomInFocused,
+  zoomOutFocused,
   setViewportOffset,
   panViewport,
   setViewportDimensions,

@@ -20,6 +20,7 @@ interface LaneProps {
   snapValue: number;
   selectedClipIds: ID[];
   verticalDragState: { deltaY: number; draggedClipId: ID } | null;
+  verticalZoom: number; // Vertical zoom percentage (50-150)
   isEditing: boolean;
   onNameChange: (laneId: ID, newName: string) => void;
   onColorChange?: (laneId: ID, color: string) => void;
@@ -46,6 +47,7 @@ const Lane = ({
   snapValue,
   selectedClipIds,
   verticalDragState,
+  verticalZoom,
   isEditing,
   onNameChange,
   onColorChange,
@@ -62,6 +64,8 @@ const Lane = ({
   onClipVerticalDragUpdate,
   onDoubleClick,
 }: LaneProps) => {
+  // Calculate lane height from vertical zoom (base height is 80px)
+  const laneHeight = (80 * verticalZoom) / 100;
   const inputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const gridCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -265,7 +269,7 @@ const Lane = ({
   ];
 
   return (
-    <div className="lane" data-testid={`lane-${id}`}>
+    <div className="lane" data-testid={`lane-${id}`} style={{ minHeight: `${laneHeight}px` }}>
       <div className="lane__header">
         <button
           className="lane__color-swatch"
