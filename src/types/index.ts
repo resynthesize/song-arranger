@@ -58,11 +58,13 @@ export interface ViewportState {
  */
 export interface TimelineState {
   viewport: ViewportState; // Viewport state for infinite scroll
+  verticalZoom: number; // Vertical zoom percentage (50-150%, affects lane height)
   playheadPosition: Position; // Current playback position in beats
   isPlaying: boolean;
   tempo: number; // BPM (beats per minute)
   snapValue: number; // Snap interval in beats (e.g., 0.25 for 1/16th note, 1 for quarter note)
   snapMode: SnapMode; // 'fixed' for manual snap values, 'grid' for dynamic grid-based snapping
+  minimapVisible: boolean; // Whether minimap is visible
 }
 
 /**
@@ -81,10 +83,11 @@ export interface ClipsState {
 }
 
 /**
- * Selection State - Manages selected clips
+ * Selection State - Manages selected clips and current lane
  */
 export interface SelectionState {
   selectedClipIds: ID[];
+  currentLaneId: ID | null; // Currently selected lane (for navigation when no clips selected)
 }
 
 /**

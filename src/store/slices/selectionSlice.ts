@@ -8,6 +8,7 @@ import type { SelectionState, ID } from '@/types';
 
 const initialState: SelectionState = {
   selectedClipIds: [],
+  currentLaneId: null,
 };
 
 const selectionSlice = createSlice({
@@ -16,6 +17,8 @@ const selectionSlice = createSlice({
   reducers: {
     selectClip: (state, action: PayloadAction<ID>) => {
       state.selectedClipIds = [action.payload];
+      // Clear current lane when selecting a clip
+      state.currentLaneId = null;
     },
 
     deselectClip: (state, action: PayloadAction<ID>) => {
@@ -85,6 +88,58 @@ const selectionSlice = createSlice({
 
       state.selectedClipIds = [clipIds[nextIndex]];
     },
+
+    setCurrentLane: (state, action: PayloadAction<ID>) => {
+      state.currentLaneId = action.payload;
+    },
+
+    clearCurrentLane: (state) => {
+      state.currentLaneId = null;
+    },
+
+    navigateUp: (state, action: PayloadAction<ID[]>) => {
+      const laneIds = action.payload;
+
+      if (laneIds.length === 0) {
+        return;
+      }
+
+      if (state.currentLaneId === null) {
+        // No current lane, select last lane
+        state.currentLaneId = laneIds[laneIds.length - 1] || null;
+      } else {
+        // Find current lane index
+        const currentIndex = laneIds.indexOf(state.currentLaneId);
+
+        if (currentIndex > 0) {
+          // Move to previous lane
+          state.currentLaneId = laneIds[currentIndex - 1] || null;
+        }
+        // If at first lane or not found, stay at current lane
+      }
+    },
+
+    navigateDown: (state, action: PayloadAction<ID[]>) => {
+      const laneIds = action.payload;
+
+      if (laneIds.length === 0) {
+        return;
+      }
+
+      if (state.currentLaneId === null) {
+        // No current lane, select first lane
+        state.currentLaneId = laneIds[0] || null;
+      } else {
+        // Find current lane index
+        const currentIndex = laneIds.indexOf(state.currentLaneId);
+
+        if (currentIndex !== -1 && currentIndex < laneIds.length - 1) {
+          // Move to next lane
+          state.currentLaneId = laneIds[currentIndex + 1] || null;
+        }
+        // If at last lane or not found, stay at current lane
+      }
+    },
   },
 });
 
@@ -96,6 +151,10 @@ export const {
   selectAllClips,
   clearSelection,
   cycleSelection,
+  setCurrentLane,
+  clearCurrentLane,
+  navigateUp,
+  navigateDown,
 } = selectionSlice.actions;
 
 export default selectionSlice.reducer;

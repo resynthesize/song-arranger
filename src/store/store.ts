@@ -10,6 +10,8 @@ import clipsReducer from './slices/clipsSlice';
 import selectionReducer from './slices/selectionSlice';
 import crtEffectsReducer from './slices/crtEffectsSlice';
 import projectReducer from './slices/projectSlice';
+import quickInputReducer from './slices/quickInputSlice';
+import commandPaletteReducer from './slices/commandPaletteSlice';
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +21,8 @@ export const store = configureStore({
     selection: selectionReducer,
     crtEffects: crtEffectsReducer,
     project: projectReducer,
+    quickInput: quickInputReducer,
+    commandPalette: commandPaletteReducer,
   },
 });
 

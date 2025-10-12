@@ -15,10 +15,12 @@ import type { SelectionState } from '@/types';
 describe('selectionSlice', () => {
   const initialState: SelectionState = {
     selectedClipIds: [],
+    currentLaneId: null,
   };
 
   const stateWithSelection: SelectionState = {
     selectedClipIds: ['clip-1', 'clip-2', 'clip-3'],
+    currentLaneId: null,
   };
 
   it('should return the initial state', () => {
@@ -122,6 +124,72 @@ describe('selectionSlice', () => {
     it('should work with empty selection', () => {
       const newState = reducer(initialState, clearSelection());
       expect(newState.selectedClipIds).toEqual([]);
+    });
+  });
+
+  describe('current lane selection', () => {
+    it('should set current lane', () => {
+      const newState = reducer(initialState, { type: 'selection/setCurrentLane', payload: 'lane-1' });
+      expect(newState.currentLaneId).toBe('lane-1');
+    });
+
+    it('should change current lane', () => {
+      const state = { ...initialState, currentLaneId: 'lane-1' };
+      const newState = reducer(state, { type: 'selection/setCurrentLane', payload: 'lane-2' });
+      expect(newState.currentLaneId).toBe('lane-2');
+    });
+
+    it('should clear current lane', () => {
+      const state = { ...initialState, currentLaneId: 'lane-1' };
+      const newState = reducer(state, { type: 'selection/clearCurrentLane' });
+      expect(newState.currentLaneId).toBeNull();
+    });
+
+    it('should navigate to next lane', () => {
+      const lanes = ['lane-1', 'lane-2', 'lane-3'];
+      const state = { ...initialState, currentLaneId: 'lane-1' };
+      const newState = reducer(state, { type: 'selection/navigateDown', payload: lanes });
+      expect(newState.currentLaneId).toBe('lane-2');
+    });
+
+    it('should navigate to previous lane', () => {
+      const lanes = ['lane-1', 'lane-2', 'lane-3'];
+      const state = { ...initialState, currentLaneId: 'lane-2' };
+      const newState = reducer(state, { type: 'selection/navigateUp', payload: lanes });
+      expect(newState.currentLaneId).toBe('lane-1');
+    });
+
+    it('should not navigate past first lane', () => {
+      const lanes = ['lane-1', 'lane-2', 'lane-3'];
+      const state = { ...initialState, currentLaneId: 'lane-1' };
+      const newState = reducer(state, { type: 'selection/navigateUp', payload: lanes });
+      expect(newState.currentLaneId).toBe('lane-1');
+    });
+
+    it('should not navigate past last lane', () => {
+      const lanes = ['lane-1', 'lane-2', 'lane-3'];
+      const state = { ...initialState, currentLaneId: 'lane-3' };
+      const newState = reducer(state, { type: 'selection/navigateDown', payload: lanes });
+      expect(newState.currentLaneId).toBe('lane-3');
+    });
+
+    it('should select first lane when navigating down with no current lane', () => {
+      const lanes = ['lane-1', 'lane-2', 'lane-3'];
+      const newState = reducer(initialState, { type: 'selection/navigateDown', payload: lanes });
+      expect(newState.currentLaneId).toBe('lane-1');
+    });
+
+    it('should select last lane when navigating up with no current lane', () => {
+      const lanes = ['lane-1', 'lane-2', 'lane-3'];
+      const newState = reducer(initialState, { type: 'selection/navigateUp', payload: lanes });
+      expect(newState.currentLaneId).toBe('lane-3');
+    });
+
+    it('should clear current lane when a clip is selected', () => {
+      const state = { ...initialState, currentLaneId: 'lane-1' };
+      const newState = reducer(state, selectClip('clip-1'));
+      expect(newState.currentLaneId).toBeNull();
+      expect(newState.selectedClipIds).toEqual(['clip-1']);
     });
   });
 });

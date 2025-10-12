@@ -52,6 +52,7 @@ export type KeyboardAction =
   | 'zoomIn'
   | 'zoomOut'
   | 'togglePlay'
+  | 'toggleMinimap'
   | 'help'
   | 'settings'
   | 'commandPalette';
@@ -317,6 +318,13 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     description: 'Play/Pause'
   },
 
+  // Minimap
+  {
+    key: 'n',
+    action: 'toggleMinimap',
+    description: 'Toggle minimap visibility'
+  },
+
   // Help and Settings
   {
     key: '?',
@@ -377,7 +385,7 @@ export const getShortcutsForContext = (
 
   // Global shortcuts (always available)
   const globalActions: KeyboardAction[] = [
-    'zoomIn', 'zoomOut', 'togglePlay', 'undo', 'redo',
+    'zoomIn', 'zoomOut', 'togglePlay', 'toggleMinimap', 'undo', 'redo',
     'navigateUp', 'navigateDown', 'help', 'settings',
     'commandPalette', 'stop', 'jumpToStart', 'jumpToEnd',
     'movePlayheadLeft', 'movePlayheadRight',

@@ -14,6 +14,9 @@ import Timeline from './components/Timeline';
 import CommandFooter from './components/CommandFooter';
 import CRTEffects from './components/CRTEffects';
 import TerminalNoise from './components/TerminalNoise';
+import Help from './components/Help';
+import Minimap from './components/Minimap';
+import { setViewportOffset } from './store/slices/timelineSlice';
 import './App.css';
 
 function App() {
@@ -24,9 +27,27 @@ function App() {
   );
   const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
   const isEditingLane = useAppSelector((state) => state.lanes.editingLaneId !== null);
+  const minimapVisible = useAppSelector((state) => state.timeline.minimapVisible);
+  const viewport = useAppSelector((state) => state.timeline.viewport);
+  const lanes = useAppSelector((state) => state.lanes.lanes);
+  const clips = useAppSelector((state) => state.clips.clips);
 
-  // Initialize keyboard shortcuts
-  useKeyboardShortcuts();
+  // Initialize keyboard shortcuts and get modal states
+  const { showHelp, setShowHelp, showSettings, setShowSettings } = useKeyboardShortcuts();
+
+  // Calculate total timeline length
+  const timelineLength = clips.reduce((max, clip) => {
+    const clipEnd = clip.position + clip.duration;
+    return Math.max(max, clipEnd);
+  }, 64); // Minimum 64 beats
+
+  const handleMinimapViewportChange = (offsetBeats: number) => {
+    dispatch(setViewportOffset(offsetBeats));
+  };
+
+  const handleMinimapToggle = () => {
+    dispatch({ type: 'timeline/toggleMinimap' });
+  };
 
   const handleBootComplete = () => {
     setShowBootSequence(false);
@@ -59,6 +80,16 @@ function App() {
       />
       <CRTEffects />
       <TerminalNoise />
+      <Help isOpen={showHelp} onClose={() => setShowHelp(false)} />
+      <Minimap
+        lanes={lanes}
+        clips={clips}
+        viewport={viewport}
+        timelineLength={timelineLength}
+        visible={minimapVisible}
+        onViewportChange={handleMinimapViewportChange}
+        onToggle={handleMinimapToggle}
+      />
     </div>
   );
 }

@@ -8,8 +8,10 @@ import './ContextMenu.css';
 
 export interface MenuItem {
   label: string;
-  action: () => void;
+  action?: () => void;
   disabled?: boolean;
+  submenu?: MenuItem[];
+  separator?: boolean;
 }
 
 interface ContextMenuProps {
@@ -74,7 +76,7 @@ const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
   }, [x, y]);
 
   const handleItemClick = (item: MenuItem) => {
-    if (!item.disabled) {
+    if (!item.disabled && !item.submenu && item.action) {
       item.action();
       onClose();
     }
@@ -94,20 +96,37 @@ const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
           <span className="context-menu__corner">┐</span>
         </div>
         <div className="context-menu__items">
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className={`context-menu__item ${
-                item.disabled ? 'context-menu__item--disabled' : ''
-              }`}
-              onClick={() => handleItemClick(item)}
-              data-testid={`context-menu-item-${index}`}
-            >
-              <span className="context-menu__border-char">│</span>
-              <span className="context-menu__label">{item.label}</span>
-              <span className="context-menu__border-char">│</span>
-            </div>
-          ))}
+          {items.map((item, index) => {
+            if (item.separator) {
+              return (
+                <div
+                  key={index}
+                  className="context-menu__separator"
+                  data-testid={`context-menu-separator-${index}`}
+                >
+                  <span className="context-menu__border-char">│</span>
+                  <span className="context-menu__separator-line">─────────</span>
+                  <span className="context-menu__border-char">│</span>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={index}
+                className={`context-menu__item ${
+                  item.disabled ? 'context-menu__item--disabled' : ''
+                } ${item.submenu ? 'context-menu__item--has-submenu' : ''}`}
+                onClick={() => handleItemClick(item)}
+                data-testid={`context-menu-item-${index}`}
+              >
+                <span className="context-menu__border-char">│</span>
+                <span className="context-menu__label">{item.label}</span>
+                {item.submenu && <span className="context-menu__submenu-arrow"> ▸</span>}
+                <span className="context-menu__border-char">│</span>
+              </div>
+            );
+          })}
         </div>
         <div className="context-menu__footer">
           <span className="context-menu__corner">└</span>

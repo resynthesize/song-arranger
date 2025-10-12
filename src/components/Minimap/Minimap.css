@@ -1,0 +1,99 @@
+/**
+ * Song Arranger - Minimap Component Styles
+ * Terminal-styled arrangement overview
+ */
+
+.minimap {
+  position: fixed;
+  bottom: var(--spacing-lg);
+  right: var(--spacing-lg);
+  background: var(--color-bg);
+  border: var(--border-width-base) solid var(--color-secondary);
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+  z-index: var(--z-modal);
+  font-family: var(--font-primary);
+  color: var(--color-primary);
+}
+
+.minimap__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg);
+  border-bottom: var(--border-width-thin) solid var(--color-secondary);
+}
+
+.minimap__title {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-sm);
+  font-weight: bold;
+}
+
+.minimap__close {
+  background: none;
+  border: none;
+  color: var(--color-secondary);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  padding: 0;
+  transition: color var(--transition-fast);
+}
+
+.minimap__close:hover {
+  color: var(--color-highlight);
+}
+
+.minimap__close:focus {
+  outline: 1px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.minimap__content {
+  padding: var(--spacing-sm);
+}
+
+.minimap__canvas-container {
+  position: relative;
+}
+
+.minimap__canvas {
+  display: block;
+  cursor: pointer;
+  border: var(--border-width-thin) solid var(--color-grid);
+}
+
+.minimap__canvas:hover {
+  border-color: var(--color-secondary);
+}
+
+.minimap__viewport {
+  position: absolute;
+  top: 4px;
+  border: 2px solid var(--color-primary);
+  background: rgba(0, 255, 0, 0.1);
+  cursor: move;
+  pointer-events: auto;
+  box-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
+  transition: background var(--transition-fast);
+}
+
+.minimap__viewport:hover {
+  background: rgba(0, 255, 0, 0.15);
+  box-shadow: 0 0 6px rgba(0, 255, 0, 0.7);
+}
+
+.minimap__viewport:active {
+  background: rgba(0, 255, 0, 0.2);
+  cursor: grabbing;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .minimap__close,
+  .minimap__viewport {
+    transition: none;
+  }
+}
