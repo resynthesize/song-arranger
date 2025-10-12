@@ -13,6 +13,10 @@ import {
   resizeClip,
   resizeClips,
   removeClips,
+  updateClip,
+  duplicateClip,
+  duplicateClips,
+  updateClipLane,
 } from '@/store/slices/clipsSlice';
 import {
   selectClip,
@@ -140,6 +144,61 @@ const Timeline = () => {
     [dispatch, snapValue]
   );
 
+  // Handle clip label change
+  const handleClipLabelChange = useCallback(
+    (clipId: ID, label: string) => {
+      dispatch(updateClip({ clipId, updates: { label } }));
+    },
+    [dispatch]
+  );
+
+  // Handle clip copy (Alt+drag)
+  const handleClipCopy = useCallback(
+    (clipId: ID) => {
+      if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
+        // Duplicate all selected clips
+        dispatch(duplicateClips(selectedClipIds));
+      } else {
+        // Duplicate single clip
+        dispatch(duplicateClip(clipId));
+      }
+    },
+    [dispatch, selectedClipIds]
+  );
+
+  // Handle vertical clip dragging (move between lanes)
+  const handleClipVerticalDrag = useCallback(
+    (clipId: ID, deltaY: number) => {
+      // Calculate which lane the clip should move to based on deltaY
+      const LANE_HEIGHT = 80; // Match CSS .lane height
+      const laneIndex = lanes.findIndex((lane) =>
+        clips.find((c) => c.id === clipId && c.laneId === lane.id)
+      );
+
+      if (laneIndex === -1) return;
+
+      const laneDelta = Math.round(deltaY / LANE_HEIGHT);
+      const targetLaneIndex = Math.max(
+        0,
+        Math.min(lanes.length - 1, laneIndex + laneDelta)
+      );
+
+      if (targetLaneIndex !== laneIndex) {
+        const targetLaneId = lanes[targetLaneIndex]?.id;
+        if (targetLaneId) {
+          if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
+            // Move all selected clips
+            dispatch(updateClipLane({ clipId: selectedClipIds, laneId: targetLaneId }));
+          } else {
+            // Move single clip
+            dispatch(updateClipLane({ clipId, laneId: targetLaneId }));
+          }
+        }
+      }
+    },
+    [dispatch, lanes, clips, selectedClipIds]
+  );
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -241,6 +300,9 @@ const Timeline = () => {
               onClipSelect={handleClipSelect}
               onClipMove={handleClipMove}
               onClipResize={handleClipResize}
+              onClipLabelChange={handleClipLabelChange}
+              onClipCopy={handleClipCopy}
+              onClipVerticalDrag={handleClipVerticalDrag}
               onDoubleClick={handleLaneDoubleClick}
             />
           ))}

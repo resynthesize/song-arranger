@@ -20,8 +20,11 @@ interface LaneProps {
   onStartEditing: (laneId: ID) => void;
   onStopEditing: () => void;
   onClipSelect: (clipId: ID, isMultiSelect: boolean) => void;
-  onClipMove: (clipId: ID, delta: number) => void;
+  onClipMove: (clipId: ID, newPosition: Position) => void;
   onClipResize: (clipId: ID, newDuration: Duration, edge: 'left' | 'right') => void;
+  onClipLabelChange?: (clipId: ID, label: string) => void;
+  onClipCopy?: (clipId: ID) => void;
+  onClipVerticalDrag?: (clipId: ID, deltaY: number) => void;
   onDoubleClick: (laneId: ID, position: Position) => void;
 }
 
@@ -39,6 +42,9 @@ const Lane = ({
   onClipSelect,
   onClipMove,
   onClipResize,
+  onClipLabelChange,
+  onClipCopy,
+  onClipVerticalDrag,
   onDoubleClick,
 }: LaneProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -204,9 +210,13 @@ const Lane = ({
             snapValue={snapValue}
             isSelected={selectedClipIds.includes(clip.id)}
             label={clip.label}
+            laneName={name}
             onSelect={onClipSelect}
             onMove={onClipMove}
             onResize={onClipResize}
+            onLabelChange={onClipLabelChange}
+            onCopy={onClipCopy}
+            onVerticalDrag={onClipVerticalDrag}
           />
         ))}
       </div>
