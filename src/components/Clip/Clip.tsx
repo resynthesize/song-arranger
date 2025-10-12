@@ -135,12 +135,17 @@ const Clip = ({
       const deltaBeats = deltaX / zoom;
 
       if (isDragging) {
-        // Calculate the unsnapped new position
-        const rawNewPosition = dragStartPosition.current + deltaBeats;
-        // Snap to grid
-        const snappedPosition = snapToGrid(rawNewPosition, snapValue);
-        // Calculate snapped delta from original position
-        const snappedDelta = snappedPosition - dragStartPosition.current;
+        // Snap the mouse delta to ensure clip only moves when cursor has fully
+        // crossed into the next grid space. Use floor for positive, ceil for negative
+        // to ensure movement only occurs after crossing a full grid boundary
+        let snappedDelta = deltaBeats;
+        if (snapValue > 0) {
+          if (deltaBeats >= 0) {
+            snappedDelta = Math.floor(deltaBeats / snapValue) * snapValue;
+          } else {
+            snappedDelta = Math.ceil(deltaBeats / snapValue) * snapValue;
+          }
+        }
         onMove(id, snappedDelta);
 
         // Handle vertical lane dragging
