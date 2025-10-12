@@ -1,0 +1,80 @@
+/**
+ * BlockCursor Styles
+ * Terminal-style block cursor with blinking animation
+ */
+
+.block-cursor {
+  display: inline-block;
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+  font-family: var(--font-primary);
+  line-height: 1;
+  animation: cursor-blink var(--cursor-blink-duration) step-end infinite;
+  box-shadow: var(--phosphor-glow);
+  vertical-align: baseline;
+}
+
+/* Blinking Animation */
+@keyframes cursor-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* No Blink Variant */
+.block-cursor--no-blink {
+  animation: none;
+  opacity: 1;
+}
+
+/* Variants */
+.block-cursor--primary {
+  background-color: var(--color-primary);
+  box-shadow: var(--phosphor-glow);
+}
+
+.block-cursor--secondary {
+  background-color: var(--color-secondary);
+  box-shadow: 0 0 var(--glow-intensity-sm) var(--color-secondary);
+}
+
+.block-cursor--highlight {
+  background-color: var(--color-highlight);
+  box-shadow: 0 0 var(--glow-intensity-md) var(--color-highlight);
+}
+
+/* Sizes */
+.block-cursor--sm {
+  width: 0.5em;
+  height: 1em;
+  font-size: var(--font-size-sm);
+  padding: 0 2px;
+}
+
+.block-cursor--md {
+  width: 0.6em;
+  height: 1em;
+  font-size: var(--font-size-base);
+  padding: 0 2px;
+}
+
+.block-cursor--lg {
+  width: 0.7em;
+  height: 1.2em;
+  font-size: var(--font-size-md);
+  padding: 0 3px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .block-cursor {
+    animation: none;
+    opacity: 1;
+    box-shadow: none;
+  }
+}

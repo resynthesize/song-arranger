@@ -6,10 +6,16 @@
 :root {
   /* Color Palette - Terminal Green */
   --color-bg: #000000;
+  --color-bg-elevated: #001100;
   --color-primary: #00ff00;
   --color-secondary: #008800;
+  --color-tertiary: #006600;
   --color-highlight: #66ff66;
   --color-grid: #003300;
+  --color-dim: #004400;
+  --color-disabled: #002200;
+  --color-error: #ff0000;
+  --color-warning: #ffff00;
 
   /* Typography */
   --font-primary: 'VT323', monospace;
@@ -17,26 +23,63 @@
   --font-fallback: 'Courier', monospace;
 
   /* Font Sizes (using VT323 which requires larger sizes) */
-  --font-size-small: 16px;
+  --font-size-xs: 14px;
+  --font-size-sm: 16px;
   --font-size-base: 20px;
-  --font-size-large: 24px;
-  --font-size-xlarge: 32px;
+  --font-size-md: 24px;
+  --font-size-lg: 28px;
+  --font-size-xl: 32px;
+  --font-size-2xl: 40px;
+  --font-size-3xl: 48px;
 
-  /* Spacing */
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.8;
+
+  /* Font Weights (monospace fonts typically only have normal/bold) */
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+
+  /* Spacing (8px grid system) */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
+  --spacing-2xl: 40px;
+  --spacing-3xl: 48px;
 
-  /* CRT Effects (Foundation - to be implemented) */
+  /* Border Radius (minimal for terminal aesthetic) */
+  --border-radius-none: 0;
+  --border-radius-sm: 2px;
+  --border-radius-md: 4px;
+
+  /* Border Widths */
+  --border-width-thin: 1px;
+  --border-width-base: 2px;
+  --border-width-thick: 3px;
+
+  /* CRT Effects */
   --scanline-opacity: 0.1;
-  --glow-intensity: 2px;
-  --phosphor-glow: 0 0 var(--glow-intensity) var(--color-primary);
+  --glow-intensity-sm: 2px;
+  --glow-intensity-md: 4px;
+  --glow-intensity-lg: 6px;
+  --phosphor-glow-sm: 0 0 var(--glow-intensity-sm) var(--color-primary);
+  --phosphor-glow-md: 0 0 var(--glow-intensity-md) var(--color-primary);
+  --phosphor-glow-lg: 0 0 var(--glow-intensity-lg) var(--color-primary);
+  --phosphor-glow: var(--phosphor-glow-sm);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 255, 0, 0.1);
+  --shadow-md: 0 2px 4px rgba(0, 255, 0, 0.15);
+  --shadow-lg: 0 4px 8px rgba(0, 255, 0, 0.2);
+  --shadow-glow: var(--phosphor-glow-md);
 
   /* Z-Index Layers */
   --z-base: 1;
   --z-controls: 10;
+  --z-dropdown: 50;
   --z-modal: 100;
   --z-tooltip: 1000;
 
@@ -44,6 +87,34 @@
   --transition-fast: 150ms ease-in-out;
   --transition-base: 250ms ease-in-out;
   --transition-slow: 350ms ease-in-out;
+
+  /* Animation Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+
+  /* Animation Timing Functions */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Opacity Levels */
+  --opacity-disabled: 0.4;
+  --opacity-muted: 0.6;
+  --opacity-hover: 0.8;
+  --opacity-full: 1;
+
+  /* Component Specific */
+  --button-padding-x: var(--spacing-md);
+  --button-padding-y: var(--spacing-sm);
+  --input-padding-x: var(--spacing-sm);
+  --input-padding-y: var(--spacing-xs);
+  --panel-padding: var(--spacing-md);
+
+  /* Cursor */
+  --cursor-blink-duration: 1000ms;
 }
 
 /* Respect user preferences for reduced motion */
@@ -52,5 +123,10 @@
     --transition-fast: 0ms;
     --transition-base: 0ms;
     --transition-slow: 0ms;
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-slower: 0ms;
+    --cursor-blink-duration: 0ms;
   }
 }

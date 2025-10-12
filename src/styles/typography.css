@@ -1,0 +1,221 @@
+/**
+ * Song Arranger - Typography Utilities
+ * Text size, style, and effect utilities for terminal UI
+ */
+
+/* Font Size Utilities */
+.text-xs {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-base);
+}
+
+.text-sm {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.text-base {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+
+.text-md {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-base);
+}
+
+.text-lg {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-base);
+}
+
+.text-xl {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-tight);
+}
+
+.text-2xl {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-tight);
+}
+
+.text-3xl {
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-tight);
+}
+
+/* Font Family Utilities */
+.font-primary {
+  font-family: var(--font-primary);
+}
+
+.font-secondary {
+  font-family: var(--font-secondary);
+}
+
+.font-mono {
+  font-family: var(--font-primary);
+}
+
+/* Font Weight Utilities */
+.font-normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Line Height Utilities */
+.leading-tight {
+  line-height: var(--line-height-tight);
+}
+
+.leading-base {
+  line-height: var(--line-height-base);
+}
+
+.leading-relaxed {
+  line-height: var(--line-height-relaxed);
+}
+
+/* Text Transform */
+.uppercase {
+  text-transform: uppercase;
+}
+
+.lowercase {
+  text-transform: lowercase;
+}
+
+/* Text Alignment */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Phosphor Glow Effects */
+.glow-sm {
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.glow-md {
+  text-shadow: var(--phosphor-glow-md);
+}
+
+.glow-lg {
+  text-shadow: var(--phosphor-glow-lg);
+}
+
+.glow {
+  text-shadow: var(--phosphor-glow);
+}
+
+/* Color Utilities */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
+}
+
+.text-tertiary {
+  color: var(--color-tertiary);
+}
+
+.text-highlight {
+  color: var(--color-highlight);
+}
+
+.text-dim {
+  color: var(--color-dim);
+}
+
+.text-disabled {
+  color: var(--color-disabled);
+}
+
+.text-error {
+  color: var(--color-error);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+/* Text Decorations */
+.no-underline {
+  text-decoration: none;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+/* Text Overflow */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.break-words {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Monospace Specific */
+.mono {
+  font-family: var(--font-primary);
+  font-variant-ligatures: none;
+  font-feature-settings: normal;
+}
+
+/* Terminal-specific text effects */
+.terminal-text {
+  font-family: var(--font-primary);
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow);
+  letter-spacing: 0.05em;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  background-color: var(--color-primary);
+  animation: blink var(--cursor-blink-duration) step-end infinite;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  50.01%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Disable animations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .terminal-cursor {
+    animation: none;
+    opacity: 1;
+  }
+
+  .glow-sm,
+  .glow-md,
+  .glow-lg,
+  .glow,
+  .terminal-text {
+    text-shadow: none;
+  }
+}

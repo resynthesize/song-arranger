@@ -1,0 +1,117 @@
+/**
+ * TerminalInput Styles
+ * Terminal-styled input with monospace font and green on black
+ */
+
+.terminal-input-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.terminal-input-wrapper--full-width {
+  width: 100%;
+}
+
+.terminal-input-label {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow);
+}
+
+.terminal-input {
+  font-family: var(--font-primary);
+  background-color: var(--color-bg);
+  color: var(--color-primary);
+  border: var(--border-width-base) solid var(--color-primary);
+  border-radius: var(--border-radius-none);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  outline: none;
+  transition: all var(--transition-fast);
+  text-shadow: var(--phosphor-glow);
+  box-shadow: inset var(--shadow-sm);
+}
+
+.terminal-input::placeholder {
+  color: var(--color-dim);
+  opacity: 1;
+}
+
+.terminal-input:focus {
+  border-color: var(--color-highlight);
+  box-shadow: inset var(--shadow-sm), var(--shadow-glow);
+  text-shadow: var(--phosphor-glow-md);
+}
+
+.terminal-input:hover:not(:disabled) {
+  border-color: var(--color-secondary);
+}
+
+/* Sizes */
+.terminal-input--sm {
+  font-size: var(--font-size-sm);
+  padding: calc(var(--input-padding-y) * 0.75) calc(var(--input-padding-x) * 0.75);
+}
+
+.terminal-input--md {
+  font-size: var(--font-size-base);
+  padding: var(--input-padding-y) var(--input-padding-x);
+}
+
+.terminal-input--lg {
+  font-size: var(--font-size-md);
+  padding: calc(var(--input-padding-y) * 1.25) calc(var(--input-padding-x) * 1.25);
+}
+
+/* States */
+.terminal-input--disabled,
+.terminal-input:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  color: var(--color-disabled);
+  border-color: var(--color-disabled);
+}
+
+.terminal-input--error {
+  border-color: var(--color-error);
+  box-shadow: inset var(--shadow-sm), 0 0 var(--glow-intensity-sm) var(--color-error);
+}
+
+.terminal-input--error:focus {
+  box-shadow: inset var(--shadow-sm), 0 0 var(--glow-intensity-md) var(--color-error);
+}
+
+.terminal-input-error {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  text-shadow: 0 0 var(--glow-intensity-sm) var(--color-error);
+}
+
+/* Full Width */
+.terminal-input-wrapper--full-width .terminal-input {
+  width: 100%;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .terminal-input {
+    transition: none;
+    text-shadow: none;
+    box-shadow: none;
+  }
+
+  .terminal-input:focus {
+    text-shadow: none;
+    box-shadow: none;
+  }
+
+  .terminal-input-label {
+    text-shadow: none;
+  }
+
+  .terminal-input-error {
+    text-shadow: none;
+  }
+}

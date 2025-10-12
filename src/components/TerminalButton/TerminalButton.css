@@ -1,0 +1,179 @@
+/**
+ * TerminalButton Styles
+ * Terminal-styled button with ASCII borders and glow effects
+ */
+
+.terminal-button {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-primary);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow);
+  padding: 0;
+  user-select: none;
+}
+
+.terminal-button:focus {
+  outline: none;
+}
+
+.terminal-button:focus-visible {
+  text-shadow: var(--phosphor-glow-md);
+}
+
+/* Border Elements */
+.terminal-button__border {
+  display: block;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.terminal-button__content {
+  display: block;
+  padding: var(--button-padding-y) var(--button-padding-x);
+  font-size: var(--font-size-base);
+  line-height: 1.2;
+}
+
+/* Variants */
+.terminal-button--primary {
+  color: var(--color-primary);
+}
+
+.terminal-button--primary:hover:not(:disabled) {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-md);
+}
+
+.terminal-button--primary:active:not(:disabled),
+.terminal-button--primary.terminal-button--active {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-lg);
+  transform: scale(0.98);
+}
+
+.terminal-button--secondary {
+  color: var(--color-secondary);
+  text-shadow: 0 0 var(--glow-intensity-sm) var(--color-secondary);
+}
+
+.terminal-button--secondary .terminal-button__border {
+  color: var(--color-secondary);
+  text-shadow: 0 0 var(--glow-intensity-sm) var(--color-secondary);
+}
+
+.terminal-button--secondary:hover:not(:disabled) {
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-md);
+}
+
+.terminal-button--secondary:hover:not(:disabled) .terminal-button__border {
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-md);
+}
+
+.terminal-button--secondary:active:not(:disabled),
+.terminal-button--secondary.terminal-button--active {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-lg);
+  transform: scale(0.98);
+}
+
+.terminal-button--ghost {
+  color: var(--color-dim);
+  text-shadow: none;
+}
+
+.terminal-button--ghost .terminal-button__border {
+  color: var(--color-dim);
+  text-shadow: none;
+}
+
+.terminal-button--ghost:hover:not(:disabled) {
+  color: var(--color-secondary);
+  text-shadow: 0 0 var(--glow-intensity-sm) var(--color-secondary);
+}
+
+.terminal-button--ghost:hover:not(:disabled) .terminal-button__border {
+  color: var(--color-secondary);
+  text-shadow: 0 0 var(--glow-intensity-sm) var(--color-secondary);
+}
+
+/* Sizes */
+.terminal-button--sm .terminal-button__content {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.terminal-button--sm .terminal-button__border {
+  font-size: var(--font-size-xs);
+}
+
+.terminal-button--md .terminal-button__content {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+}
+
+.terminal-button--md .terminal-button__border {
+  font-size: var(--font-size-sm);
+}
+
+.terminal-button--lg .terminal-button__content {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-md);
+}
+
+.terminal-button--lg .terminal-button__border {
+  font-size: var(--font-size-base);
+}
+
+/* States */
+.terminal-button--disabled,
+.terminal-button:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  color: var(--color-disabled);
+}
+
+.terminal-button--disabled .terminal-button__border,
+.terminal-button:disabled .terminal-button__border {
+  color: var(--color-disabled);
+}
+
+.terminal-button--active {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-lg);
+}
+
+/* Full Width */
+.terminal-button--full-width {
+  width: 100%;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .terminal-button {
+    transition: none;
+    text-shadow: none;
+  }
+
+  .terminal-button__border {
+    text-shadow: none;
+  }
+
+  .terminal-button:active:not(:disabled),
+  .terminal-button--active {
+    transform: none;
+  }
+}
