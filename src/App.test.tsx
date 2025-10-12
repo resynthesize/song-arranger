@@ -12,6 +12,12 @@ import lanesReducer from './store/slices/lanesSlice';
 import clipsReducer from './store/slices/clipsSlice';
 import selectionReducer from './store/slices/selectionSlice';
 import crtEffectsReducer from './store/slices/crtEffectsSlice';
+import projectReducer from './store/slices/projectSlice';
+
+// Mock the storage util
+jest.mock('./utils/storage', () => ({
+  getTemplateProject: jest.fn(() => null),
+}));
 
 describe('App', () => {
   const createTestStore = (initialState = {}) => {
@@ -22,6 +28,7 @@ describe('App', () => {
         clips: clipsReducer,
         selection: selectionReducer,
         crtEffects: crtEffectsReducer,
+        project: projectReducer,
       },
       preloadedState: initialState,
     });

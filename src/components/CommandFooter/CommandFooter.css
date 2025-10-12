@@ -1,0 +1,153 @@
+/**
+ * Song Arranger - Command Footer Component Styles
+ * Voyetra-inspired command reference footer with terminal aesthetics
+ */
+
+.command-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-bg);
+  border-top: var(--border-width-base) solid var(--color-secondary);
+  z-index: var(--z-controls);
+  user-select: none;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+}
+
+/* ASCII box-drawing borders with phosphor glow */
+.command-footer__border {
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  white-space: pre;
+  overflow: hidden;
+  padding: 0 var(--spacing-sm);
+  text-shadow: var(--phosphor-glow-sm);
+  letter-spacing: -1px;
+}
+
+.command-footer__border--top {
+  margin-top: 2px;
+}
+
+.command-footer__border--bottom {
+  margin-bottom: 2px;
+}
+
+/* Main content area - horizontal layout */
+.command-footer__content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+/* Shortcut groups */
+.command-footer__group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* Individual shortcut item */
+.command-footer__shortcut {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  white-space: nowrap;
+}
+
+/* Key display with brackets */
+.command-footer__key {
+  color: var(--color-highlight);
+  font-weight: var(--font-weight-bold);
+  text-shadow: var(--phosphor-glow-md);
+  padding: 0 var(--spacing-xs);
+}
+
+.command-footer__key::before {
+  content: '[';
+  color: var(--color-secondary);
+}
+
+.command-footer__key::after {
+  content: ']';
+  color: var(--color-secondary);
+}
+
+/* Description text */
+.command-footer__description {
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+/* Vertical separators */
+.command-footer__separator {
+  color: var(--color-grid);
+  text-shadow: var(--phosphor-glow-sm);
+  user-select: none;
+}
+
+/* Hover effects on shortcuts */
+.command-footer__shortcut:hover .command-footer__key {
+  color: var(--color-primary);
+  text-shadow:
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-highlight);
+}
+
+.command-footer__shortcut:hover .command-footer__description {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-md);
+}
+
+/* When CRT effects are disabled, reduce glow intensity */
+.app.no-crt-effects .command-footer__key,
+.app.no-crt-effects .command-footer__description,
+.app.no-crt-effects .command-footer__border,
+.app.no-crt-effects .command-footer__separator {
+  text-shadow: none;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .command-footer__key,
+  .command-footer__description {
+    transition: none;
+  }
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1200px) {
+  .command-footer__content {
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .command-footer__group {
+    gap: var(--spacing-xs);
+  }
+}
+
+/* Very small screens - hide some shortcuts */
+@media (max-width: 768px) {
+  .command-footer__border {
+    display: none;
+  }
+
+  .command-footer__content {
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  /* Hide less important shortcuts on mobile */
+  .command-footer__group:nth-child(n+4) {
+    display: none;
+  }
+}
