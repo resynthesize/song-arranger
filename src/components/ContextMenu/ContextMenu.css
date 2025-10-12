@@ -1,0 +1,79 @@
+/**
+ * Song Arranger - Context Menu Styles
+ * Terminal-styled right-click menu
+ */
+
+.context-menu {
+  position: fixed;
+  z-index: 10000;
+  background: var(--color-bg);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
+  user-select: none;
+  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+}
+
+.context-menu__border {
+  display: flex;
+  flex-direction: column;
+}
+
+.context-menu__header,
+.context-menu__footer {
+  display: flex;
+  color: var(--color-secondary);
+}
+
+.context-menu__corner {
+  color: var(--color-secondary);
+}
+
+.context-menu__line {
+  color: var(--color-secondary);
+  letter-spacing: -0.1em;
+}
+
+.context-menu__items {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+}
+
+.context-menu__item {
+  display: flex;
+  padding: var(--spacing-xs) 0;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.context-menu__item:hover:not(.context-menu__item--disabled) {
+  background: var(--color-bg-elevated);
+  color: var(--color-highlight);
+}
+
+.context-menu__item:hover:not(.context-menu__item--disabled) .context-menu__label {
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.context-menu__item--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.context-menu__border-char {
+  color: var(--color-secondary);
+  padding: 0 var(--spacing-xs);
+}
+
+.context-menu__label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .context-menu__item {
+    transition: none;
+  }
+}

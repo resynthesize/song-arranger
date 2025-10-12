@@ -193,6 +193,21 @@ const Timeline = () => {
     [dispatch, selectedClipIds]
   );
 
+  // Handle clip deletion (via context menu)
+  const handleClipDelete = useCallback(
+    (clipId: ID) => {
+      if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
+        // Delete all selected clips
+        dispatch(removeClips(selectedClipIds));
+        dispatch(clearSelection());
+      } else {
+        // Delete single clip
+        dispatch(removeClips([clipId]));
+      }
+    },
+    [dispatch, selectedClipIds]
+  );
+
   // Handle vertical clip dragging (move between lanes)
   const handleClipVerticalDrag = useCallback(
     (clipId: ID, startingLaneId: ID, deltaY: number) => {
@@ -307,6 +322,7 @@ const Timeline = () => {
                 onClipResize={handleClipResize}
                 onClipLabelChange={handleClipLabelChange}
                 onClipCopy={handleClipCopy}
+                onClipDelete={handleClipDelete}
                 onClipVerticalDrag={handleClipVerticalDrag}
                 onDoubleClick={handleLaneDoubleClick}
               />

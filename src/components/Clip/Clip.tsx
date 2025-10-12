@@ -4,6 +4,7 @@
  */
 
 import { useState, useRef, useEffect, MouseEvent, KeyboardEvent } from 'react';
+import ContextMenu, { type MenuItem } from '../ContextMenu';
 import type { ID, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx } from '@/utils/viewport';
 import { snapToGrid } from '@/utils/snap';
@@ -25,6 +26,7 @@ interface ClipProps {
   onVerticalDrag?: (clipId: ID, startingLaneId: ID, deltaY: number) => void;
   onCopy?: (clipId: ID) => void;
   onLabelChange?: (clipId: ID, label: string) => void;
+  onDelete?: (clipId: ID) => void;
 }
 
 const Clip = ({
@@ -43,11 +45,13 @@ const Clip = ({
   onVerticalDrag,
   onCopy,
   onLabelChange,
+  onDelete,
 }: ClipProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<'left' | 'right' | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const dragStartX = useRef(0);
   const dragStartY = useRef(0);
   const dragStartPosition = useRef(0);
@@ -185,6 +189,30 @@ const Clip = ({
     };
   }, [isDragging, isResizing, id, viewport.zoom, snapValue, onMove, onResize, onVerticalDrag]);
 
+  const handleContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  const handleDeleteClip = () => {
+    if (onDelete) {
+      onDelete(id);
+    }
+  };
+
+  const contextMenuItems: MenuItem[] = [
+    {
+      label: 'Delete Clip',
+      action: handleDeleteClip,
+      disabled: !onDelete,
+    },
+  ];
+
   // Display label: custom label > lane name > nothing
   const displayLabel = label || laneName;
 
@@ -201,6 +229,7 @@ const Clip = ({
         width: `${widthPx.toString()}px`,
       }}
       onMouseDown={handleMouseDown}
+      onContextMenu={handleContextMenu}
     >
       <div
         className="clip__handle clip__handle--left"
@@ -245,6 +274,14 @@ const Clip = ({
         data-testid={`clip-${id}-handle-right`}
         onMouseDown={handleResizeStart('right')}
       />
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenuItems}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };

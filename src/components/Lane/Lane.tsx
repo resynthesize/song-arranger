@@ -3,8 +3,9 @@
  * Horizontal lane that contains clips
  */
 
-import { useRef, useEffect, useMemo, KeyboardEvent, MouseEvent } from 'react';
+import { useRef, useEffect, useMemo, useState, KeyboardEvent, MouseEvent } from 'react';
 import Clip from '../Clip';
+import ContextMenu, { type MenuItem } from '../ContextMenu';
 import type { ID, Clip as ClipType, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx, isRangeVisible } from '@/utils/viewport';
 import './Lane.css';
@@ -26,6 +27,7 @@ interface LaneProps {
   onClipResize: (clipId: ID, newDuration: Duration, edge: 'left' | 'right') => void;
   onClipLabelChange?: (clipId: ID, label: string) => void;
   onClipCopy?: (clipId: ID) => void;
+  onClipDelete?: (clipId: ID) => void;
   onClipVerticalDrag?: (clipId: ID, startingLaneId: ID, deltaY: number) => void;
   onDoubleClick: (laneId: ID, position: Position) => void;
 }
@@ -47,12 +49,14 @@ const Lane = ({
   onClipResize,
   onClipLabelChange,
   onClipCopy,
+  onClipDelete,
   onClipVerticalDrag,
   onDoubleClick,
 }: LaneProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const gridCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; position: number } | null>(null);
 
   // Filter clips to only show those in this lane
   const laneClips = clips.filter((clip) => clip.laneId === id);
@@ -216,6 +220,40 @@ const Lane = ({
     onRemove(id);
   };
 
+  const handleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
+    // Don't show menu if clicking on a clip
+    if ((e.target as HTMLElement).closest('.clip')) {
+      return;
+    }
+
+    e.preventDefault();
+
+    if (contentRef.current) {
+      const rect = contentRef.current.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const positionInBeats = viewport.offsetBeats + clickX / viewport.zoom;
+
+      setContextMenu({
+        x: e.clientX,
+        y: e.clientY,
+        position: positionInBeats,
+      });
+    }
+  };
+
+  const handleInsertClip = () => {
+    if (contextMenu) {
+      onDoubleClick(id, contextMenu.position);
+    }
+  };
+
+  const contextMenuItems: MenuItem[] = [
+    {
+      label: 'Insert Clip',
+      action: handleInsertClip,
+    },
+  ];
+
   return (
     <div className="lane" data-testid={`lane-${id}`}>
       <div className="lane__header">
@@ -246,6 +284,7 @@ const Lane = ({
         className="lane__content"
         data-testid={`lane-${id}-content`}
         onDoubleClick={handleContentDoubleClick}
+        onContextMenu={handleContextMenu}
       >
         <canvas
           ref={gridCanvasRef}
@@ -269,10 +308,19 @@ const Lane = ({
             onResize={onClipResize}
             onLabelChange={onClipLabelChange}
             onCopy={onClipCopy}
+            onDelete={onClipDelete}
             onVerticalDrag={onClipVerticalDrag}
           />
         ))}
       </div>
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenuItems}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };
