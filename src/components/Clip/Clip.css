@@ -80,6 +80,7 @@
 .clip--resizing {
   opacity: 0.8;
   cursor: grabbing;
+  z-index: var(--z-tooltip); /* Ensure dragging clips are above everything */
 }
 
 .clip--copying {
