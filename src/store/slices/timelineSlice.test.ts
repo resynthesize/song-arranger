@@ -5,8 +5,6 @@
 
 import reducer, {
   setZoom,
-  zoomIn,
-  zoomOut,
   setPlayheadPosition,
   play,
   pause,

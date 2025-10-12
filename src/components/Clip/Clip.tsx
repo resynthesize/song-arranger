@@ -221,7 +221,9 @@ const Clip = ({
             defaultValue={label || ''}
             onKeyDown={handleLabelInputKeyDown}
             onBlur={handleLabelInputBlur}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
             data-testid={`clip-${id}-label-input`}
           />
         ) : (

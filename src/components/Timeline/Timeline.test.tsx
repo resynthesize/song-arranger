@@ -11,6 +11,7 @@ import timelineReducer from '@/store/slices/timelineSlice';
 import lanesReducer from '@/store/slices/lanesSlice';
 import clipsReducer from '@/store/slices/clipsSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
+import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
 import type { RootState } from '@/types';
 
 const createMockStore = (initialState?: Partial<RootState>) => {
@@ -20,6 +21,7 @@ const createMockStore = (initialState?: Partial<RootState>) => {
       lanes: lanesReducer,
       clips: clipsReducer,
       selection: selectionReducer,
+      crtEffects: crtEffectsReducer,
     },
     preloadedState: initialState as RootState,
   });
