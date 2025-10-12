@@ -13,6 +13,19 @@
   border-bottom: none;
 }
 
+/* Current lane (for keyboard navigation) */
+.lane--current {
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+.lane--current .lane__header {
+  background: rgba(0, 255, 0, 0.05);
+}
+
+.lane--current .lane__content {
+  background: rgba(0, 255, 0, 0.02);
+}
+
 /* Lane Header (Name) */
 .lane__header {
   width: 150px;
@@ -21,7 +34,29 @@
   border-right: var(--border-width-base) solid var(--color-secondary);
   display: flex;
   align-items: center;
+  gap: var(--spacing-xs);
   flex-shrink: 0;
+}
+
+/* Current lane indicator */
+.lane__current-indicator {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  font-weight: bold;
+  text-shadow: var(--phosphor-glow-md);
+  animation: pulse-indicator 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-indicator {
+  0%, 100% {
+    opacity: 1;
+    text-shadow: var(--phosphor-glow-md);
+  }
+  50% {
+    opacity: 0.6;
+    text-shadow: var(--phosphor-glow-sm);
+  }
 }
 
 .lane__name {

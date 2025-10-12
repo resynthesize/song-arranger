@@ -21,6 +21,7 @@ interface LaneProps {
   selectedClipIds: ID[];
   verticalDragState: { deltaY: number; draggedClipId: ID } | null;
   verticalZoom: number; // Vertical zoom percentage (50-150)
+  isCurrent: boolean; // Is this the current lane for navigation
   isEditing: boolean;
   onNameChange: (laneId: ID, newName: string) => void;
   onColorChange?: (laneId: ID, color: string) => void;
@@ -48,6 +49,7 @@ const Lane = ({
   selectedClipIds,
   verticalDragState,
   verticalZoom,
+  isCurrent,
   isEditing,
   onNameChange,
   onColorChange,
@@ -267,8 +269,9 @@ const Lane = ({
   ];
 
   return (
-    <div className="lane" data-testid={`lane-${id}`} style={{ minHeight: `${laneHeight}px` }}>
+    <div className={`lane ${isCurrent ? 'lane--current' : ''}`} data-testid={`lane-${id}`} style={{ minHeight: `${laneHeight}px` }}>
       <div className="lane__header">
+        {isCurrent && <span className="lane__current-indicator">&gt;</span>}
         <button
           className="lane__color-swatch"
           onClick={() => setShowColorPicker(true)}

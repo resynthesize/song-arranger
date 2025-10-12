@@ -67,6 +67,7 @@ const Timeline = () => {
   const selectedClipIds = useAppSelector(
     (state) => state.selection.selectedClipIds
   );
+  const currentLaneId = useAppSelector((state) => state.selection.currentLaneId);
   const editingLaneId = useAppSelector((state) => state.lanes.editingLaneId);
   const verticalZoom = useAppSelector((state) => state.timeline.verticalZoom);
 
@@ -525,6 +526,7 @@ const Timeline = () => {
                 selectedClipIds={selectedClipIds}
                 verticalDragState={verticalDragState}
                 verticalZoom={verticalZoom}
+                isCurrent={lane.id === currentLaneId}
                 isEditing={editingLaneId === lane.id}
                 onNameChange={handleNameChange}
                 onColorChange={handleColorChange}
