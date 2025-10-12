@@ -187,7 +187,7 @@ describe('Lane', () => {
     laneContent.dispatchEvent(dblClickEvent);
 
     expect(onDoubleClick).toHaveBeenCalled();
-    const callArgs = onDoubleClick.mock.calls[0];
+    const callArgs = onDoubleClick.mock.calls[0] as [string, number];
     expect(callArgs[0]).toBe('lane-1');
     expect(callArgs[1]).toBe(4); // Position should be 4 beats
   });

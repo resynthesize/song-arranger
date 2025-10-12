@@ -35,29 +35,29 @@ describe('lanesSlice', () => {
     it('should add a new lane with provided name', () => {
       const newState = reducer(initialState, addLane({ name: 'Bass' }));
       expect(newState.lanes).toHaveLength(1);
-      expect(newState.lanes[0]!.name).toBe('Bass');
-      expect(newState.lanes[0]!.id).toBeDefined();
+      expect(newState.lanes[0]?.name).toBe('Bass');
+      expect(newState.lanes[0]?.id).toBeDefined();
     });
 
     it('should add a new lane with default name if not provided', () => {
       const newState = reducer(initialState, addLane({}));
       expect(newState.lanes).toHaveLength(1);
-      expect(newState.lanes[0]!.name).toBe('Lane 1');
+      expect(newState.lanes[0]?.name).toBe('Lane 1');
     });
 
     it('should increment default lane names', () => {
       let state = reducer(initialState, addLane({}));
       state = reducer(state, addLane({}));
       state = reducer(state, addLane({}));
-      expect(state.lanes[0]!.name).toBe('Lane 1');
-      expect(state.lanes[1]!.name).toBe('Lane 2');
-      expect(state.lanes[2]!.name).toBe('Lane 3');
+      expect(state.lanes[0]?.name).toBe('Lane 1');
+      expect(state.lanes[1]?.name).toBe('Lane 2');
+      expect(state.lanes[2]?.name).toBe('Lane 3');
     });
 
     it('should add lanes to the end', () => {
       const newState = reducer(stateWithLanes, addLane({ name: 'Lead' }));
       expect(newState.lanes).toHaveLength(4);
-      expect(newState.lanes[3]!.name).toBe('Lead');
+      expect(newState.lanes[3]?.name).toBe('Lead');
     });
   });
 
@@ -66,8 +66,8 @@ describe('lanesSlice', () => {
       const newState = reducer(stateWithLanes, removeLane('lane-2'));
       expect(newState.lanes).toHaveLength(2);
       expect(newState.lanes.find((l) => l.id === 'lane-2')).toBeUndefined();
-      expect(newState.lanes[0]!.id).toBe('lane-1');
-      expect(newState.lanes[1]!.id).toBe('lane-3');
+      expect(newState.lanes[0]?.id).toBe('lane-1');
+      expect(newState.lanes[1]?.id).toBe('lane-3');
     });
 
     it('should do nothing if lane not found', () => {
@@ -88,7 +88,7 @@ describe('lanesSlice', () => {
         stateWithLanes,
         renameLane({ laneId: 'lane-2', name: 'Clap' })
       );
-      expect(newState.lanes[1]!.name).toBe('Clap');
+      expect(newState.lanes[1]?.name).toBe('Clap');
     });
 
     it('should trim whitespace from name', () => {
@@ -96,7 +96,7 @@ describe('lanesSlice', () => {
         stateWithLanes,
         renameLane({ laneId: 'lane-1', name: '  Kick Drum  ' })
       );
-      expect(newState.lanes[0]!.name).toBe('Kick Drum');
+      expect(newState.lanes[0]?.name).toBe('Kick Drum');
     });
 
     it('should not rename if empty string after trimming', () => {
@@ -104,7 +104,7 @@ describe('lanesSlice', () => {
         stateWithLanes,
         renameLane({ laneId: 'lane-1', name: '   ' })
       );
-      expect(newState.lanes[0]!.name).toBe('Kick');
+      expect(newState.lanes[0]?.name).toBe('Kick');
     });
 
     it('should do nothing if lane not found', () => {

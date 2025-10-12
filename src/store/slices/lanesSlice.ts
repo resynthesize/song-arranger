@@ -24,11 +24,11 @@ const lanesSlice = createSlice({
         const defaultLaneCount = state.lanes.filter((l) =>
           l.name.match(/^Lane \d+$/)
         ).length;
-        laneName = `Lane ${defaultLaneCount + 1}`;
+        laneName = `Lane ${(defaultLaneCount + 1).toString()}`;
       }
 
       state.lanes.push({
-        id: `lane-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `lane-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
         name: laneName,
       });
     },

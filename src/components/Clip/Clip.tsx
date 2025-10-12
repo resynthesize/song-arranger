@@ -114,8 +114,8 @@ const Clip = ({
         isDragging ? 'clip--dragging' : ''
       } ${isResizing ? 'clip--resizing' : ''}`}
       style={{
-        left: `${leftPx}px`,
-        width: `${widthPx}px`,
+        left: `${leftPx.toString()}px`,
+        width: `${widthPx.toString()}px`,
       }}
       onMouseDown={handleMouseDown}
     >

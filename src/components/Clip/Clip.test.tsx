@@ -62,7 +62,7 @@ describe('Clip', () => {
     expect(onSelect).toHaveBeenCalledWith('clip-1', false); // false = not multi-select
   });
 
-  it('should call onSelect with multi-select flag when Alt+clicked', async () => {
+  it('should call onSelect with multi-select flag when Alt+clicked', () => {
     const onSelect = jest.fn();
     render(<Clip {...defaultProps} onSelect={onSelect} />);
 

@@ -57,10 +57,12 @@ describe('clipsSlice', () => {
         addClip({ laneId: 'lane-1', position: 0, duration: 4 })
       );
       expect(newState.clips).toHaveLength(1);
-      expect(newState.clips[0]!.laneId).toBe('lane-1');
-      expect(newState.clips[0]!.position).toBe(0);
-      expect(newState.clips[0]!.duration).toBe(4);
-      expect(newState.clips[0]!.id).toBeDefined();
+      const clip = newState.clips[0];
+      expect(clip).toBeDefined();
+      expect(clip?.laneId).toBe('lane-1');
+      expect(clip?.position).toBe(0);
+      expect(clip?.duration).toBe(4);
+      expect(clip?.id).toBeDefined();
     });
 
     it('should add a clip with optional label', () => {
@@ -68,7 +70,7 @@ describe('clipsSlice', () => {
         initialState,
         addClip({ laneId: 'lane-1', position: 0, duration: 4, label: 'Verse' })
       );
-      expect(newState.clips[0]!.label).toBe('Verse');
+      expect(newState.clips[0]?.label).toBe('Verse');
     });
 
     it('should use default duration if not provided', () => {
@@ -76,7 +78,7 @@ describe('clipsSlice', () => {
         initialState,
         addClip({ laneId: 'lane-1', position: 0 })
       );
-      expect(newState.clips[0]!.duration).toBe(4);
+      expect(newState.clips[0]?.duration).toBe(4);
     });
   });
 
@@ -100,7 +102,7 @@ describe('clipsSlice', () => {
         removeClips(['clip-1', 'clip-3'])
       );
       expect(newState.clips).toHaveLength(1);
-      expect(newState.clips[0]!.id).toBe('clip-2');
+      expect(newState.clips[0]?.id).toBe('clip-2');
     });
 
     it('should handle empty array', () => {
@@ -143,9 +145,9 @@ describe('clipsSlice', () => {
         stateWithClips,
         moveClips({ clipIds: ['clip-1', 'clip-2'], delta: 4 })
       );
-      expect(newState.clips[0]!.position).toBe(4);
-      expect(newState.clips[1]!.position).toBe(12);
-      expect(newState.clips[2]!.position).toBe(0); // clip-3 unchanged
+      expect(newState.clips[0]?.position).toBe(4);
+      expect(newState.clips[1]?.position).toBe(12);
+      expect(newState.clips[2]?.position).toBe(0); // clip-3 unchanged
     });
 
     it('should not move clips to negative positions', () => {
@@ -153,8 +155,8 @@ describe('clipsSlice', () => {
         stateWithClips,
         moveClips({ clipIds: ['clip-1', 'clip-2'], delta: -10 })
       );
-      expect(newState.clips[0]!.position).toBe(0);
-      expect(newState.clips[1]!.position).toBe(0);
+      expect(newState.clips[0]?.position).toBe(0);
+      expect(newState.clips[1]?.position).toBe(0);
     });
   });
 
@@ -192,9 +194,9 @@ describe('clipsSlice', () => {
         stateWithClips,
         resizeClips({ clipIds: ['clip-1', 'clip-3'], factor: 2 })
       );
-      expect(newState.clips[0]!.duration).toBe(8); // 4 * 2
-      expect(newState.clips[1]!.duration).toBe(4); // clip-2 unchanged
-      expect(newState.clips[2]!.duration).toBe(16); // 8 * 2
+      expect(newState.clips[0]?.duration).toBe(8); // 4 * 2
+      expect(newState.clips[1]?.duration).toBe(4); // clip-2 unchanged
+      expect(newState.clips[2]?.duration).toBe(16); // 8 * 2
     });
 
     it('should not resize below minimum duration', () => {
@@ -202,7 +204,7 @@ describe('clipsSlice', () => {
         stateWithClips,
         resizeClips({ clipIds: ['clip-1'], factor: 0.1 })
       );
-      expect(newState.clips[0]!.duration).toBe(1);
+      expect(newState.clips[0]?.duration).toBe(1);
     });
   });
 

@@ -27,7 +27,7 @@ const clipsSlice = createSlice({
     ) => {
       const { laneId, position, duration = 4, label } = action.payload;
       const newClip: Clip = {
-        id: `clip-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `clip-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
         laneId,
         position,
         duration,
