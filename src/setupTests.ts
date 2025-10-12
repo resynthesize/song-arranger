@@ -37,6 +37,13 @@ const localStorageMock = (() => {
     clear: () => {
       store = {};
     },
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: (index: number) => {
+      const keys = Object.keys(store);
+      return keys[index] || null;
+    },
   };
 })();
 
@@ -100,7 +107,7 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
 })) as unknown as typeof HTMLCanvasElement.prototype.getContext;
 
 // Mock ResizeObserver for viewport tests
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
+(globalThis as any).ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),

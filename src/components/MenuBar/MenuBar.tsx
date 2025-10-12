@@ -12,6 +12,7 @@ import { TerminalButton } from '../TerminalButton';
 import { TerminalInput } from '../TerminalInput';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
 import { DurationDisplay } from '../DurationDisplay';
+import { FileMenu } from '../FileMenu';
 import './MenuBar.css';
 
 // Snap value options with musical notation
@@ -154,6 +155,8 @@ const MenuBar = () => {
 
       {/* Compact controls */}
       <div className="menu-bar__controls">
+        <FileMenu />
+
         <DurationDisplay />
 
         <div className="menu-bar__control">
