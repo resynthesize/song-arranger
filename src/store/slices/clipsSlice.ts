@@ -142,7 +142,11 @@ const clipsSlice = createSlice({
 
       state.clips.forEach((clip) => {
         if (clipIdsSet.has(clip.id)) {
-          clip.laneId = laneId;
+          // Only mutate if actually changing - prevents unnecessary re-renders
+          // This makes the reducer idempotent: calling it with the same lane is a no-op
+          if (clip.laneId !== laneId) {
+            clip.laneId = laneId;
+          }
         }
       });
     },

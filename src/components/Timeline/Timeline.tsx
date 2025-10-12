@@ -233,12 +233,8 @@ const Timeline = () => {
       const targetLaneId = lanes[targetLaneIndex]?.id;
       if (!targetLaneId) return;
 
-      // Get the current lane of the clip to avoid redundant updates
-      const clip = clips.find((c) => c.id === clipId);
-      if (clip && clip.laneId === targetLaneId) {
-        return; // Already in target lane
-      }
-
+      // Dispatch unconditionally - the Redux reducer is idempotent
+      // This keeps the callback reference stable during drag operations
       if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
         // Move all selected clips
         dispatch(updateClipLane({ clipId: selectedClipIds, laneId: targetLaneId }));
@@ -247,7 +243,7 @@ const Timeline = () => {
         dispatch(updateClipLane({ clipId, laneId: targetLaneId }));
       }
     },
-    [dispatch, lanes, clips, selectedClipIds]
+    [dispatch, lanes, selectedClipIds]
   );
 
   // Handle ruler click to move playhead
