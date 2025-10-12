@@ -18,7 +18,7 @@ interface ClipProps {
   label?: string;
   laneName?: string;
   onSelect: (clipId: ID, isMultiSelect: boolean) => void;
-  onMove: (clipId: ID, delta: number) => void;
+  onMove: (clipId: ID, newPosition: Position) => void;
   onResize: (clipId: ID, newDuration: Duration, edge: 'left' | 'right') => void;
   onVerticalDrag?: (clipId: ID, deltaY: number) => void;
   onCopy?: (clipId: ID) => void;
@@ -135,18 +135,10 @@ const Clip = ({
       const deltaBeats = deltaX / zoom;
 
       if (isDragging) {
-        // Snap the mouse delta to ensure clip only moves when cursor has fully
-        // crossed into the next grid space. Use floor for positive, ceil for negative
-        // to ensure movement only occurs after crossing a full grid boundary
-        let snappedDelta = deltaBeats;
-        if (snapValue > 0) {
-          if (deltaBeats >= 0) {
-            snappedDelta = Math.floor(deltaBeats / snapValue) * snapValue;
-          } else {
-            snappedDelta = Math.ceil(deltaBeats / snapValue) * snapValue;
-          }
-        }
-        onMove(id, snappedDelta);
+        // Calculate new position and snap it (same approach as resize)
+        const rawNewPosition = dragStartPosition.current + deltaBeats;
+        const snappedPosition = snapToGrid(rawNewPosition, snapValue);
+        onMove(id, snappedPosition);
 
         // Handle vertical lane dragging
         if (onVerticalDrag && Math.abs(deltaY) > 5) {

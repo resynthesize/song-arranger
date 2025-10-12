@@ -76,17 +76,18 @@ const Timeline = () => {
 
   // Handle clip movement
   const handleClipMove = useCallback(
-    (clipId: ID, delta: number) => {
+    (clipId: ID, newPosition: Position) => {
+      const clip = clips.find((c) => c.id === clipId);
+      if (!clip) return;
+
       if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
-        // Ganged move: move all selected clips
+        // Ganged move: calculate delta from dragged clip and move all selected clips
+        const delta = newPosition - clip.position;
         dispatch(moveClips({ clipIds: selectedClipIds, delta }));
       } else {
         // Single clip move
-        const clip = clips.find((c) => c.id === clipId);
-        if (clip) {
-          const newPosition = Math.max(0, clip.position + delta);
-          dispatch(moveClip({ clipId, position: newPosition }));
-        }
+        const clampedPosition = Math.max(0, newPosition);
+        dispatch(moveClip({ clipId, position: clampedPosition }));
       }
     },
     [dispatch, selectedClipIds, clips]
