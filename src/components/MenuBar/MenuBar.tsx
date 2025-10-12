@@ -3,11 +3,12 @@
  * Top menu bar with controls
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { setTempo, setSnapValue, setSnapMode, zoomIn, zoomOut } from '@/store/slices/timelineSlice';
 import { addLane } from '@/store/slices/lanesSlice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
+import { calculateGlobalDuration, calculateSelectedDuration, formatDuration } from '@/utils/duration';
 import { TerminalButton } from '../TerminalButton';
 import { TerminalInput } from '../TerminalInput';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
@@ -43,12 +44,26 @@ const MenuBar = () => {
   const playheadPosition = useAppSelector((state) => state.timeline.playheadPosition);
   const laneCount = useAppSelector((state) => state.lanes.lanes.length);
   const clipCount = useAppSelector((state) => state.clips.clips.length);
-  const selectedCount = useAppSelector(
-    (state) => state.selection.selectedClipIds.length
-  );
+  const clips = useAppSelector((state) => state.clips.clips);
+  const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
+  const selectedCount = selectedClipIds.length;
   const crtEffectsEnabled = useAppSelector(
     (state) => state.crtEffects.enabled
   );
+
+  // Calculate durations
+  const globalDurationSeconds = useMemo(
+    () => calculateGlobalDuration(clips, tempo),
+    [clips, tempo]
+  );
+  const selectedDurationSeconds = useMemo(
+    () => calculateSelectedDuration(clips, selectedClipIds, tempo),
+    [clips, selectedClipIds, tempo]
+  );
+
+  // Format durations
+  const globalDurationFormatted = formatDuration(globalDurationSeconds);
+  const selectedDurationFormatted = formatDuration(selectedDurationSeconds);
 
   const handleTempoChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,6 +166,20 @@ const MenuBar = () => {
           <span className="menu-bar__info-label">CRT</span>
           <span className="menu-bar__info-value">{crtEffectsEnabled ? 'ON' : 'OFF'}</span>
         </span>
+      </div>
+
+      {/* Duration display section */}
+      <div className="menu-bar__duration">
+        <div className="menu-bar__duration-box">
+          <span className="menu-bar__duration-label">TOTAL:</span>
+          <span className="menu-bar__duration-value">{globalDurationFormatted}</span>
+        </div>
+        {selectedCount > 0 && (
+          <div className="menu-bar__duration-box">
+            <span className="menu-bar__duration-label">SELECTED:</span>
+            <span className="menu-bar__duration-value">{selectedDurationFormatted}</span>
+          </div>
+        )}
       </div>
 
       {/* Compact controls */}

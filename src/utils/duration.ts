@@ -1,80 +1,90 @@
 /**
  * Song Arranger - Duration Utilities
- * Utilities for calculating and formatting durations
+ * Functions for calculating and formatting durations
  */
 
 import type { Clip, ID } from '@/types';
 
 /**
- * Convert beats to seconds based on tempo
- * @param beats - Number of beats (quarter notes in 4/4 time)
- * @param tempo - Tempo in BPM (beats per minute)
- * @returns Duration in seconds
- */
-export const beatsToSeconds = (beats: number, tempo: number): number => {
-  // BPM is beats per minute
-  // So beats per second = BPM / 60
-  // Time for N beats = N / (BPM / 60) = (N * 60) / BPM
-  return (beats * 60) / tempo;
-};
-
-/**
- * Format duration in seconds as MM:SS
+ * Format duration in seconds to MM:SS format
  * @param seconds - Duration in seconds
- * @returns Formatted duration string (MM:SS)
+ * @returns Formatted string in MM:SS format
  */
 export const formatDuration = (seconds: number): string => {
-  const totalSeconds = Math.floor(seconds);
+  // Handle negative values
+  if (seconds < 0) {
+    seconds = 0;
+  }
+
+  // Round to nearest second
+  const totalSeconds = Math.round(seconds);
+
   const minutes = Math.floor(totalSeconds / 60);
   const remainingSeconds = totalSeconds % 60;
 
-  const minutesStr = minutes.toString().padStart(2, '0');
+  // Pad seconds with leading zero if needed
   const secondsStr = remainingSeconds.toString().padStart(2, '0');
 
-  return `${minutesStr}:${secondsStr}`;
+  return `${minutes}:${secondsStr}`;
 };
 
 /**
- * Calculate global duration from start to the end of the rightmost clip
- * @param clips - Array of clips
- * @returns Duration in beats
+ * Calculate global duration from start to rightmost clip
+ * @param clips - Array of all clips
+ * @param tempo - Current tempo in BPM
+ * @returns Total duration in seconds
  */
-export const calculateGlobalDuration = (clips: Clip[]): number => {
+export const calculateGlobalDuration = (clips: Clip[], tempo: number): number => {
+  // Handle empty clips array
   if (clips.length === 0) {
     return 0;
   }
 
-  // Find the rightmost clip end position
-  let maxEndPosition = 0;
-  for (const clip of clips) {
-    const endPosition = clip.position + clip.duration;
-    if (endPosition > maxEndPosition) {
-      maxEndPosition = endPosition;
+  // Find the rightmost position (position + duration)
+  let rightmostBeat = 0;
+  clips.forEach((clip) => {
+    const endBeat = clip.position + clip.duration;
+    if (endBeat > rightmostBeat) {
+      rightmostBeat = endBeat;
     }
-  }
+  });
 
-  return maxEndPosition;
+  // Convert beats to seconds
+  // Each beat is a quarter note at the given tempo
+  // Seconds per beat = 60 / BPM
+  const secondsPerBeat = 60 / tempo;
+  return rightmostBeat * secondsPerBeat;
 };
 
 /**
  * Calculate total duration of selected clips
  * @param clips - Array of all clips
  * @param selectedIds - Array of selected clip IDs
- * @returns Sum of durations in beats
+ * @param tempo - Current tempo in BPM
+ * @returns Total duration of selected clips in seconds
  */
-export const calculateSelectedDuration = (clips: Clip[], selectedIds: ID[]): number => {
-  if (clips.length === 0 || selectedIds.length === 0) {
+export const calculateSelectedDuration = (
+  clips: Clip[],
+  selectedIds: ID[],
+  tempo: number
+): number => {
+  // Handle empty selection or no clips
+  if (selectedIds.length === 0 || clips.length === 0) {
     return 0;
   }
 
+  // Create a Set for faster lookup
   const selectedIdsSet = new Set(selectedIds);
-  let totalDuration = 0;
 
-  for (const clip of clips) {
+  // Sum durations of selected clips
+  let totalBeats = 0;
+  clips.forEach((clip) => {
     if (selectedIdsSet.has(clip.id)) {
-      totalDuration += clip.duration;
+      totalBeats += clip.duration;
     }
-  }
+  });
 
-  return totalDuration;
+  // Convert beats to seconds
+  const secondsPerBeat = 60 / tempo;
+  return totalBeats * secondsPerBeat;
 };
