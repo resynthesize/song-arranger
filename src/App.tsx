@@ -10,6 +10,7 @@ import MenuBar from './components/MenuBar';
 import Timeline from './components/Timeline';
 import CRTEffects from './components/CRTEffects';
 import TerminalNoise from './components/TerminalNoise';
+import { MouseCursor } from './components/MouseCursor';
 import './App.css';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
       <Timeline />
       <CRTEffects />
       <TerminalNoise />
+      <MouseCursor enabled={crtEffectsEnabled} />
     </div>
   );
 }

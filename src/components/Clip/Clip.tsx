@@ -46,11 +46,20 @@ const Clip = ({
   const [isResizing, setIsResizing] = useState<'left' | 'right' | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
+  const [isNew, setIsNew] = useState(true);
   const dragStartX = useRef(0);
   const dragStartY = useRef(0);
   const dragStartPosition = useRef(0);
   const dragStartDuration = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Remove 'new' state after animation completes (400ms as defined in CSS)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsNew(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Convert beats to viewport-relative pixels
   const leftPx = beatsToViewportPx(position, viewport);
@@ -187,11 +196,11 @@ const Clip = ({
   return (
     <div
       data-testid={`clip-${id}`}
-      className={`clip ${isSelected ? 'clip--selected' : ''} ${
-        isDragging ? 'clip--dragging' : ''
-      } ${isResizing ? 'clip--resizing' : ''} ${
-        isCopying ? 'clip--copying' : ''
-      }`}
+      className={`clip ${isNew ? 'clip--new' : ''} ${
+        isSelected ? 'clip--selected' : ''
+      } ${isDragging ? 'clip--dragging' : ''} ${
+        isResizing ? 'clip--resizing' : ''
+      } ${isCopying ? 'clip--copying' : ''}`}
       style={{
         left: `${leftPx.toString()}px`,
         width: `${widthPx.toString()}px`,
