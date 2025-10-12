@@ -3,7 +3,7 @@
  * Main timeline container with lanes and clips
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { useViewport } from '@/hooks/useViewport';
 import Lane from '../Lane';
@@ -39,6 +39,12 @@ import './Timeline.css';
 const Timeline = () => {
   const dispatch = useAppDispatch();
   const timelineRef = useRef<HTMLDivElement>(null);
+  const [selectionRect, setSelectionRect] = useState<{
+    startX: number;
+    startY: number;
+    currentX: number;
+    currentY: number;
+  } | null>(null);
 
   // Use viewport hook for pan/zoom interactions
   const { viewport, handleZoomIn, handleZoomOut } = useViewport({
@@ -247,6 +253,116 @@ const Timeline = () => {
     [dispatch, effectiveSnapValue]
   );
 
+  // Handle rectangle selection
+  const handleTimelineMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Only start rectangle selection if clicking on the timeline background (not on clips/lanes)
+    const target = e.target as HTMLElement;
+    if (
+      !target.classList.contains('timeline__lanes') &&
+      !target.classList.contains('lane__content') &&
+      !target.classList.contains('lane__grid')
+    ) {
+      return;
+    }
+
+    // Don't interfere with middle mouse button panning
+    if (e.button !== 0) return;
+
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setSelectionRect({
+      startX: x,
+      startY: y,
+      currentX: x,
+      currentY: y,
+    });
+  }, []);
+
+  // Update selection rectangle on mouse move
+  useEffect(() => {
+    if (!selectionRect) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!timelineRef.current) return;
+
+      const rect = timelineRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      setSelectionRect((prev) => {
+        if (!prev) return null;
+        return { ...prev, currentX: x, currentY: y };
+      });
+    };
+
+    const handleMouseUp = () => {
+      if (!selectionRect || !timelineRef.current) {
+        setSelectionRect(null);
+        return;
+      }
+
+      // Calculate selection bounds in viewport coordinates
+      const minX = Math.min(selectionRect.startX, selectionRect.currentX);
+      const maxX = Math.max(selectionRect.startX, selectionRect.currentX);
+      const minY = Math.min(selectionRect.startY, selectionRect.currentY);
+      const maxY = Math.max(selectionRect.startY, selectionRect.currentY);
+
+      // Convert X coordinates to beat positions
+      const minBeats = viewport.offsetBeats + minX / viewport.zoom;
+      const maxBeats = viewport.offsetBeats + maxX / viewport.zoom;
+
+      // Find all clips within the selection rectangle
+      const selectedIds: ID[] = [];
+      clips.forEach((clip) => {
+        const clipStart = clip.position;
+        const clipEnd = clip.position + clip.duration;
+
+        // Check if clip overlaps with selection horizontally
+        const horizontalOverlap = clipStart < maxBeats && clipEnd > minBeats;
+
+        if (horizontalOverlap) {
+          // Find the lane's Y position to check vertical overlap
+          const laneIndex = lanes.findIndex((lane) => lane.id === clip.laneId);
+          if (laneIndex !== -1) {
+            const LANE_HEIGHT = 80; // Match CSS
+            const RULER_HEIGHT = 40; // Approximate ruler height
+            const laneY = RULER_HEIGHT + laneIndex * LANE_HEIGHT;
+            const laneBottom = laneY + LANE_HEIGHT;
+
+            // Check if selection rectangle overlaps with this lane vertically
+            if (laneY < maxY && laneBottom > minY) {
+              selectedIds.push(clip.id);
+            }
+          }
+        }
+      });
+
+      // Update selection
+      if (selectedIds.length > 0) {
+        // Select first clip and toggle the rest
+        dispatch(selectClip(selectedIds[0]));
+        selectedIds.slice(1).forEach((clipId) => {
+          dispatch(toggleClipSelection(clipId));
+        });
+      } else {
+        // Clear selection if no clips were selected
+        dispatch(clearSelection());
+      }
+
+      setSelectionRect(null);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [selectionRect, viewport, clips, lanes, dispatch]);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -284,7 +400,12 @@ const Timeline = () => {
   }, [dispatch, selectedClipIds, handleZoomIn, handleZoomOut]);
 
   return (
-    <div className="timeline" data-testid="timeline" ref={timelineRef}>
+    <div
+      className="timeline"
+      data-testid="timeline"
+      ref={timelineRef}
+      onMouseDown={handleTimelineMouseDown}
+    >
       {lanes.length === 0 ? (
         <div className="timeline__empty">
           <p>No lanes yet. Click &quot;Add Lane&quot; to get started.</p>
@@ -323,6 +444,17 @@ const Timeline = () => {
             ))}
           </div>
         </>
+      )}
+      {selectionRect && (
+        <div
+          className="timeline__selection-rect"
+          style={{
+            left: `${Math.min(selectionRect.startX, selectionRect.currentX)}px`,
+            top: `${Math.min(selectionRect.startY, selectionRect.currentY)}px`,
+            width: `${Math.abs(selectionRect.currentX - selectionRect.startX)}px`,
+            height: `${Math.abs(selectionRect.currentY - selectionRect.startY)}px`,
+          }}
+        />
       )}
     </div>
   );

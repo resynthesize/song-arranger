@@ -54,3 +54,13 @@
 .timeline::-webkit-scrollbar-corner {
   background: var(--color-bg);
 }
+
+/* Rectangle Selection Tool */
+.timeline__selection-rect {
+  position: absolute;
+  border: 2px solid var(--color-primary);
+  background: rgba(0, 255, 0, 0.1);
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: var(--phosphor-glow-sm);
+}
