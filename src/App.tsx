@@ -14,6 +14,7 @@ import Timeline from './components/Timeline';
 import CommandFooter from './components/CommandFooter';
 import CRTEffects from './components/CRTEffects';
 import TerminalNoise from './components/TerminalNoise';
+import { MouseCursor } from './components/MouseCursor';
 import './App.css';
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
       />
       <CRTEffects />
       <TerminalNoise />
+      <MouseCursor enabled={crtEffectsEnabled} />
     </div>
   );
 }

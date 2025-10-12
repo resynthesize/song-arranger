@@ -59,6 +59,7 @@ const Clip = ({
   const [isCopying, setIsCopying] = useState(false);
   const [verticalDragDeltaY, setVerticalDragDeltaY] = useState(0);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [isNew, setIsNew] = useState(true);
   const dragStartX = useRef(0);
   const dragStartY = useRef(0);
   const dragStartPosition = useRef(0);
@@ -66,6 +67,14 @@ const Clip = ({
   const dragStartLaneId = useRef<ID>('');
   const verticalDragDeltaYRef = useRef(0); // Store actual value for mouseup handler
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Remove 'new' state after animation completes (400ms as defined in CSS)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsNew(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Convert beats to viewport-relative pixels
   const leftPx = beatsToViewportPx(position, viewport);
@@ -251,11 +260,11 @@ const Clip = ({
   return (
     <div
       data-testid={`clip-${id}`}
-      className={`clip ${isSelected ? 'clip--selected' : ''} ${
-        isDragging ? 'clip--dragging' : ''
-      } ${isResizing ? 'clip--resizing' : ''} ${
-        isCopying ? 'clip--copying' : ''
-      }`}
+      className={`clip ${isNew ? 'clip--new' : ''} ${
+        isSelected ? 'clip--selected' : ''
+      } ${isDragging ? 'clip--dragging' : ''} ${
+        isResizing ? 'clip--resizing' : ''
+      } ${isCopying ? 'clip--copying' : ''}`}
       style={{
         left: `${leftPx.toString()}px`,
         width: `${widthPx.toString()}px`,

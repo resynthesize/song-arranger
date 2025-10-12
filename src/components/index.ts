@@ -13,6 +13,7 @@ export { TerminalPanel } from './TerminalPanel';
 export type { TerminalPanelProps } from './TerminalPanel';
 
 export { BlockCursor } from './BlockCursor';
+export { MouseCursor } from './MouseCursor';
 export type { BlockCursorProps } from './BlockCursor';
 
 export { TerminalMenu } from './TerminalMenu';

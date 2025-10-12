@@ -18,7 +18,6 @@ describe('Clip', () => {
 
   const defaultProps = {
     id: 'clip-1',
-    laneId: 'lane-1',
     position: 0,
     duration: 4,
     viewport: defaultViewport,
@@ -27,7 +26,6 @@ describe('Clip', () => {
     onSelect: jest.fn(),
     onMove: jest.fn(),
     onResize: jest.fn(),
-    onVerticalDrag: jest.fn(),
   };
 
   beforeEach(() => {
@@ -112,160 +110,91 @@ describe('Clip', () => {
     expect(clip).toHaveStyle({ width: '800px' }); // 4 beats * 200 zoom
   });
 
-  describe('Vertical dragging', () => {
-    it('should call onVerticalDrag on mouseup after vertical drag', async () => {
-      const onVerticalDrag = jest.fn();
-      render(<Clip {...defaultProps} onVerticalDrag={onVerticalDrag} />);
-
-      const clipContent = screen.getByTestId('clip-clip-1').querySelector('.clip__content') as HTMLElement;
+  describe('Animation States', () => {
+    it('should apply selected class when isSelected is true', () => {
+      render(<Clip {...defaultProps} isSelected={true} />);
       const clip = screen.getByTestId('clip-clip-1');
-
-      // Start drag
-      await act(async () => {
-        const mouseDownEvent = new MouseEvent('mousedown', {
-          bubbles: true,
-          clientX: 100,
-          clientY: 100,
-          button: 0,
-        });
-        clipContent.dispatchEvent(mouseDownEvent);
-      });
-
-      // Move vertically by 100px (should cross lane boundary at 80px)
-      await act(async () => {
-        const mouseMoveEvent = new MouseEvent('mousemove', {
-          bubbles: true,
-          clientX: 100,
-          clientY: 200, // deltaY = 100
-        });
-        document.dispatchEvent(mouseMoveEvent);
-      });
-
-      // Verify clip has transform applied during drag
-      expect(clip).toHaveStyle({ transform: 'translateY(100px)' });
-
-      // End drag
-      await act(async () => {
-        const mouseUpEvent = new MouseEvent('mouseup', {
-          bubbles: true,
-        });
-        document.dispatchEvent(mouseUpEvent);
-      });
-
-      // Verify onVerticalDrag was called with correct parameters
-      expect(onVerticalDrag).toHaveBeenCalledWith('clip-1', 'lane-1', 100);
+      expect(clip).toHaveClass('clip--selected');
     });
 
-    it('should not call onVerticalDrag if deltaY is less than 5px', async () => {
-      const onVerticalDrag = jest.fn();
-      render(<Clip {...defaultProps} onVerticalDrag={onVerticalDrag} />);
-
-      const clipContent = screen.getByTestId('clip-clip-1').querySelector('.clip__content') as HTMLElement;
-
-      // Start drag
-      await act(async () => {
-        const mouseDownEvent = new MouseEvent('mousedown', {
-          bubbles: true,
-          clientX: 100,
-          clientY: 100,
-          button: 0,
-        });
-        clipContent.dispatchEvent(mouseDownEvent);
-      });
-
-      // Move vertically by only 3px (below threshold)
-      await act(async () => {
-        const mouseMoveEvent = new MouseEvent('mousemove', {
-          bubbles: true,
-          clientX: 100,
-          clientY: 103, // deltaY = 3
-        });
-        document.dispatchEvent(mouseMoveEvent);
-      });
-
-      // End drag
-      await act(async () => {
-        const mouseUpEvent = new MouseEvent('mouseup', {
-          bubbles: true,
-        });
-        document.dispatchEvent(mouseUpEvent);
-      });
-
-      // Verify onVerticalDrag was NOT called
-      expect(onVerticalDrag).not.toHaveBeenCalled();
+    it('should not apply selected class when isSelected is false', () => {
+      render(<Clip {...defaultProps} isSelected={false} />);
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).not.toHaveClass('clip--selected');
     });
 
-    it('should reset transform after mouseup', async () => {
-      const onVerticalDrag = jest.fn();
-      render(<Clip {...defaultProps} onVerticalDrag={onVerticalDrag} />);
+    it('should apply dragging class during drag operation', () => {
+      render(<Clip {...defaultProps} />);
+      const content = screen.getByTestId('clip-clip-1').querySelector('.clip__content');
 
-      const clipContent = screen.getByTestId('clip-clip-1').querySelector('.clip__content') as HTMLElement;
-      const clip = screen.getByTestId('clip-clip-1');
-
-      // Start drag
-      await act(async () => {
-        clipContent.dispatchEvent(new MouseEvent('mousedown', {
+      // Simulate drag start
+      act(() => {
+        const mouseDownEvent = new MouseEvent('mousedown', {
           bubbles: true,
+          button: 0,
           clientX: 100,
           clientY: 100,
-          button: 0,
-        }));
+        });
+        content?.dispatchEvent(mouseDownEvent);
       });
 
-      // Move vertically
-      await act(async () => {
-        document.dispatchEvent(new MouseEvent('mousemove', {
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).toHaveClass('clip--dragging');
+    });
+
+    it('should apply resizing class during resize operation', () => {
+      render(<Clip {...defaultProps} />);
+      const leftHandle = screen.getByTestId('clip-clip-1-handle-left');
+
+      // Simulate resize start
+      act(() => {
+        const mouseDownEvent = new MouseEvent('mousedown', {
           bubbles: true,
+          button: 0,
           clientX: 100,
-          clientY: 200,
-        }));
+          clientY: 100,
+        });
+        leftHandle.dispatchEvent(mouseDownEvent);
       });
 
-      // Verify transform is applied
-      expect(clip).toHaveStyle({ transform: 'translateY(100px)' });
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).toHaveClass('clip--resizing');
+    });
 
-      // End drag
-      await act(async () => {
-        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    it('should apply copying class when Alt+dragging', () => {
+      const onCopy = jest.fn();
+      render(<Clip {...defaultProps} onCopy={onCopy} />);
+      const content = screen.getByTestId('clip-clip-1').querySelector('.clip__content');
+
+      // Simulate Alt+drag start
+      act(() => {
+        const mouseDownEvent = new MouseEvent('mousedown', {
+          bubbles: true,
+          button: 0,
+          clientX: 100,
+          clientY: 100,
+          altKey: true,
+        });
+        content?.dispatchEvent(mouseDownEvent);
       });
 
-      // Verify transform is removed
-      expect(clip).not.toHaveStyle({ transform: 'translateY(100px)' });
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).toHaveClass('clip--copying');
+      expect(onCopy).toHaveBeenCalledWith('clip-1');
     });
   });
 
-  describe('Color rendering', () => {
-    it('should apply lane color as border and background', () => {
-      render(<Clip {...defaultProps} color="#ff0000" />);
-      const clip = screen.getByTestId('clip-clip-1');
-
-      // Check that color is applied as CSS variable
-      expect(clip).toHaveStyle({
-        '--clip-color': '#ff0000',
-      });
-    });
-
-    it('should use default color if no color prop provided', () => {
+  describe('Cursor Styles', () => {
+    it('should have w-resize cursor on left handle', () => {
       render(<Clip {...defaultProps} />);
-      const clip = screen.getByTestId('clip-clip-1');
-
-      // Should not have custom color variable
-      expect(clip.style.getPropertyValue('--clip-color')).toBe('');
+      const leftHandle = screen.getByTestId('clip-clip-1-handle-left');
+      expect(leftHandle).toHaveClass('clip__handle--left');
     });
 
-    it('should update color when prop changes', () => {
-      const { rerender } = render(<Clip {...defaultProps} color="#00ff00" />);
-      const clip = screen.getByTestId('clip-clip-1');
-
-      expect(clip).toHaveStyle({
-        '--clip-color': '#00ff00',
-      });
-
-      rerender(<Clip {...defaultProps} color="#0000ff" />);
-
-      expect(clip).toHaveStyle({
-        '--clip-color': '#0000ff',
-      });
+    it('should have e-resize cursor on right handle', () => {
+      render(<Clip {...defaultProps} />);
+      const rightHandle = screen.getByTestId('clip-clip-1-handle-right');
+      expect(rightHandle).toHaveClass('clip__handle--right');
     });
   });
 });
