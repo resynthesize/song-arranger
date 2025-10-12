@@ -30,6 +30,8 @@ import {
   clearSelection,
   selectAllClips,
   cycleSelection,
+  navigateUp as navigateUpAction,
+  navigateDown as navigateDownAction,
 } from '@/store/slices/selectionSlice';
 import { selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
 
@@ -272,13 +274,11 @@ export const useKeyboardShortcuts = () => {
           break;
 
         case 'navigateUp':
-          // TODO: Implement lane navigation
-          console.log('Navigate up (not yet implemented)');
+          dispatch(navigateUpAction(lanes.map(l => l.id)));
           break;
 
         case 'navigateDown':
-          // TODO: Implement lane navigation
-          console.log('Navigate down (not yet implemented)');
+          dispatch(navigateDownAction(lanes.map(l => l.id)));
           break;
 
         case 'edit':

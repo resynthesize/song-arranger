@@ -3,7 +3,7 @@
  * Horizontal lane that contains clips
  */
 
-import { useRef, useEffect, useMemo, useState, KeyboardEvent, MouseEvent } from 'react';
+import { useRef, useEffect, useMemo, useState, KeyboardEvent, MouseEvent, memo } from 'react';
 import Clip from '../Clip';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
 import ColorPicker from '../ColorPicker';
@@ -364,4 +364,6 @@ const Lane = ({
   );
 };
 
-export default Lane;
+// Memoize the component to prevent unnecessary re-renders
+// Only re-render if props actually change
+export default memo(Lane);

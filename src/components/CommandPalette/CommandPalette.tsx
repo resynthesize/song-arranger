@@ -19,7 +19,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onClose }) => {
   const state = useAppSelector(state => state);
 
   const [query, setQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Get commands to display
@@ -32,7 +32,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onClose }) => {
 
   // Reset selection when commands change
   useEffect(() => {
-    setSelectedIndex(0);
+    setSelectedIndex(-1);
   }, [query]);
 
   // Auto-focus input
@@ -41,6 +41,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onClose }) => {
   }, []);
 
   const executeCommand = (index: number) => {
+    if (index < 0) return; // No selection
     const command = displayCommands[index];
     if (command) {
       command.action(dispatch, state);
@@ -58,7 +59,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onClose }) => {
       setSelectedIndex(prev => Math.min(prev + 1, displayCommands.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setSelectedIndex(prev => Math.max(prev - 1, 0));
+      setSelectedIndex(prev => Math.max(prev - 1, -1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
       executeCommand(selectedIndex);

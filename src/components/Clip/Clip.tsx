@@ -3,7 +3,7 @@
  * Represents a clip on the timeline with drag and resize functionality
  */
 
-import { useState, useRef, useEffect, MouseEvent, KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, MouseEvent, KeyboardEvent, memo } from 'react';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
 import type { ID, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx } from '@/utils/viewport';
@@ -330,4 +330,6 @@ const Clip = ({
   );
 };
 
-export default Clip;
+// Memoize the component to prevent unnecessary re-renders
+// Only re-render if props actually change
+export default memo(Clip);
