@@ -28,6 +28,31 @@ export function snapToGrid(position: number, snapValue: number): number {
 }
 
 /**
+ * Snap a position to the left edge of its grid cell
+ * Used for creating clips - if you click in a grid cell, the clip starts at the left edge
+ * @param position - The position in beats to snap
+ * @param snapValue - The snap interval in beats
+ * @returns The snapped position (left edge of grid cell) in beats
+ */
+export function snapToGridFloor(position: number, snapValue: number): number {
+  // Handle zero snap value (no snapping)
+  if (snapValue === 0) {
+    return position;
+  }
+
+  // Don't allow negative positions
+  if (position < 0) {
+    return 0;
+  }
+
+  // Floor to left edge of snap interval
+  const snapped = Math.floor(position / snapValue) * snapValue;
+
+  // Ensure we don't go negative after snapping
+  return Math.max(0, snapped);
+}
+
+/**
  * Get the snap increment for drag operations
  * This returns the snap value itself, which represents the smallest
  * increment that positions can be moved by.

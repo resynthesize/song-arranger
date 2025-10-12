@@ -32,7 +32,7 @@ import {
   removeLane,
 } from '@/store/slices/lanesSlice';
 import { setPlayheadPosition, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
-import { snapToGrid } from '@/utils/snap';
+import { snapToGrid, snapToGridFloor } from '@/utils/snap';
 import type { ID, Position, Duration } from '@/types';
 import './Timeline.css';
 
@@ -158,8 +158,9 @@ const Timeline = () => {
   // Handle double-click to create clip
   const handleLaneDoubleClick = useCallback(
     (laneId: ID, position: Position) => {
-      // Snap to grid based on current snap value
-      const snappedPosition = snapToGrid(position, effectiveSnapValue);
+      // Snap to left edge of grid cell (floor) - if you click in a grid cell,
+      // the clip starts at the left edge of that cell
+      const snappedPosition = snapToGridFloor(position, effectiveSnapValue);
       dispatch(
         addClip({
           laneId,
@@ -217,31 +218,24 @@ const Timeline = () => {
 
       if (startingLaneIndex === -1) return;
 
-      const laneDelta = Math.round(deltaY / LANE_HEIGHT);
+      const laneDelta = Math.floor(deltaY / LANE_HEIGHT);
       const targetLaneIndex = Math.max(
         0,
         Math.min(lanes.length - 1, startingLaneIndex + laneDelta)
       );
 
-      // Get current lane to check if we need to move
-      const currentLaneIndex = lanes.findIndex((lane) =>
-        clips.find((c) => c.id === clipId && c.laneId === lane.id)
-      );
-
-      if (targetLaneIndex !== currentLaneIndex) {
-        const targetLaneId = lanes[targetLaneIndex]?.id;
-        if (targetLaneId) {
-          if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
-            // Move all selected clips
-            dispatch(updateClipLane({ clipId: selectedClipIds, laneId: targetLaneId }));
-          } else {
-            // Move single clip
-            dispatch(updateClipLane({ clipId, laneId: targetLaneId }));
-          }
+      const targetLaneId = lanes[targetLaneIndex]?.id;
+      if (targetLaneId) {
+        if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
+          // Move all selected clips
+          dispatch(updateClipLane({ clipId: selectedClipIds, laneId: targetLaneId }));
+        } else {
+          // Move single clip
+          dispatch(updateClipLane({ clipId, laneId: targetLaneId }));
         }
       }
     },
-    [dispatch, lanes, clips, selectedClipIds]
+    [dispatch, lanes, selectedClipIds]
   );
 
   // Handle ruler click to move playhead
