@@ -11,12 +11,21 @@ import { searchCommands, addToRecentCommands, getRecentCommandObjects } from '@/
 import './CommandPalette.css';
 
 export interface CommandPaletteProps {
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export const CommandPalette: React.FC<CommandPaletteProps> = ({ onClose }) => {
+export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose }) => {
   const dispatch = useAppDispatch();
-  const state = useAppSelector(state => state);
+  // Select only the state we need instead of the entire root state
+  const clips = useAppSelector(state => state.clips.clips);
+  const lanes = useAppSelector(state => state.lanes.lanes);
+  const selectedClipIds = useAppSelector(state => state.selection.selectedClipIds);
+  const tempo = useAppSelector(state => state.timeline.tempo);
+  const viewport = useAppSelector(state => state.timeline.viewport);
+
+  // Build a minimal state object for commands that need it
+  const state = { clips: { clips }, lanes: { lanes }, selection: { selectedClipIds }, timeline: { tempo, viewport } };
 
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -35,10 +44,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onClose }) => {
     setSelectedIndex(-1);
   }, [query]);
 
-  // Auto-focus input
+  // Auto-focus input when opened
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (isOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  // Don't render if not open
+  if (!isOpen) {
+    return null;
+  }
 
   const executeCommand = (index: number) => {
     if (index < 0) return; // No selection
