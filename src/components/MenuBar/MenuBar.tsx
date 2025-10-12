@@ -7,6 +7,7 @@ import { useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { setTempo, setSnapValue } from '@/store/slices/timelineSlice';
 import { addLane } from '@/store/slices/lanesSlice';
+import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
 import { TerminalButton } from '../TerminalButton';
 import { TerminalInput } from '../TerminalInput';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
@@ -29,6 +30,9 @@ const MenuBar = () => {
   const selectedCount = useAppSelector(
     (state) => state.selection.selectedClipIds.length
   );
+  const crtEffectsEnabled = useAppSelector(
+    (state) => state.crtEffects.enabled
+  );
 
   const handleTempoChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,6 +46,10 @@ const MenuBar = () => {
 
   const handleAddLane = useCallback(() => {
     dispatch(addLane({}));
+  }, [dispatch]);
+
+  const handleToggleCRT = useCallback(() => {
+    dispatch(toggleCRTEffects());
   }, [dispatch]);
 
   const handleSnapChange = useCallback(
@@ -98,6 +106,10 @@ const MenuBar = () => {
 
         <TerminalButton onClick={handleAddLane}>
           + ADD LANE
+        </TerminalButton>
+
+        <TerminalButton onClick={handleToggleCRT}>
+          CRT: {crtEffectsEnabled ? 'ON' : 'OFF'}
         </TerminalButton>
       </div>
 

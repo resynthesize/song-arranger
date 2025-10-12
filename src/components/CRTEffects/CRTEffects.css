@@ -1,0 +1,112 @@
+/**
+ * Song Arranger - CRT Effects Component Styles
+ * Visual effects for authentic CRT monitor appearance
+ */
+
+/* Container for all CRT effects */
+.crt-effects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: var(--z-modal);
+  overflow: hidden;
+}
+
+/* Scanline Effect - horizontal lines across screen */
+.crt-scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 1px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 1px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.crt-enabled .crt-scanlines {
+  opacity: 1;
+}
+
+/* Flicker Effect - subtle brightness variation */
+.crt-flicker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 255, 0, 0.01);
+  opacity: 0;
+  animation: none;
+  transition: opacity var(--transition-base);
+}
+
+.crt-enabled .crt-flicker {
+  opacity: 1;
+  animation: flicker 8s infinite;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 0.98;
+  }
+  50% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.99;
+  }
+}
+
+/* Curvature Effect - barrel distortion */
+.crt-curvature {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  transition: border-radius var(--transition-base);
+}
+
+.crt-enabled .crt-curvature {
+  /* Very subtle curvature using box-shadow to create illusion */
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.3),
+    inset 0 0 100px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+/* Disable effects when reduced motion is preferred */
+@media (prefers-reduced-motion: reduce) {
+  .crt-flicker {
+    animation: none !important;
+  }
+
+  .crt-scanlines,
+  .crt-flicker,
+  .crt-curvature {
+    transition: none !important;
+  }
+}
+
+/* When effects are disabled, hide all overlays */
+.crt-disabled .crt-scanlines,
+.crt-disabled .crt-flicker,
+.crt-disabled .crt-curvature {
+  opacity: 0 !important;
+  animation: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}

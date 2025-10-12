@@ -8,6 +8,7 @@ import timelineReducer from './slices/timelineSlice';
 import lanesReducer from './slices/lanesSlice';
 import clipsReducer from './slices/clipsSlice';
 import selectionReducer from './slices/selectionSlice';
+import crtEffectsReducer from './slices/crtEffectsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     lanes: lanesReducer,
     clips: clipsReducer,
     selection: selectionReducer,
+    crtEffects: crtEffectsReducer,
   },
 });
 

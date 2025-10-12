@@ -5,60 +5,118 @@
  */
 
 /*
- * CRT Effect Container
- * Apply this class to enable CRT effects on an element
- */
-.crt-effect {
-  position: relative;
-}
-
-/*
- * Scanlines Effect
- * Creates horizontal lines to simulate CRT display
- * TODO: Implement with pseudo-element overlay when needed
- */
-.crt-effect.scanlines::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: var(--z-modal);
-  /* Scanline implementation to be added */
-}
-
-/*
  * Phosphor Glow Effect
  * Adds green glow to text and elements
+ * Use these utility classes to add glow effects
  */
 .glow-text {
   text-shadow: var(--phosphor-glow);
+  transition: text-shadow var(--transition-base);
+}
+
+.glow-text-sm {
+  text-shadow: var(--phosphor-glow-sm);
+  transition: text-shadow var(--transition-base);
+}
+
+.glow-text-md {
+  text-shadow: var(--phosphor-glow-md);
+  transition: text-shadow var(--transition-base);
+}
+
+.glow-text-lg {
+  text-shadow: var(--phosphor-glow-lg);
+  transition: text-shadow var(--transition-base);
 }
 
 .glow-box {
   box-shadow: var(--phosphor-glow);
+  transition: box-shadow var(--transition-base);
+}
+
+.glow-box-sm {
+  box-shadow: var(--phosphor-glow-sm);
+  transition: box-shadow var(--transition-base);
+}
+
+.glow-box-md {
+  box-shadow: var(--phosphor-glow-md);
+  transition: box-shadow var(--transition-base);
+}
+
+.glow-box-lg {
+  box-shadow: var(--phosphor-glow-lg);
+  transition: box-shadow var(--transition-base);
+}
+
+/*
+ * Enhanced glow for active/selected elements
+ * Phosphor persistence effect with brighter glow
+ */
+.glow-active {
+  text-shadow:
+    0 0 4px var(--color-primary),
+    0 0 8px var(--color-primary),
+    0 0 12px var(--color-secondary);
+  transition: text-shadow var(--transition-base);
+}
+
+.glow-box-active {
+  box-shadow:
+    0 0 4px var(--color-primary),
+    0 0 8px var(--color-primary),
+    0 0 12px var(--color-secondary),
+    inset 0 0 4px var(--color-primary);
+  transition: box-shadow var(--transition-base);
+}
+
+/*
+ * Phosphor persistence - afterglow effect
+ * Apply when deselecting elements
+ */
+.glow-afterglow {
+  animation: afterglow 300ms ease-out;
+}
+
+@keyframes afterglow {
+  0% {
+    filter: brightness(1.5);
+  }
+  100% {
+    filter: brightness(1);
+  }
 }
 
 /*
  * Utility class to disable CRT effects
- * Use when user prefers reduced motion or accessibility mode
+ * Applied globally when user disables effects
  */
-.no-crt-effects {
+.no-crt-effects,
+.no-crt-effects * {
   text-shadow: none !important;
   box-shadow: none !important;
-}
-
-.no-crt-effects::before,
-.no-crt-effects::after {
-  display: none !important;
+  animation: none !important;
+  filter: none !important;
 }
 
 /*
- * Additional CRT effects to be implemented:
- * - Screen curvature (border-radius + transform)
- * - RGB split/chromatic aberration
- * - Flicker animation
- * - Screen burn-in effects
+ * Respect user preferences for reduced motion
  */
+@media (prefers-reduced-motion: reduce) {
+  .glow-text,
+  .glow-text-sm,
+  .glow-text-md,
+  .glow-text-lg,
+  .glow-box,
+  .glow-box-sm,
+  .glow-box-md,
+  .glow-box-lg,
+  .glow-active,
+  .glow-box-active {
+    transition: none !important;
+  }
+
+  .glow-afterglow {
+    animation: none !important;
+  }
+}

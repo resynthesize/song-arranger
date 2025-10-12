@@ -17,3 +17,5 @@ export type { BlockCursorProps } from './BlockCursor';
 
 export { TerminalMenu } from './TerminalMenu';
 export type { TerminalMenuProps, TerminalMenuItem } from './TerminalMenu';
+
+export { default as CRTEffects } from './CRTEffects';
