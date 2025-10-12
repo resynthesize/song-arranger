@@ -21,6 +21,8 @@
   border-right: var(--border-width-base) solid var(--color-secondary);
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
   flex-shrink: 0;
 }
 
@@ -31,6 +33,10 @@
   cursor: pointer;
   user-select: none;
   transition: color var(--transition-fast);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lane__name:hover {
@@ -52,6 +58,36 @@
 .lane__name-input:focus {
   border-color: var(--color-highlight);
   box-shadow: var(--phosphor-glow-sm);
+}
+
+/* Lane Remove Button */
+.lane__remove-button {
+  background: transparent;
+  border: none;
+  color: var(--color-secondary);
+  font-family: var(--font-primary);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), text-shadow var(--transition-fast);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.lane__remove-button:hover {
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.lane__remove-button:active {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-md);
 }
 
 /* Lane Content (Clips Area) */

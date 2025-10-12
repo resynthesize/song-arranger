@@ -29,6 +29,7 @@ import {
   renameLane,
   setEditingLane,
   clearEditingLane,
+  removeLane,
 } from '@/store/slices/lanesSlice';
 import { setPlayheadPosition, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
 import { snapToGrid } from '@/utils/snap';
@@ -73,6 +74,24 @@ const Timeline = () => {
   const handleStopEditing = useCallback(() => {
     dispatch(clearEditingLane());
   }, [dispatch]);
+
+  // Handle lane removal
+  const handleRemoveLane = useCallback(
+    (laneId: ID) => {
+      // Find all clips in this lane
+      const clipsToRemove = clips.filter((clip) => clip.laneId === laneId);
+      const clipIdsToRemove = clipsToRemove.map((clip) => clip.id);
+
+      // Remove clips first
+      if (clipIdsToRemove.length > 0) {
+        dispatch(removeClips(clipIdsToRemove));
+      }
+
+      // Remove lane
+      dispatch(removeLane(laneId));
+    },
+    [dispatch, clips]
+  );
 
   // Handle clip selection
   const handleClipSelect = useCallback(
@@ -279,6 +298,7 @@ const Timeline = () => {
                 onNameChange={handleNameChange}
                 onStartEditing={handleStartEditing}
                 onStopEditing={handleStopEditing}
+                onRemove={handleRemoveLane}
                 onClipSelect={handleClipSelect}
                 onClipMove={handleClipMove}
                 onClipResize={handleClipResize}

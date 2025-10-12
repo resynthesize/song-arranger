@@ -20,6 +20,7 @@ interface LaneProps {
   onNameChange: (laneId: ID, newName: string) => void;
   onStartEditing: (laneId: ID) => void;
   onStopEditing: () => void;
+  onRemove: (laneId: ID) => void;
   onClipSelect: (clipId: ID, isMultiSelect: boolean) => void;
   onClipMove: (clipId: ID, newPosition: Position) => void;
   onClipResize: (clipId: ID, newDuration: Duration, edge: 'left' | 'right') => void;
@@ -40,6 +41,7 @@ const Lane = ({
   onNameChange,
   onStartEditing,
   onStopEditing,
+  onRemove,
   onClipSelect,
   onClipMove,
   onClipResize,
@@ -210,6 +212,10 @@ const Lane = ({
     }
   };
 
+  const handleRemove = () => {
+    onRemove(id);
+  };
+
   return (
     <div className="lane" data-testid={`lane-${id}`}>
       <div className="lane__header">
@@ -226,6 +232,14 @@ const Lane = ({
             {name}
           </div>
         )}
+        <button
+          className="lane__remove-button"
+          onClick={handleRemove}
+          title="Remove lane"
+          data-testid={`lane-${id}-remove-button`}
+        >
+          ×
+        </button>
       </div>
       <div
         ref={contentRef}
