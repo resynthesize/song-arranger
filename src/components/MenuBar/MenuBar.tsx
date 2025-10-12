@@ -5,13 +5,13 @@
 
 import { useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { setTempo, setSnapValue, setSnapMode, zoomIn, zoomOut, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
-import { calculateGridSnap } from '@/utils/snap';
+import { setTempo, setSnapValue, setSnapMode, zoomIn, zoomOut } from '@/store/slices/timelineSlice';
 import { addLane } from '@/store/slices/lanesSlice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
 import { TerminalButton } from '../TerminalButton';
 import { TerminalInput } from '../TerminalInput';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
+import { DurationDisplay } from '../DurationDisplay';
 import './MenuBar.css';
 
 // Snap value options with musical notation
@@ -38,7 +38,6 @@ const MenuBar = () => {
   const tempo = useAppSelector((state) => state.timeline.tempo);
   const snapMode = useAppSelector((state) => state.timeline.snapMode);
   const snapValue = useAppSelector((state) => state.timeline.snapValue);
-  const effectiveSnapValue = useAppSelector(selectEffectiveSnapValue);
   const zoom = useAppSelector((state) => state.timeline.viewport.zoom);
   const playheadPosition = useAppSelector((state) => state.timeline.playheadPosition);
   const laneCount = useAppSelector((state) => state.lanes.lanes.length);
@@ -155,6 +154,8 @@ const MenuBar = () => {
 
       {/* Compact controls */}
       <div className="menu-bar__controls">
+        <DurationDisplay />
+
         <div className="menu-bar__control">
           <TerminalInput
             id="tempo-input"

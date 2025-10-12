@@ -1,0 +1,100 @@
+/**
+ * Song Arranger - DurationDisplay Component Styles
+ * Retro terminal-styled duration display with ASCII borders and phosphor glow
+ */
+
+.duration-display {
+  display: inline-flex;
+  flex-direction: column;
+  font-family: var(--font-primary);
+  color: var(--color-primary);
+  background: var(--color-bg-elevated);
+  padding: 0;
+  line-height: var(--line-height-tight);
+  user-select: none;
+}
+
+/* ASCII border styles */
+.duration-display__border-top,
+.duration-display__border-bottom {
+  color: var(--color-secondary);
+  font-size: var(--font-size-base);
+  white-space: pre;
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+/* Content container */
+.duration-display__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 var(--spacing-xs);
+  border-left: var(--border-width-base) solid var(--color-secondary);
+  border-right: var(--border-width-base) solid var(--color-secondary);
+  box-shadow: inset 0 0 var(--glow-intensity-sm) var(--color-secondary);
+}
+
+/* Duration item (label + value) */
+.duration-display__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: var(--spacing-xs) 0;
+}
+
+/* Labels (GLOBAL, SELECTED) */
+.duration-display__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+  text-shadow: var(--phosphor-glow-sm);
+  letter-spacing: 1px;
+}
+
+/* Duration values (MM:SS) */
+.duration-display__value {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  text-shadow: var(--phosphor-glow-md);
+  letter-spacing: 2px;
+  transition: text-shadow var(--transition-fast);
+}
+
+/* Enhanced glow on hover */
+.duration-display__item:hover .duration-display__value {
+  text-shadow: var(--phosphor-glow-lg);
+}
+
+/* Separator between items */
+.duration-display__item + .duration-display__item {
+  border-top: var(--border-width-thin) solid var(--color-grid);
+  padding-top: var(--spacing-xs);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .duration-display {
+    font-size: var(--font-size-sm);
+  }
+
+  .duration-display__label {
+    font-size: var(--font-size-xs);
+  }
+
+  .duration-display__value {
+    font-size: var(--font-size-md);
+  }
+
+  .duration-display__border-top,
+  .duration-display__border-bottom {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* Accessibility - respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .duration-display__value {
+    transition: none;
+  }
+}
