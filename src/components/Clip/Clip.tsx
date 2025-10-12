@@ -18,6 +18,7 @@ interface ClipProps {
   viewport: ViewportState;
   snapValue: number;
   isSelected: boolean;
+  isEditing?: boolean;
   label?: string;
   laneName?: string;
   color?: string;
@@ -28,6 +29,8 @@ interface ClipProps {
   onVerticalDrag?: (clipId: ID, startingLaneId: ID, deltaY: number) => void;
   onVerticalDragUpdate?: (clipId: ID, deltaY: number) => void;
   onCopy?: (clipId: ID) => void;
+  onStartEditing?: (clipId: ID) => void;
+  onStopEditing?: () => void;
   onLabelChange?: (clipId: ID, label: string) => void;
   onDelete?: (clipId: ID) => void;
 }
@@ -40,6 +43,7 @@ const Clip = ({
   viewport,
   snapValue,
   isSelected,
+  isEditing = false,
   label,
   laneName,
   color,
@@ -50,12 +54,13 @@ const Clip = ({
   onVerticalDrag,
   onVerticalDragUpdate,
   onCopy,
+  onStartEditing,
+  onStopEditing,
   onLabelChange,
   onDelete,
 }: ClipProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<'left' | 'right' | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [verticalDragDeltaY, setVerticalDragDeltaY] = useState(0);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -109,8 +114,8 @@ const Clip = ({
 
   const handleDoubleClick = (e: MouseEvent) => {
     e.stopPropagation();
-    if (onLabelChange) {
-      setIsEditing(true);
+    if (onStartEditing) {
+      onStartEditing(id);
     }
   };
 
@@ -130,9 +135,13 @@ const Clip = ({
       if (onLabelChange) {
         onLabelChange(id, newLabel);
       }
-      setIsEditing(false);
+      if (onStopEditing) {
+        onStopEditing();
+      }
     } else if (e.key === 'Escape') {
-      setIsEditing(false);
+      if (onStopEditing) {
+        onStopEditing();
+      }
     }
   };
 
@@ -141,7 +150,9 @@ const Clip = ({
       const newLabel = inputRef.current.value;
       onLabelChange(id, newLabel);
     }
-    setIsEditing(false);
+    if (onStopEditing) {
+      onStopEditing();
+    }
   };
 
   // Auto-focus input when editing starts
@@ -269,7 +280,7 @@ const Clip = ({
         left: `${leftPx.toString()}px`,
         width: `${widthPx.toString()}px`,
         transform: effectiveVerticalDragDeltaY !== 0 ? `translateY(${effectiveVerticalDragDeltaY}px)` : undefined,
-        zIndex: effectiveVerticalDragDeltaY !== 0 ? 1000 : undefined,
+        zIndex: (isDragging || isResizing || effectiveVerticalDragDeltaY !== 0) ? 1000 : undefined,
         ...(color ? { '--clip-color': color } as React.CSSProperties : {}),
       }}
       onMouseDown={handleMouseDown}

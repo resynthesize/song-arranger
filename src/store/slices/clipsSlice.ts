@@ -8,6 +8,7 @@ import type { ClipsState, Clip, ID, Position, Duration } from '@/types';
 
 const initialState: ClipsState = {
   clips: [],
+  editingClipId: null,
 };
 
 const MIN_DURATION = 1; // Minimum clip duration in beats
@@ -227,6 +228,14 @@ const clipsSlice = createSlice({
         clip.duration = Math.max(MIN_DURATION, clip.duration - amount);
       }
     },
+
+    setEditingClip: (state, action: PayloadAction<ID>) => {
+      state.editingClipId = action.payload;
+    },
+
+    clearEditingClip: (state) => {
+      state.editingClipId = null;
+    },
   },
 });
 
@@ -247,6 +256,8 @@ export const {
   setClipsDuration,
   trimClipStart,
   trimClipEnd,
+  setEditingClip,
+  clearEditingClip,
 } = clipsSlice.actions;
 
 export default clipsSlice.reducer;

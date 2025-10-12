@@ -80,6 +80,7 @@ export interface LanesState {
  */
 export interface ClipsState {
   clips: Clip[];
+  editingClipId: ID | null; // Currently editing clip for label changes
 }
 
 /**

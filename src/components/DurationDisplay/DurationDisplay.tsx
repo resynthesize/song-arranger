@@ -44,10 +44,11 @@ export const DurationDisplay = () => {
         const contentWidth = contentRef.current.offsetWidth;
         // Each dash character is roughly 0.6em wide in VT323 font
         // Calculate how many dashes fit in the content width
-        // Account for the corner characters (2 characters total)
+        // Account for borders (2px * 2 = 4px) and padding (4px * 2 = 8px)
         const fontSize = parseFloat(getComputedStyle(contentRef.current).fontSize);
         const dashWidth = fontSize * 0.6;
-        const numDashes = Math.max(8, Math.floor(contentWidth / dashWidth) - 2);
+        const adjustedWidth = contentWidth + 12; // Add padding compensation
+        const numDashes = Math.max(8, Math.floor(adjustedWidth / dashWidth) - 2);
         setBorderWidth(numDashes);
       }
     };
