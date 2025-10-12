@@ -57,7 +57,6 @@ const Clip = ({
   const dragStartPosition = useRef(0);
   const dragStartDuration = useRef(0);
   const dragStartLaneId = useRef<ID>('');
-  const lastTargetDeltaY = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Convert beats to viewport-relative pixels
@@ -89,7 +88,6 @@ const Clip = ({
     dragStartY.current = e.clientY;
     dragStartPosition.current = position;
     dragStartLaneId.current = laneId; // Track starting lane
-    lastTargetDeltaY.current = 0; // Reset vertical drag tracking
   };
 
   const handleDoubleClick = (e: MouseEvent) => {
@@ -151,18 +149,10 @@ const Clip = ({
         const snappedPosition = snapToGrid(rawNewPosition, snapValue);
         onMove(id, snappedPosition);
 
-        // Handle vertical lane dragging - call on every significant deltaY change
-        // This ensures smooth continuous movement across multiple lanes
-        if (onVerticalDrag) {
-          const LANE_HEIGHT = 80;
-          const currentLaneDelta = Math.floor(deltaY / LANE_HEIGHT);
-          const lastLaneDelta = Math.floor(lastTargetDeltaY.current / LANE_HEIGHT);
-
-          // Only dispatch when we've crossed into a new lane
-          if (currentLaneDelta !== lastLaneDelta || Math.abs(deltaY) < Math.abs(lastTargetDeltaY.current)) {
-            lastTargetDeltaY.current = deltaY;
-            onVerticalDrag(id, dragStartLaneId.current, deltaY);
-          }
+        // Handle vertical lane dragging - always call with current deltaY
+        // Let the Timeline component determine if lane change is needed
+        if (onVerticalDrag && Math.abs(deltaY) > 5) {
+          onVerticalDrag(id, dragStartLaneId.current, deltaY);
         }
       } else if (isResizing) {
         if (isResizing === 'right') {

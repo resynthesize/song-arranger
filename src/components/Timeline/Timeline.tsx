@@ -231,17 +231,23 @@ const Timeline = () => {
       );
 
       const targetLaneId = lanes[targetLaneIndex]?.id;
-      if (targetLaneId) {
-        if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
-          // Move all selected clips
-          dispatch(updateClipLane({ clipId: selectedClipIds, laneId: targetLaneId }));
-        } else {
-          // Move single clip
-          dispatch(updateClipLane({ clipId, laneId: targetLaneId }));
-        }
+      if (!targetLaneId) return;
+
+      // Get the current lane of the clip to avoid redundant updates
+      const clip = clips.find((c) => c.id === clipId);
+      if (clip && clip.laneId === targetLaneId) {
+        return; // Already in target lane
+      }
+
+      if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
+        // Move all selected clips
+        dispatch(updateClipLane({ clipId: selectedClipIds, laneId: targetLaneId }));
+      } else {
+        // Move single clip
+        dispatch(updateClipLane({ clipId, laneId: targetLaneId }));
       }
     },
-    [dispatch, lanes, selectedClipIds]
+    [dispatch, lanes, clips, selectedClipIds]
   );
 
   // Handle ruler click to move playhead
