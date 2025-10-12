@@ -11,6 +11,7 @@ const initialState: TimelineState = {
   playheadPosition: 0,
   isPlaying: false,
   tempo: 120, // Default BPM
+  snapValue: 1, // Default to quarter note (1 beat)
 };
 
 const timelineSlice = createSlice({
@@ -45,6 +46,10 @@ const timelineSlice = createSlice({
     setTempo: (state, action: PayloadAction<number>) => {
       state.tempo = Math.max(20, Math.min(300, action.payload));
     },
+
+    setSnapValue: (state, action: PayloadAction<number>) => {
+      state.snapValue = Math.max(0, action.payload);
+    },
   },
 });
 
@@ -56,6 +61,7 @@ export const {
   stop,
   togglePlayPause,
   setTempo,
+  setSnapValue,
 } = timelineSlice.actions;
 
 export default timelineSlice.reducer;

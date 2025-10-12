@@ -5,6 +5,7 @@
 
 import { useState, useRef, useEffect, MouseEvent } from 'react';
 import type { ID, Position, Duration } from '@/types';
+import { snapToGrid } from '@/utils/snap';
 import './Clip.css';
 
 interface ClipProps {
@@ -12,6 +13,7 @@ interface ClipProps {
   position: Position;
   duration: Duration;
   zoom: number;
+  snapValue: number;
   isSelected: boolean;
   label?: string;
   onSelect: (clipId: ID, isMultiSelect: boolean) => void;
@@ -24,6 +26,7 @@ const Clip = ({
   position,
   duration,
   zoom,
+  snapValue,
   isSelected,
   label,
   onSelect,
@@ -77,18 +80,30 @@ const Clip = ({
       const deltaBeats = deltaX / zoom;
 
       if (isDragging) {
-        onMove(id, deltaBeats);
+        // Calculate the unsnapped new position
+        const rawNewPosition = dragStartPosition.current + deltaBeats;
+        // Snap to grid
+        const snappedPosition = snapToGrid(rawNewPosition, snapValue);
+        // Calculate snapped delta from original position
+        const snappedDelta = snappedPosition - dragStartPosition.current;
+        onMove(id, snappedDelta);
       } else if (isResizing) {
         if (isResizing === 'right') {
-          const newDuration = Math.max(1, dragStartDuration.current + deltaBeats);
-          onResize(id, newDuration, 'right');
-        } else {
-          // Left edge resize
-          const newDuration = Math.max(
-            1,
-            dragStartDuration.current - deltaBeats
+          // Resize from right edge
+          const rawNewDuration = dragStartDuration.current + deltaBeats;
+          const snappedDuration = Math.max(
+            snapValue || 1,
+            snapToGrid(rawNewDuration, snapValue)
           );
-          onResize(id, newDuration, 'left');
+          onResize(id, snappedDuration, 'right');
+        } else {
+          // Resize from left edge
+          const rawNewDuration = dragStartDuration.current - deltaBeats;
+          const snappedDuration = Math.max(
+            snapValue || 1,
+            snapToGrid(rawNewDuration, snapValue)
+          );
+          onResize(id, snappedDuration, 'left');
         }
       }
     };
@@ -105,7 +120,7 @@ const Clip = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, id, zoom, onMove, onResize]);
+  }, [isDragging, isResizing, id, zoom, snapValue, onMove, onResize]);
 
   return (
     <div

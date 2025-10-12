@@ -24,6 +24,7 @@ import {
   setEditingLane,
   clearEditingLane,
 } from '@/store/slices/lanesSlice';
+import { snapToGrid } from '@/utils/snap';
 import type { ID, Position, Duration } from '@/types';
 import './Timeline.css';
 
@@ -32,6 +33,7 @@ const Timeline = () => {
 
   // Select data from Redux
   const zoom = useAppSelector((state) => state.timeline.zoom);
+  const snapValue = useAppSelector((state) => state.timeline.snapValue);
   const lanes = useAppSelector((state) => state.lanes.lanes);
   const clips = useAppSelector((state) => state.clips.clips);
   const selectedClipIds = useAppSelector(
@@ -122,17 +124,17 @@ const Timeline = () => {
   // Handle double-click to create clip
   const handleLaneDoubleClick = useCallback(
     (laneId: ID, position: Position) => {
-      // Snap to nearest beat (optional, currently just uses exact position)
-      const snappedPosition = Math.round(position);
+      // Snap to grid based on current snap value
+      const snappedPosition = snapToGrid(position, snapValue);
       dispatch(
         addClip({
           laneId,
           position: snappedPosition,
-          duration: 4, // Default 4 beats
+          duration: 4, // Default 4 beats (1 bar)
         })
       );
     },
-    [dispatch]
+    [dispatch, snapValue]
   );
 
   // Handle keyboard shortcuts
@@ -175,6 +177,7 @@ const Timeline = () => {
               name={lane.name}
               clips={clips}
               zoom={zoom}
+              snapValue={snapValue}
               selectedClipIds={selectedClipIds}
               isEditing={editingLaneId === lane.id}
               onNameChange={handleNameChange}

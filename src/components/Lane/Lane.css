@@ -63,22 +63,15 @@
   cursor: crosshair;
 }
 
-/* Grid lines (bars) */
-.lane__content::before {
-  content: '';
+/* Grid canvas for dynamic grid lines */
+.lane__grid {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--color-grid) 0px,
-    var(--color-grid) 1px,
-    transparent 1px,
-    transparent 400px
-  );
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+  z-index: 0;
 }
 
 /* Respect reduced motion preference */

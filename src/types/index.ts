@@ -46,6 +46,7 @@ export interface TimelineState {
   playheadPosition: Position; // Current playback position in beats
   isPlaying: boolean;
   tempo: number; // BPM (beats per minute)
+  snapValue: number; // Snap interval in beats (e.g., 0.25 for 1/16th note, 1 for quarter note)
 }
 
 /**

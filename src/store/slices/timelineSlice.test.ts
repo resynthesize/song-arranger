@@ -11,6 +11,7 @@ import reducer, {
   stop,
   togglePlayPause,
   setTempo,
+  setSnapValue,
 } from './timelineSlice';
 import type { TimelineState } from '@/types';
 
@@ -20,6 +21,7 @@ describe('timelineSlice', () => {
     playheadPosition: 0,
     isPlaying: false,
     tempo: 120,
+    snapValue: 1,
   };
 
   it('should return the initial state', () => {
@@ -101,6 +103,43 @@ describe('timelineSlice', () => {
     it('should clamp tempo to maximum value', () => {
       const newState = reducer(initialState, setTempo(500));
       expect(newState.tempo).toBe(300);
+    });
+  });
+
+  describe('setSnapValue', () => {
+    it('should set snap value to 1/16th note (0.25 beats)', () => {
+      const newState = reducer(initialState, setSnapValue(0.25));
+      expect(newState.snapValue).toBe(0.25);
+    });
+
+    it('should set snap value to 1/8th note (0.5 beats)', () => {
+      const newState = reducer(initialState, setSnapValue(0.5));
+      expect(newState.snapValue).toBe(0.5);
+    });
+
+    it('should set snap value to 1/4 note (1 beat)', () => {
+      const newState = reducer(initialState, setSnapValue(1));
+      expect(newState.snapValue).toBe(1);
+    });
+
+    it('should set snap value to 1/2 note (2 beats)', () => {
+      const newState = reducer(initialState, setSnapValue(2));
+      expect(newState.snapValue).toBe(2);
+    });
+
+    it('should set snap value to 1 bar (4 beats)', () => {
+      const newState = reducer(initialState, setSnapValue(4));
+      expect(newState.snapValue).toBe(4);
+    });
+
+    it('should not allow negative snap values', () => {
+      const newState = reducer(initialState, setSnapValue(-1));
+      expect(newState.snapValue).toBe(0);
+    });
+
+    it('should allow zero snap value (no snapping)', () => {
+      const newState = reducer(initialState, setSnapValue(0));
+      expect(newState.snapValue).toBe(0);
     });
   });
 });

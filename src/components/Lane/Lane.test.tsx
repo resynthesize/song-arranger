@@ -25,6 +25,7 @@ describe('Lane', () => {
     name: 'Kick',
     clips: mockClips,
     zoom: 100,
+    snapValue: 1,
     selectedClipIds: [],
     isEditing: false,
     onNameChange: jest.fn(),

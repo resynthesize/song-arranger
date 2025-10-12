@@ -13,6 +13,7 @@ describe('Clip', () => {
     position: 0,
     duration: 4,
     zoom: 100,
+    snapValue: 1,
     isSelected: false,
     onSelect: jest.fn(),
     onMove: jest.fn(),

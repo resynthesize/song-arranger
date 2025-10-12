@@ -13,6 +13,7 @@ interface LaneProps {
   name: string;
   clips: ClipType[];
   zoom: number;
+  snapValue: number;
   selectedClipIds: ID[];
   isEditing: boolean;
   onNameChange: (laneId: ID, newName: string) => void;
@@ -29,6 +30,7 @@ const Lane = ({
   name,
   clips,
   zoom,
+  snapValue,
   selectedClipIds,
   isEditing,
   onNameChange,
@@ -41,6 +43,7 @@ const Lane = ({
 }: LaneProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const gridCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Filter clips to only show those in this lane
   const laneClips = clips.filter((clip) => clip.laneId === id);
@@ -52,6 +55,78 @@ const Lane = ({
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  // Draw grid lines on canvas
+  useEffect(() => {
+    const canvas = gridCanvasRef.current;
+    const container = contentRef.current;
+    if (!canvas || !container) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size to match container
+    const rect = container.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw grid lines
+    const barWidth = 4 * zoom; // 4 beats = 1 bar
+    const snapWidth = snapValue * zoom;
+
+    // Calculate how many bars to show (with some extra)
+    const numBars = Math.ceil(canvas.width / barWidth) + 1;
+
+    // Draw bar lines (every 4 beats) - brighter and thicker
+    ctx.strokeStyle = '#00ff00';
+    ctx.globalAlpha = 0.35;
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= numBars; i++) {
+      const x = i * barWidth;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+
+    // Draw snap lines (based on snap value) - dimmer and thinner
+    if (snapValue > 0 && snapValue < 4) {
+      ctx.strokeStyle = '#003300';
+      ctx.globalAlpha = 0.2;
+      ctx.lineWidth = 1;
+
+      const numSnaps = Math.ceil(canvas.width / snapWidth) + 1;
+      for (let i = 0; i <= numSnaps; i++) {
+        const x = i * snapWidth;
+        // Skip if this is a bar line (already drawn)
+        if (Math.abs((x % barWidth)) < 0.1) continue;
+
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+    }
+  }, [zoom, snapValue]);
+
+  // Re-draw grid when window resizes
+  useEffect(() => {
+    const handleResize = () => {
+      const canvas = gridCanvasRef.current;
+      const container = contentRef.current;
+      if (!canvas || !container) return;
+
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleNameDoubleClick = () => {
     onStartEditing(id);
@@ -112,6 +187,11 @@ const Lane = ({
         data-testid={`lane-${id}-content`}
         onDoubleClick={handleContentDoubleClick}
       >
+        <canvas
+          ref={gridCanvasRef}
+          className="lane__grid"
+          data-testid={`lane-${id}-grid`}
+        />
         {laneClips.map((clip) => (
           <Clip
             key={clip.id}
@@ -119,6 +199,7 @@ const Lane = ({
             position={clip.position}
             duration={clip.duration}
             zoom={zoom}
+            snapValue={snapValue}
             isSelected={selectedClipIds.includes(clip.id)}
             label={clip.label}
             onSelect={onClipSelect}

@@ -110,6 +110,7 @@ describe('Timeline', () => {
         playheadPosition: 0,
         isPlaying: false,
         tempo: 120,
+        snapValue: 1,
       },
       lanes: {
         lanes: [{ id: 'lane-1', name: 'Kick' }],
