@@ -39,11 +39,17 @@ import './Timeline.css';
 const Timeline = () => {
   const dispatch = useAppDispatch();
   const timelineRef = useRef<HTMLDivElement>(null);
+  const lastPositionRef = useRef<Map<ID, Position>>(new Map());
+  const lastDurationRef = useRef<Map<ID, Duration>>(new Map());
   const [selectionRect, setSelectionRect] = useState<{
     startX: number;
     startY: number;
     currentX: number;
     currentY: number;
+  } | null>(null);
+  const [verticalDragState, setVerticalDragState] = useState<{
+    deltaY: number;
+    draggedClipId: ID;
   } | null>(null);
 
   // Use viewport hook for pan/zoom interactions
@@ -61,6 +67,10 @@ const Timeline = () => {
     (state) => state.selection.selectedClipIds
   );
   const editingLaneId = useAppSelector((state) => state.lanes.editingLaneId);
+
+  // Keep clips in a ref so callbacks can access them without changing reference
+  const clipsRef = useRef(clips);
+  clipsRef.current = clips;
 
   // Handle lane name changes
   const handleNameChange = useCallback(
@@ -113,52 +123,86 @@ const Timeline = () => {
 
   // Handle clip movement
   const handleClipMove = useCallback(
-    (clipId: ID, newPosition: Position) => {
-      const clip = clips.find((c) => c.id === clipId);
-      if (!clip) return;
-
+    (clipId: ID, newPosition: Position, delta: number) => {
       if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
-        // Ganged move: calculate delta from dragged clip and move all selected clips
-        const delta = newPosition - clip.position;
-        dispatch(moveClips({ clipIds: selectedClipIds, delta }));
+        // Ganged move: calculate incremental delta from last position
+        // If this is the first move, get the current position from Redux
+        let lastPosition = lastPositionRef.current.get(clipId);
+        if (lastPosition === undefined) {
+          const clip = clipsRef.current.find(c => c.id === clipId);
+          lastPosition = clip?.position ?? newPosition;
+        }
+
+        const incrementalDelta = newPosition - lastPosition;
+        lastPositionRef.current.set(clipId, newPosition);
+
+        // Only dispatch if there's actual movement
+        if (incrementalDelta !== 0) {
+          dispatch(moveClips({ clipIds: selectedClipIds, delta: incrementalDelta }));
+        }
       } else {
         // Single clip move
         const clampedPosition = Math.max(0, newPosition);
         dispatch(moveClip({ clipId, position: clampedPosition }));
+        lastPositionRef.current.delete(clipId); // Clear tracking
       }
     },
-    [dispatch, selectedClipIds, clips]
+    [dispatch, selectedClipIds]
   );
 
   // Handle clip resize
   const handleClipResize = useCallback(
-    (clipId: ID, newDuration: Duration, edge: 'left' | 'right') => {
-      const clip = clips.find((c) => c.id === clipId);
-      if (!clip) return;
-
+    (clipId: ID, newDuration: Duration, edge: 'left' | 'right', startDuration: Duration, startPosition: Position) => {
       if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
-        // Ganged resize: resize all selected clips proportionally
-        const factor = newDuration / clip.duration;
-        dispatch(resizeClips({ clipIds: selectedClipIds, factor }));
+        // Ganged resize: calculate incremental factor from last duration
+        // If this is the first resize, get the current duration from Redux
+        let lastDuration = lastDurationRef.current.get(clipId);
+        if (lastDuration === undefined) {
+          const clip = clipsRef.current.find(c => c.id === clipId);
+          lastDuration = clip?.duration ?? newDuration;
+        }
 
-        // If resizing from left, move all clips
+        const incrementalFactor = newDuration / lastDuration;
+        lastDurationRef.current.set(clipId, newDuration);
+
+        // Only dispatch if there's actual change
+        if (incrementalFactor !== 1) {
+          dispatch(resizeClips({ clipIds: selectedClipIds, factor: incrementalFactor }));
+        }
+
+        // If resizing from left, calculate incremental position delta
         if (edge === 'left') {
-          const positionDelta = clip.duration - newDuration;
-          dispatch(moveClips({ clipIds: selectedClipIds, delta: positionDelta }));
+          let lastPosition = lastPositionRef.current.get(clipId);
+          if (lastPosition === undefined) {
+            const clip = clipsRef.current.find(c => c.id === clipId);
+            lastPosition = clip?.position ?? startPosition;
+          }
+
+          const newPosition = Math.max(0, startPosition + (startDuration - newDuration));
+          const incrementalPositionDelta = newPosition - lastPosition;
+          lastPositionRef.current.set(clipId, newPosition);
+
+          if (incrementalPositionDelta !== 0) {
+            dispatch(moveClips({ clipIds: selectedClipIds, delta: incrementalPositionDelta }));
+          }
         }
       } else {
         // Single clip resize
         dispatch(resizeClip({ clipId, duration: newDuration }));
 
-        // If resizing from left edge, adjust position
+        // If resizing from left edge, adjust position using start position
         if (edge === 'left') {
-          const positionDelta = clip.duration - newDuration;
-          const newPosition = Math.max(0, clip.position + positionDelta);
+          const positionDelta = startDuration - newDuration;
+          const newPosition = Math.max(0, startPosition + positionDelta);
           dispatch(moveClip({ clipId, position: newPosition }));
         }
+
+        // Clear tracking
+        lastDurationRef.current.delete(clipId);
+        lastPositionRef.current.delete(clipId);
       }
     },
-    [dispatch, selectedClipIds, clips]
+    [dispatch, selectedClipIds]
   );
 
   // Handle double-click to create clip
@@ -215,32 +259,71 @@ const Timeline = () => {
     [dispatch, selectedClipIds]
   );
 
-  // Handle vertical clip dragging (move between lanes)
+  // Handle vertical clip drag updates (called during drag for visual feedback)
+  const handleClipVerticalDragUpdate = useCallback(
+    (clipId: ID, deltaY: number) => {
+      setVerticalDragState({ deltaY, draggedClipId: clipId });
+    },
+    []
+  );
+
+  // Handle vertical clip dragging (move between lanes) - called on mouseup
   const handleClipVerticalDrag = useCallback(
     (clipId: ID, startingLaneId: ID, deltaY: number) => {
+      // Clear visual drag state
+      setVerticalDragState(null);
+
       // Calculate which lane the clip should move to based on deltaY from starting lane
+      // Use center-based snapping: round instead of floor so clip snaps to the lane
+      // that contains >50% of the clip (the "51% rule")
       const LANE_HEIGHT = 80; // Match CSS .lane height
       const startingLaneIndex = lanes.findIndex((lane) => lane.id === startingLaneId);
 
       if (startingLaneIndex === -1) return;
 
-      const laneDelta = Math.floor(deltaY / LANE_HEIGHT);
-      const targetLaneIndex = Math.max(
-        0,
-        Math.min(lanes.length - 1, startingLaneIndex + laneDelta)
-      );
+      const laneDelta = Math.round(deltaY / LANE_HEIGHT);
 
-      const targetLaneId = lanes[targetLaneIndex]?.id;
-      if (!targetLaneId) return;
-
-      // Dispatch unconditionally - the Redux reducer is idempotent
-      // This keeps the callback reference stable during drag operations
       if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
-        // Move all selected clips
-        dispatch(updateClipLane({ clipId: selectedClipIds, laneId: targetLaneId }));
+        // Ganged vertical move: move all selected clips by the same lane delta
+        // Find min/max lane indices to constrain the movement
+        const selectedClips = clipsRef.current.filter(c => selectedClipIds.includes(c.id));
+        const clipLaneIndices = selectedClips.map(clip => {
+          const idx = lanes.findIndex(lane => lane.id === clip.laneId);
+          return { clipId: clip.id, laneIndex: idx };
+        }).filter(item => item.laneIndex !== -1);
+
+        if (clipLaneIndices.length === 0) return;
+
+        // Calculate constrained delta to prevent any clip from going out of bounds
+        const minCurrentIndex = Math.min(...clipLaneIndices.map(item => item.laneIndex));
+        const maxCurrentIndex = Math.max(...clipLaneIndices.map(item => item.laneIndex));
+
+        const constrainedDelta = Math.max(
+          -minCurrentIndex, // Don't go below lane 0
+          Math.min(
+            laneDelta,
+            lanes.length - 1 - maxCurrentIndex // Don't go above last lane
+          )
+        );
+
+        // Move each clip by the constrained delta
+        clipLaneIndices.forEach(({ clipId: cId, laneIndex }) => {
+          const newLaneIndex = laneIndex + constrainedDelta;
+          const newLaneId = lanes[newLaneIndex]?.id;
+          if (newLaneId) {
+            dispatch(updateClipLane({ clipId: cId, laneId: newLaneId }));
+          }
+        });
       } else {
-        // Move single clip
-        dispatch(updateClipLane({ clipId, laneId: targetLaneId }));
+        // Single clip move
+        const targetLaneIndex = Math.max(
+          0,
+          Math.min(lanes.length - 1, startingLaneIndex + laneDelta)
+        );
+        const targetLaneId = lanes[targetLaneIndex]?.id;
+        if (targetLaneId) {
+          dispatch(updateClipLane({ clipId, laneId: targetLaneId }));
+        }
       }
     },
     [dispatch, lanes, selectedClipIds]
@@ -311,25 +394,25 @@ const Timeline = () => {
       const minY = Math.min(selectionRect.startY, selectionRect.currentY);
       const maxY = Math.max(selectionRect.startY, selectionRect.currentY);
 
-      // Convert X coordinates to beat positions
-      const minBeats = viewport.offsetBeats + minX / viewport.zoom;
-      const maxBeats = viewport.offsetBeats + maxX / viewport.zoom;
-
       // Find all clips within the selection rectangle
+      // Do comparison in pixel space to avoid precision loss at low zoom levels
+      const LANE_HEADER_WIDTH = 150; // Match CSS .lane__header width
       const selectedIds: ID[] = [];
       clips.forEach((clip) => {
-        const clipStart = clip.position;
-        const clipEnd = clip.position + clip.duration;
+        // Convert clip beat positions to viewport pixels, then add lane header offset
+        // Clips are positioned inside lane__content, which starts after the 150px lane header
+        const clipStartPx = LANE_HEADER_WIDTH + (clip.position - viewport.offsetBeats) * viewport.zoom;
+        const clipEndPx = LANE_HEADER_WIDTH + (clip.position + clip.duration - viewport.offsetBeats) * viewport.zoom;
 
-        // Check if clip overlaps with selection horizontally
-        const horizontalOverlap = clipStart < maxBeats && clipEnd > minBeats;
+        // Check if clip overlaps with selection horizontally (in pixel space)
+        const horizontalOverlap = clipStartPx < maxX && clipEndPx > minX;
 
         if (horizontalOverlap) {
           // Find the lane's Y position to check vertical overlap
           const laneIndex = lanes.findIndex((lane) => lane.id === clip.laneId);
           if (laneIndex !== -1) {
-            const LANE_HEIGHT = 80; // Match CSS
-            const RULER_HEIGHT = 40; // Approximate ruler height
+            const LANE_HEIGHT = 80; // Match CSS .lane height
+            const RULER_HEIGHT = 50; // Match CSS .ruler height
             const laneY = RULER_HEIGHT + laneIndex * LANE_HEIGHT;
             const laneBottom = laneY + LANE_HEIGHT;
 
@@ -429,6 +512,7 @@ const Timeline = () => {
                 viewport={viewport}
                 snapValue={effectiveSnapValue}
                 selectedClipIds={selectedClipIds}
+                verticalDragState={verticalDragState}
                 isEditing={editingLaneId === lane.id}
                 onNameChange={handleNameChange}
                 onStartEditing={handleStartEditing}
@@ -441,6 +525,7 @@ const Timeline = () => {
                 onClipCopy={handleClipCopy}
                 onClipDelete={handleClipDelete}
                 onClipVerticalDrag={handleClipVerticalDrag}
+                onClipVerticalDragUpdate={handleClipVerticalDragUpdate}
                 onDoubleClick={handleLaneDoubleClick}
               />
             ))}

@@ -3,7 +3,7 @@
  * Tests for the Clip component
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Clip from './Clip';
 import type { ViewportState } from '@/types';
@@ -27,6 +27,7 @@ describe('Clip', () => {
     onSelect: jest.fn(),
     onMove: jest.fn(),
     onResize: jest.fn(),
+    onVerticalDrag: jest.fn(),
   };
 
   beforeEach(() => {
@@ -109,5 +110,127 @@ describe('Clip', () => {
     const viewport200: ViewportState = { ...defaultViewport, zoom: 200 };
     rerender(<Clip {...defaultProps} viewport={viewport200} />);
     expect(clip).toHaveStyle({ width: '800px' }); // 4 beats * 200 zoom
+  });
+
+  describe('Vertical dragging', () => {
+    it('should call onVerticalDrag on mouseup after vertical drag', async () => {
+      const onVerticalDrag = jest.fn();
+      render(<Clip {...defaultProps} onVerticalDrag={onVerticalDrag} />);
+
+      const clipContent = screen.getByTestId('clip-clip-1').querySelector('.clip__content') as HTMLElement;
+      const clip = screen.getByTestId('clip-clip-1');
+
+      // Start drag
+      await act(async () => {
+        const mouseDownEvent = new MouseEvent('mousedown', {
+          bubbles: true,
+          clientX: 100,
+          clientY: 100,
+          button: 0,
+        });
+        clipContent.dispatchEvent(mouseDownEvent);
+      });
+
+      // Move vertically by 100px (should cross lane boundary at 80px)
+      await act(async () => {
+        const mouseMoveEvent = new MouseEvent('mousemove', {
+          bubbles: true,
+          clientX: 100,
+          clientY: 200, // deltaY = 100
+        });
+        document.dispatchEvent(mouseMoveEvent);
+      });
+
+      // Verify clip has transform applied during drag
+      expect(clip).toHaveStyle({ transform: 'translateY(100px)' });
+
+      // End drag
+      await act(async () => {
+        const mouseUpEvent = new MouseEvent('mouseup', {
+          bubbles: true,
+        });
+        document.dispatchEvent(mouseUpEvent);
+      });
+
+      // Verify onVerticalDrag was called with correct parameters
+      expect(onVerticalDrag).toHaveBeenCalledWith('clip-1', 'lane-1', 100);
+    });
+
+    it('should not call onVerticalDrag if deltaY is less than 5px', async () => {
+      const onVerticalDrag = jest.fn();
+      render(<Clip {...defaultProps} onVerticalDrag={onVerticalDrag} />);
+
+      const clipContent = screen.getByTestId('clip-clip-1').querySelector('.clip__content') as HTMLElement;
+
+      // Start drag
+      await act(async () => {
+        const mouseDownEvent = new MouseEvent('mousedown', {
+          bubbles: true,
+          clientX: 100,
+          clientY: 100,
+          button: 0,
+        });
+        clipContent.dispatchEvent(mouseDownEvent);
+      });
+
+      // Move vertically by only 3px (below threshold)
+      await act(async () => {
+        const mouseMoveEvent = new MouseEvent('mousemove', {
+          bubbles: true,
+          clientX: 100,
+          clientY: 103, // deltaY = 3
+        });
+        document.dispatchEvent(mouseMoveEvent);
+      });
+
+      // End drag
+      await act(async () => {
+        const mouseUpEvent = new MouseEvent('mouseup', {
+          bubbles: true,
+        });
+        document.dispatchEvent(mouseUpEvent);
+      });
+
+      // Verify onVerticalDrag was NOT called
+      expect(onVerticalDrag).not.toHaveBeenCalled();
+    });
+
+    it('should reset transform after mouseup', async () => {
+      const onVerticalDrag = jest.fn();
+      render(<Clip {...defaultProps} onVerticalDrag={onVerticalDrag} />);
+
+      const clipContent = screen.getByTestId('clip-clip-1').querySelector('.clip__content') as HTMLElement;
+      const clip = screen.getByTestId('clip-clip-1');
+
+      // Start drag
+      await act(async () => {
+        clipContent.dispatchEvent(new MouseEvent('mousedown', {
+          bubbles: true,
+          clientX: 100,
+          clientY: 100,
+          button: 0,
+        }));
+      });
+
+      // Move vertically
+      await act(async () => {
+        document.dispatchEvent(new MouseEvent('mousemove', {
+          bubbles: true,
+          clientX: 100,
+          clientY: 200,
+        }));
+      });
+
+      // Verify transform is applied
+      expect(clip).toHaveStyle({ transform: 'translateY(100px)' });
+
+      // End drag
+      await act(async () => {
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      });
+
+      // Verify transform is removed
+      expect(clip).not.toHaveStyle({ transform: 'translateY(100px)' });
+    });
   });
 });

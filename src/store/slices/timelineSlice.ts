@@ -16,7 +16,7 @@ const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 const initialState: TimelineState = {
   viewport: {
     offsetBeats: 0, // Start at beginning
-    zoom: 100, // 100 pixels per beat (default)
+    zoom: 5, // 5 pixels per beat (shows ~64-80 bars on typical screen)
     widthPx: 1600, // Default width, will be updated by component
     heightPx: 600, // Default height, will be updated by component
   },
@@ -24,7 +24,7 @@ const initialState: TimelineState = {
   isPlaying: false,
   tempo: 120, // Default BPM
   snapValue: 1, // Default to quarter note (1 beat)
-  snapMode: 'fixed', // Default to fixed snap mode
+  snapMode: 'grid', // Default to grid snap mode
 };
 
 /**

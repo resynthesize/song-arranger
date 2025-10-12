@@ -17,18 +17,20 @@ interface LaneProps {
   viewport: ViewportState;
   snapValue: number;
   selectedClipIds: ID[];
+  verticalDragState: { deltaY: number; draggedClipId: ID } | null;
   isEditing: boolean;
   onNameChange: (laneId: ID, newName: string) => void;
   onStartEditing: (laneId: ID) => void;
   onStopEditing: () => void;
   onRemove: (laneId: ID) => void;
   onClipSelect: (clipId: ID, isMultiSelect: boolean) => void;
-  onClipMove: (clipId: ID, newPosition: Position) => void;
-  onClipResize: (clipId: ID, newDuration: Duration, edge: 'left' | 'right') => void;
+  onClipMove: (clipId: ID, newPosition: Position, delta: number) => void;
+  onClipResize: (clipId: ID, newDuration: Duration, edge: 'left' | 'right', startDuration: Duration, startPosition: Position) => void;
   onClipLabelChange?: (clipId: ID, label: string) => void;
   onClipCopy?: (clipId: ID) => void;
   onClipDelete?: (clipId: ID) => void;
   onClipVerticalDrag?: (clipId: ID, startingLaneId: ID, deltaY: number) => void;
+  onClipVerticalDragUpdate?: (clipId: ID, deltaY: number) => void;
   onDoubleClick: (laneId: ID, position: Position) => void;
 }
 
@@ -39,6 +41,7 @@ const Lane = ({
   viewport,
   snapValue,
   selectedClipIds,
+  verticalDragState,
   isEditing,
   onNameChange,
   onStartEditing,
@@ -51,6 +54,7 @@ const Lane = ({
   onClipCopy,
   onClipDelete,
   onClipVerticalDrag,
+  onClipVerticalDragUpdate,
   onDoubleClick,
 }: LaneProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -291,27 +295,37 @@ const Lane = ({
           className="lane__grid"
           data-testid={`lane-${id}-grid`}
         />
-        {visibleClips.map((clip) => (
-          <Clip
-            key={clip.id}
-            id={clip.id}
-            laneId={clip.laneId}
-            position={clip.position}
-            duration={clip.duration}
-            viewport={viewport}
-            snapValue={snapValue}
-            isSelected={selectedClipIds.includes(clip.id)}
-            label={clip.label}
-            laneName={name}
-            onSelect={onClipSelect}
-            onMove={onClipMove}
-            onResize={onClipResize}
-            onLabelChange={onClipLabelChange}
-            onCopy={onClipCopy}
-            onDelete={onClipDelete}
-            onVerticalDrag={onClipVerticalDrag}
-          />
-        ))}
+        {visibleClips.map((clip) => {
+          // Calculate deltaY for this clip if it's selected during vertical drag
+          let externalVerticalDragDeltaY: number | undefined;
+          if (verticalDragState && selectedClipIds.includes(clip.id)) {
+            externalVerticalDragDeltaY = verticalDragState.deltaY;
+          }
+
+          return (
+            <Clip
+              key={clip.id}
+              id={clip.id}
+              laneId={clip.laneId}
+              position={clip.position}
+              duration={clip.duration}
+              viewport={viewport}
+              snapValue={snapValue}
+              isSelected={selectedClipIds.includes(clip.id)}
+              externalVerticalDragDeltaY={externalVerticalDragDeltaY}
+              label={clip.label}
+              laneName={name}
+              onSelect={onClipSelect}
+              onMove={onClipMove}
+              onResize={onClipResize}
+              onLabelChange={onClipLabelChange}
+              onCopy={onClipCopy}
+              onDelete={onClipDelete}
+              onVerticalDrag={onClipVerticalDrag}
+              onVerticalDragUpdate={onClipVerticalDragUpdate}
+            />
+          );
+        })}
       </div>
       {contextMenu && (
         <ContextMenu

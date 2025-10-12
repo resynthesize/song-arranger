@@ -25,7 +25,7 @@ describe('timelineSlice', () => {
   const initialState: TimelineState = {
     viewport: {
       offsetBeats: 0,
-      zoom: 100,
+      zoom: 5,
       widthPx: 1600,
       heightPx: 600,
     },
@@ -33,7 +33,7 @@ describe('timelineSlice', () => {
     isPlaying: false,
     tempo: 120,
     snapValue: 1,
-    snapMode: 'fixed',
+    snapMode: 'grid',
   };
 
   it('should return the initial state', () => {

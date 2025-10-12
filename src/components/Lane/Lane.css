@@ -97,7 +97,7 @@
   background: var(--color-bg);
   min-width: 0;
   cursor: crosshair;
-  overflow: hidden; /* Clip content to prevent clips from overlapping lane header */
+  overflow: visible; /* Allow clips to be visible outside lane during vertical drag */
 }
 
 /* Grid canvas for dynamic grid lines */
