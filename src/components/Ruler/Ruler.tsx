@@ -10,16 +10,29 @@ interface RulerProps {
   zoom: number; // Pixels per beat
   snapValue: number; // Snap interval in beats (currently unused but kept for future features)
   containerWidth: number; // Width of the timeline container
+  scrollLeft: number; // Horizontal scroll position in pixels
   onPositionClick?: (position: number) => void; // Optional click handler
 }
 
 const BEATS_PER_BAR = 4; // 4/4 time signature
 
-const Ruler = ({ zoom, containerWidth, onPositionClick }: RulerProps) => {
+const Ruler = ({ zoom, containerWidth, scrollLeft, onPositionClick }: RulerProps) => {
   // Calculate visible bars, beats, and adaptive marker intervals
   const { bars, beats, subBeats } = useMemo(() => {
+    // Handle zero width gracefully
+    if (containerWidth === 0) {
+      return { bars: [], beats: [], subBeats: [] };
+    }
+
+    // Calculate visible range in beats
+    const startBeat = scrollLeft / zoom;
     const beatsVisible = containerWidth / zoom;
-    const barsVisible = Math.ceil(beatsVisible / BEATS_PER_BAR);
+    const endBeat = startBeat + beatsVisible;
+
+    // Calculate visible bars
+    const startBar = Math.floor(startBeat / BEATS_PER_BAR);
+    const endBar = Math.ceil(endBeat / BEATS_PER_BAR);
+    const barsVisible = endBar - startBar;
 
     // Determine bar number interval based on visible bars
     // Show fewer bar numbers when zoomed out, more when zoomed in
@@ -43,11 +56,11 @@ const Ruler = ({ zoom, containerWidth, onPositionClick }: RulerProps) => {
     const beatsArray: Array<{ barNumber: number; beat: number; position: number }> = [];
     const subBeatsArray: Array<{ position: number }> = [];
 
-    // Generate bar numbers and beat markers
-    for (let bar = 0; bar < barsVisible; bar++) {
+    // Generate bar numbers and beat markers for visible range
+    for (let bar = startBar; bar <= endBar; bar++) {
       const barNumber = bar + 1; // Bars start at 1
       const barBeat = bar * BEATS_PER_BAR;
-      const x = barBeat * zoom;
+      const x = barBeat * zoom - scrollLeft; // Position relative to visible area
 
       // Add bar marker if it matches the interval
       if ((bar % barInterval) === 0) {
@@ -58,7 +71,7 @@ const Ruler = ({ zoom, containerWidth, onPositionClick }: RulerProps) => {
       if (showBeats) {
         for (let beat = 1; beat < BEATS_PER_BAR; beat++) {
           const beatPosition = barBeat + beat;
-          const beatX = beatPosition * zoom;
+          const beatX = beatPosition * zoom - scrollLeft;
           beatsArray.push({ barNumber, beat: beat + 1, position: beatX });
         }
       }
@@ -70,19 +83,20 @@ const Ruler = ({ zoom, containerWidth, onPositionClick }: RulerProps) => {
           if (sixteenth % 4 === 0) continue;
 
           const subBeatPosition = barBeat + (sixteenth * 0.25);
-          const subBeatX = subBeatPosition * zoom;
+          const subBeatX = subBeatPosition * zoom - scrollLeft;
           subBeatsArray.push({ position: subBeatX });
         }
       }
     }
 
     return { bars: barsArray, beats: beatsArray, subBeats: subBeatsArray };
-  }, [zoom, containerWidth]);
+  }, [zoom, containerWidth, scrollLeft]);
 
   const handleClick = (position: number) => {
     if (onPositionClick) {
-      // Convert pixel position to beat position
-      const beatPosition = position / zoom;
+      // Convert pixel position (relative to visible area) to absolute beat position
+      const absolutePixelPosition = position + scrollLeft;
+      const beatPosition = absolutePixelPosition / zoom;
       onPositionClick(beatPosition);
     }
   };

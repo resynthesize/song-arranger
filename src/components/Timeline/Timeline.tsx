@@ -38,6 +38,7 @@ const Timeline = () => {
   const dispatch = useAppDispatch();
   const timelineRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   // Select data from Redux
   const zoom = useAppSelector((state) => state.timeline.zoom);
@@ -210,22 +211,32 @@ const Timeline = () => {
     [dispatch, snapValue]
   );
 
-  // Track container width for ruler
+  // Track container width and scroll position for ruler
   useEffect(() => {
-    const updateWidth = () => {
-      if (timelineRef.current) {
-        const rect = timelineRef.current.getBoundingClientRect();
-        setContainerWidth(rect.width);
-      }
+    const timeline = timelineRef.current;
+    if (!timeline) return;
+
+    const updateDimensions = () => {
+      const rect = timeline.getBoundingClientRect();
+      setContainerWidth(rect.width);
+      setScrollLeft(timeline.scrollLeft);
     };
 
-    // Initial width
-    updateWidth();
+    // Initial dimensions
+    updateDimensions();
 
     // Update on resize
-    window.addEventListener('resize', updateWidth);
+    window.addEventListener('resize', updateDimensions);
+
+    // Update on scroll
+    const handleScroll = () => {
+      setScrollLeft(timeline.scrollLeft);
+    };
+    timeline.addEventListener('scroll', handleScroll);
+
     return () => {
-      window.removeEventListener('resize', updateWidth);
+      window.removeEventListener('resize', updateDimensions);
+      timeline.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -318,6 +329,7 @@ const Timeline = () => {
             zoom={zoom}
             snapValue={snapValue}
             containerWidth={containerWidth}
+            scrollLeft={scrollLeft}
             onPositionClick={handleRulerClick}
           />
           <div className="timeline__lanes">

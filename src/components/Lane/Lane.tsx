@@ -62,7 +62,7 @@ const Lane = ({
     }
   }, [isEditing]);
 
-  // Draw grid lines on canvas
+  // Draw adaptive grid lines on canvas
   useEffect(() => {
     const canvas = gridCanvasRef.current;
     const container = contentRef.current;
@@ -79,36 +79,75 @@ const Lane = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw grid lines
+    // Calculate how many bars are visible (determines grid line density)
     const barWidth = 4 * zoom; // 4 beats = 1 bar
-    const snapWidth = snapValue * zoom;
+    const barsVisible = Math.ceil(canvas.width / barWidth);
 
-    // Calculate how many bars to show (with some extra)
+    // Determine bar line interval (same logic as ruler)
+    let barInterval = 1;
+    if (barsVisible > 128) {
+      barInterval = 16; // Very zoomed out: every 16 bars
+    } else if (barsVisible > 64) {
+      barInterval = 8; // Every 8 bars
+    } else if (barsVisible > 32) {
+      barInterval = 4; // Every 4 bars
+    } else if (barsVisible > 16) {
+      barInterval = 2; // Every 2 bars
+    }
+
+    // Determine whether to show beat lines and sub-beat lines
+    const showBeats = barsVisible < 32;
+    const showSubBeats = zoom >= 200;
+
     const numBars = Math.ceil(canvas.width / barWidth) + 1;
 
-    // Draw bar lines (every 4 beats) - brighter and thicker
+    // Draw bar lines - brighter and thicker
     ctx.strokeStyle = '#00ff00';
     ctx.globalAlpha = 0.35;
     ctx.lineWidth = 2;
     for (let i = 0; i <= numBars; i++) {
-      const x = i * barWidth;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, canvas.height);
-      ctx.stroke();
+      // Only draw if it matches the interval
+      if (i % barInterval === 0) {
+        const x = i * barWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
     }
 
-    // Draw snap lines (based on snap value) - dimmer and thinner
-    if (snapValue > 0 && snapValue < 4) {
+    // Draw beat lines (quarters) - dimmer and thinner
+    if (showBeats) {
       ctx.strokeStyle = '#003300';
       ctx.globalAlpha = 0.2;
       ctx.lineWidth = 1;
 
-      const numSnaps = Math.ceil(canvas.width / snapWidth) + 1;
-      for (let i = 0; i <= numSnaps; i++) {
-        const x = i * snapWidth;
+      const beatWidth = zoom; // 1 beat
+      const numBeats = Math.ceil(canvas.width / beatWidth) + 1;
+      for (let i = 0; i <= numBeats; i++) {
+        const x = i * beatWidth;
         // Skip if this is a bar line (already drawn)
-        if (Math.abs((x % barWidth)) < 0.1) continue;
+        if (i % 4 === 0 && (Math.floor(i / 4) % barInterval === 0)) continue;
+
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+    }
+
+    // Draw sub-beat lines (1/16th notes) - very dim
+    if (showSubBeats) {
+      ctx.strokeStyle = '#002200';
+      ctx.globalAlpha = 0.1;
+      ctx.lineWidth = 1;
+
+      const sixteenthWidth = zoom * 0.25; // 1/16th note
+      const numSixteenths = Math.ceil(canvas.width / sixteenthWidth) + 1;
+      for (let i = 0; i <= numSixteenths; i++) {
+        const x = i * sixteenthWidth;
+        // Skip if this is a beat line (already drawn)
+        if (i % 4 === 0) continue;
 
         ctx.beginPath();
         ctx.moveTo(x, 0);

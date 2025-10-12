@@ -11,6 +11,7 @@ describe('Ruler', () => {
     zoom: 100, // 100 pixels per beat
     snapValue: 1,
     containerWidth: 1600, // Width of timeline container
+    scrollLeft: 0, // Not scrolled
   };
 
   describe('Rendering', () => {
