@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { findMatchingShortcut, type KeyboardContext } from '@/utils/keyboard';
+import { findMatchingShortcut, getShortcutsForContext, type KeyboardContext } from '@/utils/keyboard';
 import {
   removeClips,
   duplicateClips,
@@ -66,6 +66,18 @@ export const useKeyboardShortcuts = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Debug logging for bracket keys with modifiers
+      if ((event.key === '[' || event.key === ']' || event.key === '{' || event.key === '}') && (event.ctrlKey || event.shiftKey)) {
+        console.log('Bracket key detected:', {
+          key: event.key,
+          code: event.code,
+          ctrlKey: event.ctrlKey,
+          shiftKey: event.shiftKey,
+          altKey: event.altKey,
+          metaKey: event.metaKey
+        });
+      }
+
       // Build current context
       const context: KeyboardContext = {
         hasSelection: selectedClipIds.length > 0,
@@ -77,7 +89,19 @@ export const useKeyboardShortcuts = () => {
       const shortcut = findMatchingShortcut(event, context);
 
       if (!shortcut) {
+        // Debug log when no shortcut matches for bracket keys
+        if ((event.key === '[' || event.key === ']' || event.key === '{' || event.key === '}') && (event.ctrlKey || event.shiftKey)) {
+          console.log('No matching shortcut found for:', event.key, 'Context:', context);
+          console.log('Available shortcuts:', getShortcutsForContext(context).filter(s =>
+            s.action === 'verticalZoomIn' || s.action === 'verticalZoomOut'
+          ));
+        }
         return;
+      }
+
+      // Debug log when shortcut is found
+      if (shortcut.action === 'verticalZoomIn' || shortcut.action === 'verticalZoomOut') {
+        console.log('Vertical zoom shortcut matched:', shortcut);
       }
 
       // Prevent default browser behavior

@@ -327,12 +327,14 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
   {
     key: '{',
     ctrlKey: true,
+    shiftKey: true,
     action: 'verticalZoomOut',
     description: 'Decrease lane height (Ctrl+Shift+[)'
   },
   {
     key: '}',
     ctrlKey: true,
+    shiftKey: true,
     action: 'verticalZoomIn',
     description: 'Increase lane height (Ctrl+Shift+])'
   },
