@@ -12,6 +12,9 @@ import reducer, {
   resizeClip,
   resizeClips,
   updateClip,
+  duplicateClip,
+  duplicateClips,
+  updateClipLane,
 } from './clipsSlice';
 import type { ClipsState, Clip } from '@/types';
 
@@ -224,6 +227,94 @@ describe('clipsSlice', () => {
       const newState = reducer(
         stateWithClips,
         updateClip({ clipId: 'non-existent', updates: { label: 'Test' } })
+      );
+      expect(newState.clips).toEqual(stateWithClips.clips);
+    });
+  });
+
+  describe('duplicateClip', () => {
+    it('should create a copy of a clip with new ID', () => {
+      const newState = reducer(stateWithClips, duplicateClip('clip-1'));
+      expect(newState.clips).toHaveLength(4);
+      const duplicatedClip = newState.clips[3];
+      expect(duplicatedClip).toBeDefined();
+      expect(duplicatedClip?.id).not.toBe('clip-1');
+      expect(duplicatedClip?.laneId).toBe('lane-1');
+      expect(duplicatedClip?.position).toBe(0);
+      expect(duplicatedClip?.duration).toBe(4);
+      expect(duplicatedClip?.label).toBe('Intro');
+    });
+
+    it('should do nothing if clip not found', () => {
+      const newState = reducer(stateWithClips, duplicateClip('non-existent'));
+      expect(newState.clips).toHaveLength(3);
+    });
+  });
+
+  describe('duplicateClips', () => {
+    it('should create copies of multiple clips', () => {
+      const newState = reducer(
+        stateWithClips,
+        duplicateClips(['clip-1', 'clip-2'])
+      );
+      expect(newState.clips).toHaveLength(5);
+
+      // Check first duplicate
+      const duplicate1 = newState.clips[3];
+      expect(duplicate1?.id).not.toBe('clip-1');
+      expect(duplicate1?.laneId).toBe('lane-1');
+      expect(duplicate1?.position).toBe(0);
+      expect(duplicate1?.duration).toBe(4);
+
+      // Check second duplicate
+      const duplicate2 = newState.clips[4];
+      expect(duplicate2?.id).not.toBe('clip-2');
+      expect(duplicate2?.laneId).toBe('lane-1');
+      expect(duplicate2?.position).toBe(8);
+      expect(duplicate2?.duration).toBe(4);
+    });
+
+    it('should handle empty array', () => {
+      const newState = reducer(stateWithClips, duplicateClips([]));
+      expect(newState.clips).toHaveLength(3);
+    });
+
+    it('should skip non-existent clips', () => {
+      const newState = reducer(
+        stateWithClips,
+        duplicateClips(['clip-1', 'non-existent', 'clip-2'])
+      );
+      expect(newState.clips).toHaveLength(5); // Only 2 new clips created
+    });
+  });
+
+  describe('updateClipLane', () => {
+    it('should move clip to different lane', () => {
+      const newState = reducer(
+        stateWithClips,
+        updateClipLane({ clipId: 'clip-1', laneId: 'lane-2' })
+      );
+      const movedClip = newState.clips.find((c) => c.id === 'clip-1');
+      expect(movedClip?.laneId).toBe('lane-2');
+      expect(movedClip?.position).toBe(0); // Position unchanged
+      expect(movedClip?.duration).toBe(4); // Duration unchanged
+    });
+
+    it('should move multiple clips to same lane', () => {
+      const newState = reducer(
+        stateWithClips,
+        updateClipLane({ clipId: ['clip-1', 'clip-2'], laneId: 'lane-3' })
+      );
+      const movedClip1 = newState.clips.find((c) => c.id === 'clip-1');
+      const movedClip2 = newState.clips.find((c) => c.id === 'clip-2');
+      expect(movedClip1?.laneId).toBe('lane-3');
+      expect(movedClip2?.laneId).toBe('lane-3');
+    });
+
+    it('should do nothing if clip not found', () => {
+      const newState = reducer(
+        stateWithClips,
+        updateClipLane({ clipId: 'non-existent', laneId: 'lane-2' })
       );
       expect(newState.clips).toEqual(stateWithClips.clips);
     });

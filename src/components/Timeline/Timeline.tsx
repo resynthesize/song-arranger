@@ -3,7 +3,7 @@
  * Main timeline container with lanes and clips
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import Lane from '../Lane';
 import {
@@ -24,12 +24,14 @@ import {
   setEditingLane,
   clearEditingLane,
 } from '@/store/slices/lanesSlice';
+import { zoomIn, zoomOut } from '@/store/slices/timelineSlice';
 import { snapToGrid } from '@/utils/snap';
 import type { ID, Position, Duration } from '@/types';
 import './Timeline.css';
 
 const Timeline = () => {
   const dispatch = useAppDispatch();
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   // Select data from Redux
   const zoom = useAppSelector((state) => state.timeline.zoom);
@@ -154,6 +156,17 @@ const Timeline = () => {
       if (e.key === 'Escape') {
         dispatch(clearSelection());
       }
+
+      // Zoom shortcuts
+      if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        dispatch(zoomIn());
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
+        e.preventDefault();
+        dispatch(zoomOut());
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -162,8 +175,49 @@ const Timeline = () => {
     };
   }, [dispatch, selectedClipIds]);
 
+  // Handle mousewheel zoom with focal point
+  useEffect(() => {
+    const timeline = timelineRef.current;
+    if (!timeline) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only zoom if Ctrl/Cmd key is held (standard zoom gesture)
+      if (!e.ctrlKey && !e.metaKey) return;
+
+      e.preventDefault();
+
+      // Store scroll position before zoom
+      const scrollLeft = timeline.scrollLeft;
+      const mouseX = e.clientX - timeline.getBoundingClientRect().left;
+
+      // Calculate position in beats (focal point)
+      const beatPositionAtMouse = (scrollLeft + mouseX) / zoom;
+
+      // Zoom in or out based on wheel delta
+      if (e.deltaY < 0) {
+        dispatch(zoomIn());
+      } else if (e.deltaY > 0) {
+        dispatch(zoomOut());
+      }
+
+      // Note: Focal point scrolling adjustment happens in next render
+      // We'll use requestAnimationFrame to adjust scroll after zoom state updates
+      requestAnimationFrame(() => {
+        const newZoom = zoom; // This will be updated by Redux in next render
+        // Calculate new scroll position to keep focal point under mouse
+        const newScrollLeft = beatPositionAtMouse * newZoom - mouseX;
+        timeline.scrollLeft = Math.max(0, newScrollLeft);
+      });
+    };
+
+    timeline.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      timeline.removeEventListener('wheel', handleWheel);
+    };
+  }, [dispatch, zoom]);
+
   return (
-    <div className="timeline" data-testid="timeline">
+    <div className="timeline" data-testid="timeline" ref={timelineRef}>
       {lanes.length === 0 ? (
         <div className="timeline__empty">
           <p>No lanes yet. Click &quot;Add Lane&quot; to get started.</p>

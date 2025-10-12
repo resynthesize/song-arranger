@@ -33,6 +33,20 @@
   cursor: grabbing;
 }
 
+.clip--copying {
+  box-shadow: var(--phosphor-glow-lg);
+  animation: clip-copying-pulse 400ms ease-in-out infinite;
+}
+
+@keyframes clip-copying-pulse {
+  0%, 100% {
+    border-color: var(--color-highlight);
+  }
+  50% {
+    border-color: var(--color-primary);
+  }
+}
+
 /* Clip Content */
 .clip__content {
   flex: 1;
@@ -90,6 +104,29 @@
 
 .clip--selected .clip__label {
   color: var(--color-highlight);
+}
+
+/* Clip Label Input */
+.clip__label-input {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - var(--spacing-md));
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-primary);
+  padding: var(--spacing-xs);
+  text-align: center;
+  z-index: 10;
+}
+
+.clip__label-input:focus {
+  outline: none;
+  border-color: var(--color-highlight);
+  box-shadow: var(--phosphor-glow-sm);
 }
 
 /* Resize Handles */

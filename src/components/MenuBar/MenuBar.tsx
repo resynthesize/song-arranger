@@ -5,7 +5,7 @@
 
 import { useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { setTempo, setSnapValue } from '@/store/slices/timelineSlice';
+import { setTempo, setSnapValue, zoomIn, zoomOut } from '@/store/slices/timelineSlice';
 import { addLane } from '@/store/slices/lanesSlice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
 import { TerminalButton } from '../TerminalButton';
@@ -26,6 +26,7 @@ const MenuBar = () => {
   const dispatch = useAppDispatch();
   const tempo = useAppSelector((state) => state.timeline.tempo);
   const snapValue = useAppSelector((state) => state.timeline.snapValue);
+  const zoom = useAppSelector((state) => state.timeline.zoom);
   const laneCount = useAppSelector((state) => state.lanes.lanes.length);
   const selectedCount = useAppSelector(
     (state) => state.selection.selectedClipIds.length
@@ -61,6 +62,14 @@ const MenuBar = () => {
     },
     [dispatch]
   );
+
+  const handleZoomIn = useCallback(() => {
+    dispatch(zoomIn());
+  }, [dispatch]);
+
+  const handleZoomOut = useCallback(() => {
+    dispatch(zoomOut());
+  }, [dispatch]);
 
   // Get current snap label for display
   const currentSnapLabel =
@@ -102,6 +111,27 @@ const MenuBar = () => {
             trigger={<span>{currentSnapLabel}</span>}
             onSelect={handleSnapChange}
           />
+        </div>
+
+        <div className="menu-bar__control">
+          <label className="menu-bar__label">ZOOM</label>
+          <TerminalButton
+            onClick={handleZoomOut}
+            size="sm"
+            variant="secondary"
+            title="Zoom out (Ctrl+-)"
+          >
+            -
+          </TerminalButton>
+          <span className="menu-bar__zoom-display">{zoom}px/beat</span>
+          <TerminalButton
+            onClick={handleZoomIn}
+            size="sm"
+            variant="secondary"
+            title="Zoom in (Ctrl+=)"
+          >
+            +
+          </TerminalButton>
         </div>
 
         <TerminalButton onClick={handleAddLane}>

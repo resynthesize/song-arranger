@@ -105,6 +105,47 @@ const clipsSlice = createSlice({
         Object.assign(clip, updates);
       }
     },
+
+    duplicateClip: (state, action: PayloadAction<ID>) => {
+      const clipId = action.payload;
+      const originalClip = state.clips.find((c) => c.id === clipId);
+      if (originalClip) {
+        const newClip: Clip = {
+          ...originalClip,
+          id: `clip-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+        };
+        state.clips.push(newClip);
+      }
+    },
+
+    duplicateClips: (state, action: PayloadAction<ID[]>) => {
+      const clipIds = action.payload;
+      const clipIdsSet = new Set(clipIds);
+      const clipsToDuplicate = state.clips.filter((c) => clipIdsSet.has(c.id));
+
+      clipsToDuplicate.forEach((clip) => {
+        const newClip: Clip = {
+          ...clip,
+          id: `clip-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+        };
+        state.clips.push(newClip);
+      });
+    },
+
+    updateClipLane: (
+      state,
+      action: PayloadAction<{ clipId: ID | ID[]; laneId: ID }>
+    ) => {
+      const { clipId, laneId } = action.payload;
+      const clipIds = Array.isArray(clipId) ? clipId : [clipId];
+      const clipIdsSet = new Set(clipIds);
+
+      state.clips.forEach((clip) => {
+        if (clipIdsSet.has(clip.id)) {
+          clip.laneId = laneId;
+        }
+      });
+    },
   },
 });
 
@@ -117,6 +158,9 @@ export const {
   resizeClip,
   resizeClips,
   updateClip,
+  duplicateClip,
+  duplicateClips,
+  updateClipLane,
 } = clipsSlice.actions;
 
 export default clipsSlice.reducer;
