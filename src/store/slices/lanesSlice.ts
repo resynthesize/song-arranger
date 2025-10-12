@@ -1,0 +1,82 @@
+/**
+ * Song Arranger - Lanes Slice
+ * Redux state management for lanes
+ */
+
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import type { LanesState, ID } from '@/types';
+
+const initialState: LanesState = {
+  lanes: [],
+  editingLaneId: null,
+};
+
+const lanesSlice = createSlice({
+  name: 'lanes',
+  initialState,
+  reducers: {
+    addLane: (state, action: PayloadAction<{ name?: string }>) => {
+      const { name } = action.payload;
+      let laneName = name;
+
+      if (!laneName) {
+        // Generate default name based on existing lanes
+        const defaultLaneCount = state.lanes.filter((l) =>
+          l.name.match(/^Lane \d+$/)
+        ).length;
+        laneName = `Lane ${defaultLaneCount + 1}`;
+      }
+
+      state.lanes.push({
+        id: `lane-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: laneName,
+      });
+    },
+
+    removeLane: (state, action: PayloadAction<ID>) => {
+      const laneId = action.payload;
+      state.lanes = state.lanes.filter((lane) => lane.id !== laneId);
+
+      // Clear editing state if removed lane was being edited
+      if (state.editingLaneId === laneId) {
+        state.editingLaneId = null;
+      }
+    },
+
+    renameLane: (
+      state,
+      action: PayloadAction<{ laneId: ID; name: string }>
+    ) => {
+      const { laneId, name } = action.payload;
+      const trimmedName = name.trim();
+
+      // Don't rename to empty string
+      if (!trimmedName) {
+        return;
+      }
+
+      const lane = state.lanes.find((l) => l.id === laneId);
+      if (lane) {
+        lane.name = trimmedName;
+      }
+    },
+
+    setEditingLane: (state, action: PayloadAction<ID>) => {
+      state.editingLaneId = action.payload;
+    },
+
+    clearEditingLane: (state) => {
+      state.editingLaneId = null;
+    },
+  },
+});
+
+export const {
+  addLane,
+  removeLane,
+  renameLane,
+  setEditingLane,
+  clearEditingLane,
+} = lanesSlice.actions;
+
+export default lanesSlice.reducer;

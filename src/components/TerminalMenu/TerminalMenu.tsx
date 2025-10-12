@@ -100,7 +100,10 @@ export const TerminalMenu: React.FC<TerminalMenuProps> = ({
       case 'Enter':
         event.preventDefault();
         if (highlightedIndex >= 0 && highlightedIndex < selectableItems.length) {
-          handleItemClick(selectableItems[highlightedIndex]);
+          const item = selectableItems[highlightedIndex];
+          if (item) {
+            handleItemClick(item);
+          }
         }
         break;
     }

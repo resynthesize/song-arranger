@@ -5,10 +5,16 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import timelineReducer from './slices/timelineSlice';
+import lanesReducer from './slices/lanesSlice';
+import clipsReducer from './slices/clipsSlice';
+import selectionReducer from './slices/selectionSlice';
 
 export const store = configureStore({
   reducer: {
     timeline: timelineReducer,
+    lanes: lanesReducer,
+    clips: clipsReducer,
+    selection: selectionReducer,
   },
 });
 

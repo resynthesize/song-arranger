@@ -8,18 +8,24 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import App from './App';
 import timelineReducer from './store/slices/timelineSlice';
+import lanesReducer from './store/slices/lanesSlice';
+import clipsReducer from './store/slices/clipsSlice';
+import selectionReducer from './store/slices/selectionSlice';
 
 describe('App', () => {
   const createTestStore = (initialState = {}) => {
     return configureStore({
       reducer: {
         timeline: timelineReducer,
+        lanes: lanesReducer,
+        clips: clipsReducer,
+        selection: selectionReducer,
       },
       preloadedState: initialState,
     });
   };
 
-  it('should render app title', () => {
+  it('should render app with menu bar', () => {
     const store = createTestStore();
 
     render(
@@ -31,61 +37,7 @@ describe('App', () => {
     expect(screen.getByText('SONG ARRANGER')).toBeInTheDocument();
   });
 
-  it('should display current zoom level', () => {
-    const store = createTestStore({
-      timeline: {
-        zoom: 150,
-        playheadPosition: 0,
-        isPlaying: false,
-      },
-    });
-
-    render(
-      <Provider store={store}>
-        <App />
-      </Provider>
-    );
-
-    expect(screen.getByText(/ZOOM: 150px\/beat/i)).toBeInTheDocument();
-  });
-
-  it('should display stopped status when not playing', () => {
-    const store = createTestStore({
-      timeline: {
-        zoom: 100,
-        playheadPosition: 0,
-        isPlaying: false,
-      },
-    });
-
-    render(
-      <Provider store={store}>
-        <App />
-      </Provider>
-    );
-
-    expect(screen.getByText(/STATUS: STOPPED/i)).toBeInTheDocument();
-  });
-
-  it('should display playing status when playing', () => {
-    const store = createTestStore({
-      timeline: {
-        zoom: 100,
-        playheadPosition: 0,
-        isPlaying: true,
-      },
-    });
-
-    render(
-      <Provider store={store}>
-        <App />
-      </Provider>
-    );
-
-    expect(screen.getByText(/STATUS: PLAYING/i)).toBeInTheDocument();
-  });
-
-  it('should display welcome message', () => {
+  it('should render timeline', () => {
     const store = createTestStore();
 
     render(
@@ -94,7 +46,42 @@ describe('App', () => {
       </Provider>
     );
 
-    expect(screen.getByText(/SYSTEM INITIALIZED/i)).toBeInTheDocument();
-    expect(screen.getByText(/READY FOR ARRANGEMENT/i)).toBeInTheDocument();
+    expect(screen.getByTestId('timeline')).toBeInTheDocument();
+  });
+
+  it('should display default tempo', () => {
+    const store = createTestStore();
+
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+
+    expect(screen.getByDisplayValue('120')).toBeInTheDocument(); // Default tempo
+  });
+
+  it('should have Add Lane button', () => {
+    const store = createTestStore();
+
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+
+    expect(screen.getByText('+ ADD LANE')).toBeInTheDocument();
+  });
+
+  it('should show empty state when no lanes', () => {
+    const store = createTestStore();
+
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+
+    expect(screen.getByText(/No lanes yet/i)).toBeInTheDocument();
   });
 });

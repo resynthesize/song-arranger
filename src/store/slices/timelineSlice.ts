@@ -10,6 +10,7 @@ const initialState: TimelineState = {
   zoom: 100, // 100 pixels per beat (default)
   playheadPosition: 0,
   isPlaying: false,
+  tempo: 120, // Default BPM
 };
 
 const timelineSlice = createSlice({
@@ -40,6 +41,10 @@ const timelineSlice = createSlice({
     togglePlayPause: (state) => {
       state.isPlaying = !state.isPlaying;
     },
+
+    setTempo: (state, action: PayloadAction<number>) => {
+      state.tempo = Math.max(20, Math.min(300, action.payload));
+    },
   },
 });
 
@@ -50,6 +55,7 @@ export const {
   pause,
   stop,
   togglePlayPause,
+  setTempo,
 } = timelineSlice.actions;
 
 export default timelineSlice.reducer;

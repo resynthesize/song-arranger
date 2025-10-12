@@ -10,6 +10,7 @@ import reducer, {
   pause,
   stop,
   togglePlayPause,
+  setTempo,
 } from './timelineSlice';
 import type { TimelineState } from '@/types';
 
@@ -18,6 +19,7 @@ describe('timelineSlice', () => {
     zoom: 100,
     playheadPosition: 0,
     isPlaying: false,
+    tempo: 120,
   };
 
   it('should return the initial state', () => {
@@ -82,6 +84,23 @@ describe('timelineSlice', () => {
 
       const newState2 = reducer(newState1, togglePlayPause());
       expect(newState2.isPlaying).toBe(false);
+    });
+  });
+
+  describe('setTempo', () => {
+    it('should set tempo', () => {
+      const newState = reducer(initialState, setTempo(140));
+      expect(newState.tempo).toBe(140);
+    });
+
+    it('should clamp tempo to minimum value', () => {
+      const newState = reducer(initialState, setTempo(10));
+      expect(newState.tempo).toBe(20);
+    });
+
+    it('should clamp tempo to maximum value', () => {
+      const newState = reducer(initialState, setTempo(500));
+      expect(newState.tempo).toBe(300);
     });
   });
 });

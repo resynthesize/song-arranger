@@ -1,0 +1,56 @@
+/**
+ * Song Arranger - Timeline Component Styles
+ * Main timeline container styling
+ */
+
+.timeline {
+  flex: 1;
+  overflow: auto;
+  background: var(--color-bg);
+  position: relative;
+}
+
+.timeline__lanes {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.timeline__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.timeline__empty p {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-md);
+  color: var(--color-secondary);
+}
+
+/* Scrollbar styling for terminal aesthetic */
+.timeline::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.timeline::-webkit-scrollbar-track {
+  background: var(--color-bg);
+  border: var(--border-width-thin) solid var(--color-grid);
+}
+
+.timeline::-webkit-scrollbar-thumb {
+  background: var(--color-secondary);
+  border: var(--border-width-thin) solid var(--color-primary);
+}
+
+.timeline::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+.timeline::-webkit-scrollbar-corner {
+  background: var(--color-bg);
+}

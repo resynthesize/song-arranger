@@ -1,0 +1,141 @@
+/**
+ * Song Arranger - Clip Component Styles
+ * Terminal-styled clip with drag and resize functionality
+ */
+
+.clip {
+  position: absolute;
+  height: 60px;
+  background: var(--color-bg-elevated);
+  border: var(--border-width-base) solid var(--color-secondary);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  display: flex;
+  align-items: stretch;
+}
+
+.clip:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--phosphor-glow-sm);
+}
+
+.clip--selected {
+  border-color: var(--color-highlight);
+  box-shadow: var(--phosphor-glow-md);
+  z-index: var(--z-controls);
+}
+
+.clip--dragging,
+.clip--resizing {
+  opacity: 0.8;
+  cursor: grabbing;
+}
+
+/* Clip Content */
+.clip__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-xs);
+  cursor: grab;
+  position: relative;
+  overflow: hidden;
+}
+
+.clip--dragging .clip__content {
+  cursor: grabbing;
+}
+
+/* ASCII Corner Characters */
+.clip__corners {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  color: var(--color-secondary);
+  line-height: 1;
+}
+
+.clip--selected .clip__corners {
+  color: var(--color-highlight);
+}
+
+.clip__corners--bottom {
+  margin-top: auto;
+}
+
+.clip__corner {
+  display: inline-block;
+  pointer-events: none;
+}
+
+/* Clip Label */
+.clip__label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - var(--spacing-md));
+  pointer-events: none;
+}
+
+.clip--selected .clip__label {
+  color: var(--color-highlight);
+}
+
+/* Resize Handles */
+.clip__handle {
+  width: 8px;
+  cursor: ew-resize;
+  background: transparent;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.clip__handle:hover {
+  background: var(--color-primary);
+  opacity: 0.3;
+}
+
+.clip__handle--left {
+  left: 0;
+}
+
+.clip__handle--right {
+  right: 0;
+}
+
+/* Flash animation for newly created clips */
+@keyframes clip-flash {
+  0%,
+  100% {
+    box-shadow: var(--phosphor-glow-md);
+  }
+  50% {
+    box-shadow: var(--phosphor-glow-lg);
+  }
+}
+
+.clip--new {
+  animation: clip-flash 600ms ease-in-out;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .clip {
+    transition: none;
+  }
+
+  .clip--new {
+    animation: none;
+  }
+}

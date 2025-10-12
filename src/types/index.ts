@@ -45,6 +45,29 @@ export interface TimelineState {
   zoom: number; // Pixels per beat
   playheadPosition: Position; // Current playback position in beats
   isPlaying: boolean;
+  tempo: number; // BPM (beats per minute)
+}
+
+/**
+ * Lane State - Manages lanes in the timeline
+ */
+export interface LanesState {
+  lanes: Lane[];
+  editingLaneId: ID | null; // Lane currently being edited
+}
+
+/**
+ * Clip State - Manages clips in the timeline
+ */
+export interface ClipsState {
+  clips: Clip[];
+}
+
+/**
+ * Selection State - Manages selected clips
+ */
+export interface SelectionState {
+  selectedClipIds: ID[];
 }
 
 /**
@@ -52,5 +75,7 @@ export interface TimelineState {
  */
 export interface RootState {
   timeline: TimelineState;
-  // Additional slices will be added as needed
+  lanes: LanesState;
+  clips: ClipsState;
+  selection: SelectionState;
 }

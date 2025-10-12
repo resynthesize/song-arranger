@@ -1,0 +1,89 @@
+/**
+ * Song Arranger - Lane Component Styles
+ * Terminal-styled horizontal lane for clips
+ */
+
+.lane {
+  display: flex;
+  border-bottom: var(--border-width-thin) solid var(--color-grid);
+  min-height: 80px;
+}
+
+.lane:last-child {
+  border-bottom: none;
+}
+
+/* Lane Header (Name) */
+.lane__header {
+  width: 150px;
+  padding: var(--spacing-md);
+  background: var(--color-bg);
+  border-right: var(--border-width-base) solid var(--color-secondary);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.lane__name {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
+
+.lane__name:hover {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.lane__name-input {
+  width: 100%;
+  background: var(--color-bg-elevated);
+  border: var(--border-width-thin) solid var(--color-primary);
+  color: var(--color-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  padding: var(--spacing-xs);
+  outline: none;
+}
+
+.lane__name-input:focus {
+  border-color: var(--color-highlight);
+  box-shadow: var(--phosphor-glow-sm);
+}
+
+/* Lane Content (Clips Area) */
+.lane__content {
+  flex: 1;
+  position: relative;
+  background: var(--color-bg);
+  min-width: 0;
+  cursor: crosshair;
+}
+
+/* Grid lines (bars) */
+.lane__content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-grid) 0px,
+    var(--color-grid) 1px,
+    transparent 1px,
+    transparent 400px
+  );
+  pointer-events: none;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .lane__name {
+    transition: none;
+  }
+}

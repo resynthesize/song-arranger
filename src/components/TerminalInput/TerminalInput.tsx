@@ -7,7 +7,7 @@ import React, { useId } from 'react';
 import './TerminalInput.css';
 
 export interface TerminalInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   error?: string;
   size?: 'sm' | 'md' | 'lg';
