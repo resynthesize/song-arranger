@@ -138,39 +138,37 @@ const Lane = ({
     const gridIntervalBeats = (barInterval * BEATS_PER_BAR) / 4;
 
     // Draw bar lines and grid lines (same logic as Ruler)
-    for (let bar = startBar; bar <= endBar + barInterval; bar++) {
+    // Start from the first bar that matches the interval and increment by barInterval
+    const firstIntervalBar = Math.floor(startBar / barInterval) * barInterval;
+    for (let bar = firstIntervalBar; bar <= endBar + barInterval; bar += barInterval) {
       const barBeat = bar * BEATS_PER_BAR;
+      const x = beatsToViewportPx(barBeat, viewport); // Position relative to viewport
 
-      // Add bar line if it matches the interval
-      if ((bar % barInterval) === 0) {
-        const x = beatsToViewportPx(barBeat, viewport); // Position relative to viewport
+      // Draw bar line (numbered bars in ruler) - brighter and thicker
+      if (x >= -5 && x <= canvas.width + 5) {
+        ctx.strokeStyle = '#00ff00';
+        ctx.globalAlpha = 0.5;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
 
-        // Draw bar line (numbered bars in ruler) - brighter and thicker
-        if (x >= -5 && x <= canvas.width + 5) {
-          ctx.strokeStyle = '#00ff00';
-          ctx.globalAlpha = 0.5;
-          ctx.lineWidth = 2;
+      // Generate 3 grid lines between this bar and the next numbered bar
+      ctx.strokeStyle = '#004400';
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 4; i++) {
+        const gridBeat = barBeat + (i * gridIntervalBeats);
+        const gridX = beatsToViewportPx(gridBeat, viewport);
+
+        // Only draw if within visible range (with 5px margin for edges)
+        if (gridBeat >= startBeat && gridBeat <= endBeat && gridX >= -5 && gridX <= canvas.width + 5) {
           ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height);
+          ctx.moveTo(gridX, 0);
+          ctx.lineTo(gridX, canvas.height);
           ctx.stroke();
-        }
-
-        // Generate 3 grid lines between this bar and the next numbered bar
-        ctx.strokeStyle = '#004400';
-        ctx.globalAlpha = 0.4;
-        ctx.lineWidth = 1;
-        for (let i = 1; i < 4; i++) {
-          const gridBeat = barBeat + (i * gridIntervalBeats);
-          const gridX = beatsToViewportPx(gridBeat, viewport);
-
-          // Only draw if within visible range (with 5px margin for edges)
-          if (gridBeat >= startBeat && gridBeat <= endBeat && gridX >= -5 && gridX <= canvas.width + 5) {
-            ctx.beginPath();
-            ctx.moveTo(gridX, 0);
-            ctx.lineTo(gridX, canvas.height);
-            ctx.stroke();
-          }
         }
       }
     }

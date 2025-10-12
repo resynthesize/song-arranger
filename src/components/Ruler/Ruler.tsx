@@ -68,15 +68,20 @@ const Ruler = ({ viewport, snapValue, onPositionClick }: RulerProps) => {
       }
     }
 
-    // Generate beat ticks (quarter notes) - always show between bars
-    const startBeatFloor = Math.floor(startBeat);
-    const endBeatCeil = Math.ceil(endBeat);
-    for (let beat = startBeatFloor; beat <= endBeatCeil; beat++) {
-      // Skip if this beat is a bar downbeat
-      if (beat % BEATS_PER_BAR !== 0) {
-        const x = beatsToViewportPx(beat, viewport);
-        if (x >= 0 && x <= viewport.widthPx) {
-          beatTicksArray.push({ position: x, beat });
+    // Generate beat ticks (quarter notes) - only show when zoomed in enough
+    // At low zoom levels, beat ticks would be too dense
+    const showBeatTicks = viewport.zoom >= 5; // Show beats at 5px/beat or higher
+
+    if (showBeatTicks) {
+      const startBeatFloor = Math.floor(startBeat);
+      const endBeatCeil = Math.ceil(endBeat);
+      for (let beat = startBeatFloor; beat <= endBeatCeil; beat++) {
+        // Skip if this beat is a bar downbeat
+        if (beat % BEATS_PER_BAR !== 0) {
+          const x = beatsToViewportPx(beat, viewport);
+          if (x >= 0 && x <= viewport.widthPx) {
+            beatTicksArray.push({ position: x, beat });
+          }
         }
       }
     }

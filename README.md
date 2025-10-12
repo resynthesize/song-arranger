@@ -6,6 +6,10 @@ Web-based timeline tool for sketching song structures with retro VT terminal aes
 
 Song Arranger lets you plan out song arrangements in a visual timeline interface similar to Ableton Live's arrange view, but without audio or MIDI processing. Perfect for planning your tracks while away from the studio.
 
+## Demo
+
+[**Live Demo →**](https://resynthesize.github.io/song-arranger)
+
 ## Features (Planned)
 
 - **Timeline Interface:** Horizontal lanes for different parts (kick, bass, lead, etc.)
