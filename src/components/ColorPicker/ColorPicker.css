@@ -11,6 +11,9 @@
   z-index: 10000;
   max-width: 90vw;
   max-height: 90vh;
+  border: 2px solid var(--color-primary, #00ff00);
+  box-shadow: 0 0 8px var(--color-primary, #00ff00);
+  background: var(--color-bg-elevated, #001a00);
 }
 
 .color-picker__content {

@@ -22,10 +22,11 @@ export const formatDuration = (seconds: number): string => {
   const minutes = Math.floor(totalSeconds / 60);
   const remainingSeconds = totalSeconds % 60;
 
-  // Pad seconds with leading zero if needed
+  // Pad both minutes and seconds with leading zeros
+  const minutesStr = minutes.toString().padStart(2, '0');
   const secondsStr = remainingSeconds.toString().padStart(2, '0');
 
-  return `${minutes}:${secondsStr}`;
+  return `${minutesStr}:${secondsStr}`;
 };
 
 /**

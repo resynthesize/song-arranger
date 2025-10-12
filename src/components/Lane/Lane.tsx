@@ -142,9 +142,9 @@ const Lane = ({
         const x = beatsToViewportPx(barBeat, viewport); // Position relative to viewport
 
         // Draw bar line (numbered bars in ruler) - brighter and thicker
-        if (x >= 0 && x <= canvas.width) {
+        if (x >= -5 && x <= canvas.width + 5) {
           ctx.strokeStyle = '#00ff00';
-          ctx.globalAlpha = 0.35;
+          ctx.globalAlpha = 0.5;
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.moveTo(x, 0);
@@ -153,15 +153,15 @@ const Lane = ({
         }
 
         // Generate 3 grid lines between this bar and the next numbered bar
-        ctx.strokeStyle = '#003300';
-        ctx.globalAlpha = 0.2;
+        ctx.strokeStyle = '#004400';
+        ctx.globalAlpha = 0.4;
         ctx.lineWidth = 1;
         for (let i = 1; i < 4; i++) {
           const gridBeat = barBeat + (i * gridIntervalBeats);
           const gridX = beatsToViewportPx(gridBeat, viewport);
 
-          // Only draw if within visible range
-          if (gridBeat >= startBeat && gridBeat <= endBeat && gridX >= 0 && gridX <= canvas.width) {
+          // Only draw if within visible range (with 5px margin for edges)
+          if (gridBeat >= startBeat && gridBeat <= endBeat && gridX >= -5 && gridX <= canvas.width + 5) {
             ctx.beginPath();
             ctx.moveTo(gridX, 0);
             ctx.lineTo(gridX, canvas.height);

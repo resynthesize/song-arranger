@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import { useAppSelector } from '@/store/hooks';
-import { beatsToSeconds, formatDuration, calculateGlobalDuration, calculateSelectedDuration } from '@/utils/duration';
+import { formatDuration, calculateGlobalDuration, calculateSelectedDuration } from '@/utils/duration';
 import './DurationDisplay.css';
 
 export const DurationDisplay = () => {
@@ -13,25 +13,20 @@ export const DurationDisplay = () => {
   const clips = useAppSelector((state) => state.clips.clips);
   const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
 
-  // Calculate global duration
-  const globalDurationBeats = useMemo(() => calculateGlobalDuration(clips), [clips]);
+  // Calculate global duration (already returns seconds)
   const globalDurationSeconds = useMemo(
-    () => beatsToSeconds(globalDurationBeats, tempo),
-    [globalDurationBeats, tempo]
+    () => calculateGlobalDuration(clips, tempo),
+    [clips, tempo]
   );
   const globalDurationFormatted = useMemo(
     () => formatDuration(globalDurationSeconds),
     [globalDurationSeconds]
   );
 
-  // Calculate selected duration
-  const selectedDurationBeats = useMemo(
-    () => calculateSelectedDuration(clips, selectedClipIds),
-    [clips, selectedClipIds]
-  );
+  // Calculate selected duration (already returns seconds)
   const selectedDurationSeconds = useMemo(
-    () => beatsToSeconds(selectedDurationBeats, tempo),
-    [selectedDurationBeats, tempo]
+    () => calculateSelectedDuration(clips, selectedClipIds, tempo),
+    [clips, selectedClipIds, tempo]
   );
   const selectedDurationFormatted = useMemo(
     () => formatDuration(selectedDurationSeconds),

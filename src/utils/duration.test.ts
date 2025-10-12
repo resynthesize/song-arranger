@@ -7,28 +7,28 @@ import { calculateGlobalDuration, calculateSelectedDuration, formatDuration } fr
 import type { Clip } from '@/types';
 
 describe('formatDuration', () => {
-  it('should format zero seconds as 0:00', () => {
-    expect(formatDuration(0)).toBe('0:00');
+  it('should format zero seconds as 00:00', () => {
+    expect(formatDuration(0)).toBe('00:00');
   });
 
   it('should format seconds less than 60 with leading zero', () => {
-    expect(formatDuration(5)).toBe('0:05');
-    expect(formatDuration(9)).toBe('0:09');
+    expect(formatDuration(5)).toBe('00:05');
+    expect(formatDuration(9)).toBe('00:09');
   });
 
   it('should format seconds less than 60 without leading zero for tens', () => {
-    expect(formatDuration(45)).toBe('0:45');
-    expect(formatDuration(59)).toBe('0:59');
+    expect(formatDuration(45)).toBe('00:45');
+    expect(formatDuration(59)).toBe('00:59');
   });
 
-  it('should format exactly 60 seconds as 1:00', () => {
-    expect(formatDuration(60)).toBe('1:00');
+  it('should format exactly 60 seconds as 01:00', () => {
+    expect(formatDuration(60)).toBe('01:00');
   });
 
   it('should format minutes and seconds correctly', () => {
-    expect(formatDuration(90)).toBe('1:30');
-    expect(formatDuration(125)).toBe('2:05');
-    expect(formatDuration(272)).toBe('4:32');
+    expect(formatDuration(90)).toBe('01:30');
+    expect(formatDuration(125)).toBe('02:05');
+    expect(formatDuration(272)).toBe('04:32');
   });
 
   it('should handle hours correctly (over 59 minutes)', () => {
@@ -37,13 +37,13 @@ describe('formatDuration', () => {
   });
 
   it('should round to nearest second', () => {
-    expect(formatDuration(90.4)).toBe('1:30');
-    expect(formatDuration(90.5)).toBe('1:31');
-    expect(formatDuration(90.6)).toBe('1:31');
+    expect(formatDuration(90.4)).toBe('01:30');
+    expect(formatDuration(90.5)).toBe('01:31');
+    expect(formatDuration(90.6)).toBe('01:31');
   });
 
   it('should handle negative values by treating as zero', () => {
-    expect(formatDuration(-10)).toBe('0:00');
+    expect(formatDuration(-10)).toBe('00:00');
   });
 });
 
