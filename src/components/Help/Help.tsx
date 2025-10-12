@@ -4,8 +4,8 @@
  */
 
 import { useEffect, useRef } from 'react';
-import TerminalPanel from '../TerminalPanel';
-import TerminalButton from '../TerminalButton';
+import { TerminalPanel } from '../TerminalPanel';
+import { TerminalButton } from '../TerminalButton';
 import { getAllShortcuts, formatShortcut, type KeyboardAction } from '@/utils/keyboard';
 import './Help.css';
 
