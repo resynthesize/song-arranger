@@ -18,6 +18,7 @@ describe('Clip', () => {
 
   const defaultProps = {
     id: 'clip-1',
+    laneId: 'lane-1',
     position: 0,
     duration: 4,
     viewport: defaultViewport,
