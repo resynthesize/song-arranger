@@ -26,7 +26,7 @@ interface LaneProps {
   onClipResize: (clipId: ID, newDuration: Duration, edge: 'left' | 'right') => void;
   onClipLabelChange?: (clipId: ID, label: string) => void;
   onClipCopy?: (clipId: ID) => void;
-  onClipVerticalDrag?: (clipId: ID, deltaY: number) => void;
+  onClipVerticalDrag?: (clipId: ID, startingLaneId: ID, deltaY: number) => void;
   onDoubleClick: (laneId: ID, position: Position) => void;
 }
 
@@ -256,6 +256,7 @@ const Lane = ({
           <Clip
             key={clip.id}
             id={clip.id}
+            laneId={clip.laneId}
             position={clip.position}
             duration={clip.duration}
             viewport={viewport}

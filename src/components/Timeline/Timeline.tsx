@@ -195,22 +195,25 @@ const Timeline = () => {
 
   // Handle vertical clip dragging (move between lanes)
   const handleClipVerticalDrag = useCallback(
-    (clipId: ID, deltaY: number) => {
-      // Calculate which lane the clip should move to based on deltaY
+    (clipId: ID, startingLaneId: ID, deltaY: number) => {
+      // Calculate which lane the clip should move to based on deltaY from starting lane
       const LANE_HEIGHT = 80; // Match CSS .lane height
-      const laneIndex = lanes.findIndex((lane) =>
-        clips.find((c) => c.id === clipId && c.laneId === lane.id)
-      );
+      const startingLaneIndex = lanes.findIndex((lane) => lane.id === startingLaneId);
 
-      if (laneIndex === -1) return;
+      if (startingLaneIndex === -1) return;
 
       const laneDelta = Math.round(deltaY / LANE_HEIGHT);
       const targetLaneIndex = Math.max(
         0,
-        Math.min(lanes.length - 1, laneIndex + laneDelta)
+        Math.min(lanes.length - 1, startingLaneIndex + laneDelta)
       );
 
-      if (targetLaneIndex !== laneIndex) {
+      // Get current lane to check if we need to move
+      const currentLaneIndex = lanes.findIndex((lane) =>
+        clips.find((c) => c.id === clipId && c.laneId === lane.id)
+      );
+
+      if (targetLaneIndex !== currentLaneIndex) {
         const targetLaneId = lanes[targetLaneIndex]?.id;
         if (targetLaneId) {
           if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {

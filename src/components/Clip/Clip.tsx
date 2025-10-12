@@ -11,6 +11,7 @@ import './Clip.css';
 
 interface ClipProps {
   id: ID;
+  laneId: ID;
   position: Position;
   duration: Duration;
   viewport: ViewportState;
@@ -21,13 +22,14 @@ interface ClipProps {
   onSelect: (clipId: ID, isMultiSelect: boolean) => void;
   onMove: (clipId: ID, newPosition: Position) => void;
   onResize: (clipId: ID, newDuration: Duration, edge: 'left' | 'right') => void;
-  onVerticalDrag?: (clipId: ID, deltaY: number) => void;
+  onVerticalDrag?: (clipId: ID, startingLaneId: ID, deltaY: number) => void;
   onCopy?: (clipId: ID) => void;
   onLabelChange?: (clipId: ID, label: string) => void;
 }
 
 const Clip = ({
   id,
+  laneId,
   position,
   duration,
   viewport,
@@ -50,6 +52,7 @@ const Clip = ({
   const dragStartY = useRef(0);
   const dragStartPosition = useRef(0);
   const dragStartDuration = useRef(0);
+  const dragStartLaneId = useRef<ID>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Convert beats to viewport-relative pixels
@@ -80,6 +83,7 @@ const Clip = ({
     dragStartX.current = e.clientX;
     dragStartY.current = e.clientY;
     dragStartPosition.current = position;
+    dragStartLaneId.current = laneId; // Track starting lane
   };
 
   const handleDoubleClick = (e: MouseEvent) => {
@@ -141,9 +145,9 @@ const Clip = ({
         const snappedPosition = snapToGrid(rawNewPosition, snapValue);
         onMove(id, snappedPosition);
 
-        // Handle vertical lane dragging
+        // Handle vertical lane dragging - pass starting lane ID and deltaY
         if (onVerticalDrag && Math.abs(deltaY) > 5) {
-          onVerticalDrag(id, deltaY);
+          onVerticalDrag(id, dragStartLaneId.current, deltaY);
         }
       } else if (isResizing) {
         if (isResizing === 'right') {
