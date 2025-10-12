@@ -62,6 +62,11 @@
   min-width: 0;
   cursor: crosshair;
   overflow: hidden; /* Clip content to prevent clips from overlapping lane header */
+  transition: background-color var(--transition-fast);
+}
+
+.lane__content:hover {
+  background: #000a00; /* Subtle highlight on hover */
 }
 
 /* Grid canvas for dynamic grid lines */

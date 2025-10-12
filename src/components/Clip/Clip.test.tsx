@@ -3,7 +3,7 @@
  * Tests for the Clip component
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Clip from './Clip';
 import type { ViewportState } from '@/types';
@@ -108,5 +108,93 @@ describe('Clip', () => {
     const viewport200: ViewportState = { ...defaultViewport, zoom: 200 };
     rerender(<Clip {...defaultProps} viewport={viewport200} />);
     expect(clip).toHaveStyle({ width: '800px' }); // 4 beats * 200 zoom
+  });
+
+  describe('Animation States', () => {
+    it('should apply selected class when isSelected is true', () => {
+      render(<Clip {...defaultProps} isSelected={true} />);
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).toHaveClass('clip--selected');
+    });
+
+    it('should not apply selected class when isSelected is false', () => {
+      render(<Clip {...defaultProps} isSelected={false} />);
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).not.toHaveClass('clip--selected');
+    });
+
+    it('should apply dragging class during drag operation', () => {
+      render(<Clip {...defaultProps} />);
+      const content = screen.getByTestId('clip-clip-1').querySelector('.clip__content');
+
+      // Simulate drag start
+      act(() => {
+        const mouseDownEvent = new MouseEvent('mousedown', {
+          bubbles: true,
+          button: 0,
+          clientX: 100,
+          clientY: 100,
+        });
+        content?.dispatchEvent(mouseDownEvent);
+      });
+
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).toHaveClass('clip--dragging');
+    });
+
+    it('should apply resizing class during resize operation', () => {
+      render(<Clip {...defaultProps} />);
+      const leftHandle = screen.getByTestId('clip-clip-1-handle-left');
+
+      // Simulate resize start
+      act(() => {
+        const mouseDownEvent = new MouseEvent('mousedown', {
+          bubbles: true,
+          button: 0,
+          clientX: 100,
+          clientY: 100,
+        });
+        leftHandle.dispatchEvent(mouseDownEvent);
+      });
+
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).toHaveClass('clip--resizing');
+    });
+
+    it('should apply copying class when Alt+dragging', () => {
+      const onCopy = jest.fn();
+      render(<Clip {...defaultProps} onCopy={onCopy} />);
+      const content = screen.getByTestId('clip-clip-1').querySelector('.clip__content');
+
+      // Simulate Alt+drag start
+      act(() => {
+        const mouseDownEvent = new MouseEvent('mousedown', {
+          bubbles: true,
+          button: 0,
+          clientX: 100,
+          clientY: 100,
+          altKey: true,
+        });
+        content?.dispatchEvent(mouseDownEvent);
+      });
+
+      const clip = screen.getByTestId('clip-clip-1');
+      expect(clip).toHaveClass('clip--copying');
+      expect(onCopy).toHaveBeenCalledWith('clip-1');
+    });
+  });
+
+  describe('Cursor Styles', () => {
+    it('should have w-resize cursor on left handle', () => {
+      render(<Clip {...defaultProps} />);
+      const leftHandle = screen.getByTestId('clip-clip-1-handle-left');
+      expect(leftHandle).toHaveClass('clip__handle--left');
+    });
+
+    it('should have e-resize cursor on right handle', () => {
+      render(<Clip {...defaultProps} />);
+      const rightHandle = screen.getByTestId('clip-clip-1-handle-right');
+      expect(rightHandle).toHaveClass('clip__handle--right');
+    });
   });
 });
