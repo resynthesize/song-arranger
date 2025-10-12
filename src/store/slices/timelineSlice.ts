@@ -7,9 +7,9 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { TimelineState, Position } from '@/types';
 
 // Discrete zoom levels for better UX
-const ZOOM_LEVELS = [25, 50, 100, 200, 400]; // pixels per beat
-const MIN_ZOOM = ZOOM_LEVELS[0];
-const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+const ZOOM_LEVELS = [25, 50, 100, 200, 400] as const; // pixels per beat
+const MIN_ZOOM = ZOOM_LEVELS[0] ?? 25;
+const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1] ?? 400;
 
 const initialState: TimelineState = {
   zoom: 100, // 100 pixels per beat (default)
@@ -25,8 +25,9 @@ const initialState: TimelineState = {
 const getNextZoomLevel = (currentZoom: number): number => {
   // Find the next level that is greater than current zoom
   for (let i = 0; i < ZOOM_LEVELS.length; i++) {
-    if (ZOOM_LEVELS[i] > currentZoom) {
-      return ZOOM_LEVELS[i];
+    const level = ZOOM_LEVELS[i];
+    if (level !== undefined && level > currentZoom) {
+      return level;
     }
   }
   return MAX_ZOOM;
@@ -38,8 +39,9 @@ const getNextZoomLevel = (currentZoom: number): number => {
 const getPreviousZoomLevel = (currentZoom: number): number => {
   // Find the previous level that is less than current zoom
   for (let i = ZOOM_LEVELS.length - 1; i >= 0; i--) {
-    if (ZOOM_LEVELS[i] < currentZoom) {
-      return ZOOM_LEVELS[i];
+    const level = ZOOM_LEVELS[i];
+    if (level !== undefined && level < currentZoom) {
+      return level;
     }
   }
   return MIN_ZOOM;

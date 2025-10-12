@@ -3,9 +3,10 @@
  * Main timeline container with lanes and clips
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import Lane from '../Lane';
+import Ruler from '../Ruler';
 import {
   addClip,
   moveClip,
@@ -28,7 +29,7 @@ import {
   setEditingLane,
   clearEditingLane,
 } from '@/store/slices/lanesSlice';
-import { zoomIn, zoomOut } from '@/store/slices/timelineSlice';
+import { zoomIn, zoomOut, setPlayheadPosition } from '@/store/slices/timelineSlice';
 import { snapToGrid } from '@/utils/snap';
 import type { ID, Position, Duration } from '@/types';
 import './Timeline.css';
@@ -36,6 +37,7 @@ import './Timeline.css';
 const Timeline = () => {
   const dispatch = useAppDispatch();
   const timelineRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   // Select data from Redux
   const zoom = useAppSelector((state) => state.timeline.zoom);
@@ -199,6 +201,34 @@ const Timeline = () => {
     [dispatch, lanes, clips, selectedClipIds]
   );
 
+  // Handle ruler click to move playhead
+  const handleRulerClick = useCallback(
+    (position: Position) => {
+      const snappedPosition = snapToGrid(position, snapValue);
+      dispatch(setPlayheadPosition(snappedPosition));
+    },
+    [dispatch, snapValue]
+  );
+
+  // Track container width for ruler
+  useEffect(() => {
+    const updateWidth = () => {
+      if (timelineRef.current) {
+        const rect = timelineRef.current.getBoundingClientRect();
+        setContainerWidth(rect.width);
+      }
+    };
+
+    // Initial width
+    updateWidth();
+
+    // Update on resize
+    window.addEventListener('resize', updateWidth);
+    return () => {
+      window.removeEventListener('resize', updateWidth);
+    };
+  }, []);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -283,30 +313,38 @@ const Timeline = () => {
           <p>No lanes yet. Click &quot;Add Lane&quot; to get started.</p>
         </div>
       ) : (
-        <div className="timeline__lanes">
-          {lanes.map((lane) => (
-            <Lane
-              key={lane.id}
-              id={lane.id}
-              name={lane.name}
-              clips={clips}
-              zoom={zoom}
-              snapValue={snapValue}
-              selectedClipIds={selectedClipIds}
-              isEditing={editingLaneId === lane.id}
-              onNameChange={handleNameChange}
-              onStartEditing={handleStartEditing}
-              onStopEditing={handleStopEditing}
-              onClipSelect={handleClipSelect}
-              onClipMove={handleClipMove}
-              onClipResize={handleClipResize}
-              onClipLabelChange={handleClipLabelChange}
-              onClipCopy={handleClipCopy}
-              onClipVerticalDrag={handleClipVerticalDrag}
-              onDoubleClick={handleLaneDoubleClick}
-            />
-          ))}
-        </div>
+        <>
+          <Ruler
+            zoom={zoom}
+            snapValue={snapValue}
+            containerWidth={containerWidth}
+            onPositionClick={handleRulerClick}
+          />
+          <div className="timeline__lanes">
+            {lanes.map((lane) => (
+              <Lane
+                key={lane.id}
+                id={lane.id}
+                name={lane.name}
+                clips={clips}
+                zoom={zoom}
+                snapValue={snapValue}
+                selectedClipIds={selectedClipIds}
+                isEditing={editingLaneId === lane.id}
+                onNameChange={handleNameChange}
+                onStartEditing={handleStartEditing}
+                onStopEditing={handleStopEditing}
+                onClipSelect={handleClipSelect}
+                onClipMove={handleClipMove}
+                onClipResize={handleClipResize}
+                onClipLabelChange={handleClipLabelChange}
+                onClipCopy={handleClipCopy}
+                onClipVerticalDrag={handleClipVerticalDrag}
+                onDoubleClick={handleLaneDoubleClick}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

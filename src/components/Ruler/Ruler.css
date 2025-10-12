@@ -1,0 +1,80 @@
+/**
+ * Song Arranger - Ruler Component Styles
+ * Terminal-styled bar and beat ruler
+ */
+
+.ruler {
+  position: sticky;
+  top: 0;
+  height: 50px;
+  background: var(--color-bg);
+  border-bottom: var(--border-width-base) solid var(--color-secondary);
+  z-index: var(--z-controls);
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+}
+
+/* Bar Numbers */
+.ruler__bar-number {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-md);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  line-height: 1;
+  pointer-events: auto;
+}
+
+.ruler__bar-number:hover {
+  color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+/* Beat Tick Markers */
+.ruler__beat-tick {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--spacing-xs);
+  transform: translateX(-50%);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  color: var(--color-grid);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+  pointer-events: auto;
+  line-height: 1;
+}
+
+.ruler__beat-tick:hover {
+  opacity: 1;
+  color: var(--color-secondary);
+}
+
+/* Visual separator line at bottom */
+.ruler::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--border-width-thin);
+  background: var(--color-primary);
+  opacity: 0.3;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .ruler__bar-number,
+  .ruler__beat-tick {
+    transition: none;
+  }
+}
