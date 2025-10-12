@@ -7,7 +7,8 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { TimelineState, Position } from '@/types';
 
 // Discrete zoom levels for better UX
-const ZOOM_LEVELS = [25, 50, 100, 200, 400] as const; // pixels per beat
+// From 1px/beat (very zoomed out, ~512 bars visible) to 800px/beat (very zoomed in, 1/16th notes)
+const ZOOM_LEVELS = [1, 2, 5, 10, 25, 50, 100, 200, 400, 800] as const; // pixels per beat
 const MIN_ZOOM = ZOOM_LEVELS[0];
 const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
 
@@ -52,7 +53,7 @@ const timelineSlice = createSlice({
   initialState,
   reducers: {
     setZoom: (state, action: PayloadAction<number>) => {
-      state.zoom = Math.max(10, Math.min(500, action.payload));
+      state.zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, action.payload));
     },
 
     zoomIn: (state) => {

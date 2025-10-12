@@ -72,6 +72,28 @@
   color: var(--color-secondary);
 }
 
+/* Sub-beat Tick Markers (1/16th notes) */
+.ruler__subbeat-tick {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: calc(var(--spacing-xs) + 8px);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-grid);
+  opacity: 0.3;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  pointer-events: auto;
+  line-height: 1;
+}
+
+.ruler__subbeat-tick:hover {
+  opacity: 0.6;
+}
+
 /* Visual separator line at bottom */
 .ruler::after {
   content: '';

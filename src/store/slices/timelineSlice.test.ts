@@ -35,13 +35,13 @@ describe('timelineSlice', () => {
     });
 
     it('should clamp zoom to minimum value', () => {
-      const newState = reducer(initialState, setZoom(5));
-      expect(newState.zoom).toBe(10);
+      const newState = reducer(initialState, setZoom(0.5));
+      expect(newState.zoom).toBe(1);
     });
 
     it('should clamp zoom to maximum value', () => {
       const newState = reducer(initialState, setZoom(1000));
-      expect(newState.zoom).toBe(500);
+      expect(newState.zoom).toBe(800);
     });
   });
 
