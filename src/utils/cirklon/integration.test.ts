@@ -1,12 +1,13 @@
 /**
  * Song Arranger - Cirklon Integration Tests
- * Real-world test with xtlove.CKS file
+ * Real-world test with xtlove.CKS file and round-trip tests
  */
 
 import { describe, it, expect } from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseCKSFile, importFromCirklon } from './import';
+import { exportToCirklon, type ExportOptions } from './export';
 
 describe('Cirklon Integration - xtlove.CKS', () => {
   it('should import xtlove.CKS correctly', () => {
@@ -104,5 +105,55 @@ describe('Cirklon Integration - xtlove.CKS', () => {
         expect(gap).toBeLessThan(1000);
       }
     }
+  });
+
+  it('should maintain structure through import → export → import round-trip', () => {
+    // Read and import original file
+    const cksPath = path.join(__dirname, '../../../cirklon/xtlove.CKS');
+    const cksContent = fs.readFileSync(cksPath, 'utf-8');
+    const originalCksData = parseCKSFile(cksContent);
+    const imported1 = importFromCirklon(originalCksData);
+
+    // Export back to CKS format
+    const exportOptions: ExportOptions = {
+      sceneLengthBars: 8,
+      beatsPerBar: 4,
+      songName: imported1.songName,
+      tempo: imported1.tempo,
+    };
+    const exported = exportToCirklon(imported1.tracks, imported1.patterns, exportOptions);
+
+    // Re-import the exported data
+    const imported2 = importFromCirklon(exported);
+
+    // Compare track counts
+    expect(imported2.tracks.length).toBe(imported1.tracks.length);
+
+    // Compare pattern counts (should be close, might differ slightly due to scene boundaries)
+    expect(imported2.patterns.length).toBeGreaterThanOrEqual(imported1.patterns.length * 0.9);
+    expect(imported2.patterns.length).toBeLessThanOrEqual(imported1.patterns.length * 1.1);
+
+    // Verify muted patterns are preserved
+    const muted1 = imported1.patterns.filter((p) => p.muted).length;
+    const muted2 = imported2.patterns.filter((p) => p.muted).length;
+    expect(muted2).toBeGreaterThanOrEqual(muted1 * 0.9);
+    expect(muted2).toBeLessThanOrEqual(muted1 * 1.1);
+
+    // Verify pattern types are preserved
+    const p3Count1 = imported1.patterns.filter((p) => p.patternType === 'P3').length;
+    const ckCount1 = imported1.patterns.filter((p) => p.patternType === 'CK').length;
+    const p3Count2 = imported2.patterns.filter((p) => p.patternType === 'P3').length;
+    const ckCount2 = imported2.patterns.filter((p) => p.patternType === 'CK').length;
+
+    expect(p3Count2).toBeGreaterThanOrEqual(p3Count1 * 0.9);
+    expect(ckCount2).toBeGreaterThanOrEqual(ckCount1 * 0.9);
+
+    // Log round-trip summary
+    console.log('Round-trip Test Summary:');
+    console.log(`  Original tracks: ${imported1.tracks.length}, After round-trip: ${imported2.tracks.length}`);
+    console.log(`  Original patterns: ${imported1.patterns.length}, After round-trip: ${imported2.patterns.length}`);
+    console.log(`  Original muted: ${muted1}, After round-trip: ${muted2}`);
+    console.log(`  Original P3: ${p3Count1}, After round-trip: ${p3Count2}`);
+    console.log(`  Original CK: ${ckCount1}, After round-trip: ${ckCount2}`);
   });
 });
