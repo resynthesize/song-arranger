@@ -3,9 +3,9 @@
  * Main timeline page layout combining MenuBar, Timeline, and CommandFooter
  */
 
-import MenuBar from '../../MenuBar';
+import MenuBar from '../../organisms/MenuBar';
 import Timeline from '../../organisms/Timeline';
-import CommandFooter from '../../CommandFooter';
+import CommandFooter from '../../organisms/CommandFooter';
 import './TimelineTemplate.css';
 
 interface TimelineTemplateProps {

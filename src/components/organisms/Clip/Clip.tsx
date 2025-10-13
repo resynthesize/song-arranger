@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect, MouseEvent, KeyboardEvent, memo } from 'react';
-import ContextMenu, { type MenuItem } from '../../ContextMenu';
+import ContextMenu, { type MenuItem } from '../ContextMenu';
 import { ClipHandle } from '../../molecules/ClipHandle';
 import type { ID, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx } from '@/utils/viewport';

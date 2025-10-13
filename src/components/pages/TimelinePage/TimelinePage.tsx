@@ -10,9 +10,9 @@ import { loadProjectById } from '@/store/slices/projectSlice';
 import { getTemplateProject } from '@/utils/storage';
 import { logger } from '@/utils/debug';
 import { TimelineTemplate } from '../../templates';
-import Help from '../../Help';
-import { CommandPalette } from '../../CommandPalette';
-import { QuickInput } from '../../QuickInput';
+import Help from '../../organisms/Help';
+import { CommandPalette } from '../../organisms/CommandPalette';
+import { QuickInput } from '../../organisms/QuickInput';
 
 const TimelinePage = () => {
   const dispatch = useAppDispatch();

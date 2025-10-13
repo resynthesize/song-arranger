@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { useAppSelector } from './store/hooks';
-import BootSequence from './components/BootSequence';
+import BootSequence from './components/organisms/BootSequence';
 import { TimelinePage } from './components/pages';
 import CRTEffects from './components/atoms/CRTEffects';
 import TerminalNoise from './components/atoms/TerminalNoise';
