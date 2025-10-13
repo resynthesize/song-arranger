@@ -15,16 +15,14 @@ export type { BlockCursorProps } from './atoms/BlockCursor';
 
 export { default as CRTEffects } from './atoms/CRTEffects';
 
-export { TerminalNoise } from './atoms/TerminalNoise';
-export type { TerminalNoiseProps } from './atoms/TerminalNoise';
+export { default as TerminalNoise } from './atoms/TerminalNoise';
 
 export { DurationDisplay } from './atoms/DurationDisplay';
-export type { DurationDisplayProps } from './atoms/DurationDisplay';
 
 // Molecules - Simple component combinations
 export { TerminalPanel } from './molecules/TerminalPanel';
 export type { TerminalPanelProps } from './molecules/TerminalPanel';
 
 // Organisms - Complex, standalone components
-export { TerminalMenu } from './TerminalMenu';
-export type { TerminalMenuProps, TerminalMenuItem } from './TerminalMenu';
+export { TerminalMenu } from './organisms/TerminalMenu';
+export type { TerminalMenuProps, TerminalMenuItem } from './organisms/TerminalMenu';

@@ -3,6 +3,6 @@
 export { BlockCursor } from './BlockCursor';
 export { TerminalButton } from './TerminalButton';
 export { TerminalInput } from './TerminalInput';
-export { TerminalNoise } from './TerminalNoise';
-export { CRTEffects } from './CRTEffects';
+export { default as TerminalNoise } from './TerminalNoise';
+export { default as CRTEffects } from './CRTEffects';
 export { DurationDisplay } from './DurationDisplay';

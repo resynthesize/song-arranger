@@ -5,9 +5,9 @@
 
 /**
  * Check if we're in development mode
- * Uses process.env.NODE_ENV which works in both Vite and Jest
+ * Uses import.meta.env.MODE for Vite, defaults to true for Jest/tests
  */
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isDevelopment = import.meta.env?.MODE !== 'production';
 
 /**
  * Debug logger that only logs in development mode
