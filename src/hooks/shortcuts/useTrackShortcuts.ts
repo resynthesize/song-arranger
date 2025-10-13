@@ -5,12 +5,12 @@
 
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { addTrack, removeTrack, moveTrackUp, moveTrackDown, setMovingLane, clearMovingTrack } from '@/store/slices/tracksSlice';
+import { addTrack, removeTrack, moveTrackUp, moveTrackDown, setMovingTrack, clearMovingTrack } from '@/store/slices/tracksSlice';
 import { logger } from '@/utils/debug';
 
 export interface LaneShortcutHandlers {
   addTrack: () => void;
-  deleteLane: () => void;
+  deleteTrack: () => void;
   moveTrackUp: () => void;
   moveTrackDown: () => void;
 }
@@ -20,50 +20,50 @@ export interface LaneShortcutHandlers {
  */
 export const useTrackShortcuts = (): LaneShortcutHandlers => {
   const dispatch = useAppDispatch();
-  const currentLaneId = useAppSelector((state) => state.selection.currentTrackId);
+  const currentTrackId = useAppSelector((state) => state.selection.currentTrackId);
 
   const handleAddTrack = useCallback(() => {
     dispatch(addTrack({}));
   }, [dispatch]);
 
   const handleDeleteTrack = useCallback(() => {
-    if (currentLaneId) {
-      dispatch(removeTrack(currentLaneId));
+    if (currentTrackId) {
+      dispatch(removeTrack(currentTrackId));
     }
-  }, [dispatch, currentLaneId]);
+  }, [dispatch, currentTrackId]);
 
-  const handleMoveLaneUp = useCallback(() => {
-    if (currentLaneId) {
-      logger.log('moveTrackUp: Setting moving lane', currentLaneId);
-      dispatch(setMovingLane(currentLaneId));
-      dispatch(moveTrackUp(currentLaneId));
+  const handleMoveTrackUp = useCallback(() => {
+    if (currentTrackId) {
+      logger.log('moveTrackUp: Setting moving track', currentTrackId);
+      dispatch(setMovingTrack(currentTrackId));
+      dispatch(moveTrackUp(currentTrackId));
       setTimeout(() => {
-        logger.log('moveTrackUp: Clearing moving lane');
-        dispatch(clearMovingLane());
+        logger.log('moveTrackUp: Clearing moving track');
+        dispatch(clearMovingTrack());
       }, 400);
     } else {
       logger.log('moveTrackUp: No current track ID');
     }
-  }, [dispatch, currentLaneId]);
+  }, [dispatch, currentTrackId]);
 
-  const handleMoveLaneDown = useCallback(() => {
-    if (currentLaneId) {
-      logger.log('moveTrackDown: Setting moving lane', currentLaneId);
-      dispatch(setMovingLane(currentLaneId));
-      dispatch(moveTrackDown(currentLaneId));
+  const handleMoveTrackDown = useCallback(() => {
+    if (currentTrackId) {
+      logger.log('moveTrackDown: Setting moving track', currentTrackId);
+      dispatch(setMovingTrack(currentTrackId));
+      dispatch(moveTrackDown(currentTrackId));
       setTimeout(() => {
-        logger.log('moveTrackDown: Clearing moving lane');
-        dispatch(clearMovingLane());
+        logger.log('moveTrackDown: Clearing moving track');
+        dispatch(clearMovingTrack());
       }, 400);
     } else {
       logger.log('moveTrackDown: No current track ID');
     }
-  }, [dispatch, currentLaneId]);
+  }, [dispatch, currentTrackId]);
 
   return {
-    addTrack: handleAddLane,
-    deleteLane: handleDeleteLane,
-    moveTrackUp: handleMoveLaneUp,
-    moveTrackDown: handleMoveLaneDown,
+    addTrack: handleAddTrack,
+    deleteTrack: handleDeleteTrack,
+    moveTrackUp: handleMoveTrackUp,
+    moveTrackDown: handleMoveTrackDown,
   };
 };

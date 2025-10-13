@@ -13,6 +13,8 @@ import {
   deleteProjectById,
   setCurrentProjectName,
 } from '@/store/slices/projectSlice';
+import { setPatterns } from '@/store/slices/patternsSlice';
+import { setTracks } from '@/store/slices/tracksSlice';
 import { selectAllPatterns, selectAllTracks } from '@/store/selectors';
 import {
   saveProject,
@@ -40,8 +42,8 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
   const isDirty = useAppSelector((state) => state.project.isDirty);
 
   // Get all current state for saving using selectors
-  const clips = useAppSelector(selectAllPatterns);
-  const lanes = useAppSelector(selectAllTracks);
+  const patterns = useAppSelector(selectAllPatterns);
+  const tracks = useAppSelector(selectAllTracks);
   const timeline = useAppSelector((state) => state.timeline);
 
   // Dialog states
@@ -65,8 +67,8 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
       const projectId = saveProject({
         id: currentProjectId || undefined,
         name: currentProjectName,
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
       });
 
@@ -80,7 +82,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     } catch (error) {
       alert(`Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }, [currentProjectId, currentProjectName, clips, lanes, timeline, dispatch]);
+  }, [currentProjectId, currentProjectName, patterns, tracks, timeline, dispatch]);
 
   const handleSaveAs = useCallback(() => {
     setShowSaveAsDialog(true);
@@ -90,8 +92,8 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     try {
       const projectId = saveProject({
         name,
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
       });
 
@@ -100,7 +102,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     } catch (error) {
       alert(`Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }, [clips, lanes, timeline, dispatch]);
+  }, [patterns, tracks, timeline, dispatch]);
 
   const handleLoad = useCallback(() => {
     if (isDirty) {
@@ -129,11 +131,11 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     // Load project metadata
     dispatch(loadProjectById({ projectId: loadedProject.id, projectName: loadedProject.name }));
 
-    // Load clips data
-    dispatch({ type: 'clips/setClips', payload: loadedProject.data.patterns });
+    // Load patterns data
+    dispatch(setPatterns(loadedProject.data.patterns));
 
-    // Load lanes data
-    dispatch({ type: 'lanes/setLanes', payload: loadedProject.data.tracks });
+    // Load tracks data
+    dispatch(setTracks(loadedProject.data.tracks));
 
     // Load timeline data (merge with existing viewport to preserve current view)
     dispatch({ type: 'timeline/loadTimeline', payload: loadedProject.data.timeline });
@@ -199,8 +201,8 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
       // Create export data with current project state
       const exportData = {
         name: currentProjectName,
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline: {
           tempo: timeline.tempo,
           snapValue: timeline.snapValue,
@@ -231,7 +233,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     } catch (error) {
       alert(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }, [currentProjectName, clips, lanes, timeline]);
+  }, [currentProjectName, patterns, tracks, timeline]);
 
   const handleImport = useCallback(() => {
     if (isDirty) {
@@ -260,8 +262,8 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           const importData = JSON.parse(jsonString);
 
           // Validate import data
-          if (!importData.clips || !importData.lanes) {
-            throw new Error('Invalid project file: missing clips or lanes data');
+          if (!importData.patterns || !importData.tracks) {
+            throw new Error('Invalid project file: missing patterns or tracks data');
           }
 
           // Load imported data into Redux
@@ -272,11 +274,11 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
             dispatch(setCurrentProjectName(importData.name));
           }
 
-          // Load clips
-          dispatch({ type: 'clips/setClips', payload: importData.clips });
+          // Load patterns
+          dispatch(setPatterns(importData.patterns));
 
-          // Load lanes
-          dispatch({ type: 'lanes/setLanes', payload: importData.lanes });
+          // Load tracks
+          dispatch(setTracks(importData.tracks));
 
           // Load timeline settings (if present)
           if (importData.timeline) {

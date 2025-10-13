@@ -122,7 +122,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
       if (firstSelectedId) {
         const selectedClip = clips.find(c => c.id === firstSelectedId);
         if (selectedClip) {
-          laneClips = clips.filter(c => c.trackId === selectedClip.laneId);
+          laneClips = clips.filter(c => c.trackId === selectedClip.trackId);
           // Sort by position
           laneClips.sort((a, b) => a.position - b.position);
         }
@@ -143,7 +143,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
       if (firstSelectedId) {
         const selectedClip = clips.find(c => c.id === firstSelectedId);
         if (selectedClip) {
-          laneClips = clips.filter(c => c.trackId === selectedClip.laneId);
+          laneClips = clips.filter(c => c.trackId === selectedClip.trackId);
           // Sort by position
           laneClips.sort((a, b) => a.position - b.position);
         }

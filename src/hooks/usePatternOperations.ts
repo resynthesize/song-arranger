@@ -6,18 +6,18 @@
 import { useCallback, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
-  moveClip,
+  movePattern,
   movePatterns,
-  resizeClip,
+  resizePattern,
   resizePatterns,
   removePatterns,
-  updateClip,
-  duplicateClip,
+  updatePattern,
+  duplicatePattern,
   duplicatePatterns,
-  updateClipLane,
+  updatePatternTrack,
 } from '@/store/slices/patternsSlice';
 import {
-  selectClip,
+  selectPattern,
   clearSelection,
 } from '@/store/slices/selectionSlice';
 import { selectAllPatterns, selectSelectedPatternIds } from '@/store/selectors';
@@ -47,7 +47,7 @@ interface UsePatternOperationsReturn {
  * Handles pattern movement, resizing, deletion, duplication, and track changes
  */
 export function usePatternOperations(
-  tracks: Lane[]
+  tracks: Track[]
 ): UsePatternOperationsReturn {
   const dispatch = useAppDispatch();
   const patterns = useAppSelector(selectAllPatterns);
@@ -73,7 +73,7 @@ export function usePatternOperations(
         let lastPosition = lastPositionRef.current.get(patternId);
         if (lastPosition === undefined) {
           const pattern = patternsRef.current.find(c => c.id === patternId);
-          lastPosition = clip?.position ?? newPosition;
+          lastPosition = pattern?.position ?? newPosition;
         }
 
         const incrementalDelta = newPosition - lastPosition;
@@ -86,7 +86,7 @@ export function usePatternOperations(
       } else {
         // Single pattern move
         const clampedPosition = Math.max(0, newPosition);
-        dispatch(moveClip({ patternId, position: clampedPosition }));
+        dispatch(movePattern({ patternId, position: clampedPosition }));
         lastPositionRef.current.delete(patternId); // Clear tracking
       }
     },
@@ -105,7 +105,7 @@ export function usePatternOperations(
         let lastDuration = lastDurationRef.current.get(patternId);
         if (lastDuration === undefined) {
           const pattern = patternsRef.current.find(c => c.id === patternId);
-          lastDuration = clip?.duration ?? newDuration;
+          lastDuration = pattern?.duration ?? newDuration;
         }
 
         const incrementalFactor = newDuration / lastDuration;
@@ -121,11 +121,11 @@ export function usePatternOperations(
           let lastPosition = lastPositionRef.current.get(patternId);
           if (lastPosition === undefined) {
             const pattern = patternsRef.current.find(c => c.id === patternId);
-            lastPosition = clip?.position ?? startPosition;
+            lastPosition = pattern?.position ?? startPosition;
           }
 
           const newPosition = Math.max(0, startPosition + (startDuration - newDuration));
-          const incrementalPositionDelta = newPosition - lastPosition;
+          const incrementalPositionDelta = newPosition - (lastPosition ?? startPosition);
           lastPositionRef.current.set(patternId, newPosition);
 
           if (incrementalPositionDelta !== 0) {
@@ -134,13 +134,13 @@ export function usePatternOperations(
         }
       } else {
         // Single pattern resize
-        dispatch(resizeClip({ patternId, duration: newDuration }));
+        dispatch(resizePattern({ patternId, duration: newDuration }));
 
         // If resizing from left edge, adjust position using start position
         if (edge === 'left') {
           const positionDelta = startDuration - newDuration;
           const newPosition = Math.max(0, startPosition + positionDelta);
-          dispatch(moveClip({ patternId, position: newPosition }));
+          dispatch(movePattern({ patternId, position: newPosition }));
         }
 
         // Clear tracking
@@ -156,7 +156,7 @@ export function usePatternOperations(
    */
   const handleClipLabelChange = useCallback(
     (patternId: ID, label: string) => {
-      dispatch(updateClip({ patternId, updates: { label } }));
+      dispatch(updatePattern({ patternId, updates: { label } }));
     },
     [dispatch]
   );
@@ -172,7 +172,7 @@ export function usePatternOperations(
         dispatch(duplicatePatterns(selectedClipIds));
       } else {
         // Duplicate single clip
-        dispatch(duplicateClip(patternId));
+        dispatch(duplicatePattern(patternId));
       }
     },
     [dispatch, selectedClipIds]
@@ -199,19 +199,19 @@ export function usePatternOperations(
 
         logger.log('[handleClipDelete] Multi-delete:', {
           deletingCount: selectedClipIds.length,
-          firstDeletedClip,
+          firstDeletedPattern,
           remainingCount: remainingPatterns.length
         });
 
         dispatch(removePatterns(selectedClipIds));
 
         // Try to select nearest neighbor if one exists
-        if (firstDeletedClip) {
-          const nearestPattern = findNearestNeighbor(firstDeletedClip, remainingPatterns);
-          logger.log('[handleClipDelete] Nearest neighbor found:', nearestClip);
-          if (nearestClip) {
-            logger.log('[handleClipDelete] Selecting nearest clip:', nearestClip.id);
-            dispatch(selectClip(nearestClip.id));
+        if (firstDeletedPattern) {
+          const nearestPattern = findNearestNeighbor(firstDeletedPattern, remainingPatterns);
+          logger.log('[handleClipDelete] Nearest neighbor found:', nearestPattern);
+          if (nearestPattern) {
+            logger.log('[handleClipDelete] Selecting nearest pattern:', nearestPattern.id);
+            dispatch(selectPattern(nearestPattern.id));
           } else {
             logger.log('[handleClipDelete] No nearest clip, clearing selection');
             dispatch(clearSelection());
@@ -226,19 +226,19 @@ export function usePatternOperations(
         const remainingPatterns = patterns.filter((c) => c.id !== patternId);
 
         logger.log('[handleClipDelete] Single delete:', {
-          deletedClip,
+          deletedPattern,
           remainingCount: remainingPatterns.length
         });
 
         dispatch(removePatterns([patternId]));
 
         // Try to select nearest neighbor if one exists
-        if (deletedClip) {
-          const nearestPattern = findNearestNeighbor(deletedClip, remainingPatterns);
-          logger.log('[handleClipDelete] Nearest neighbor found:', nearestClip);
-          if (nearestClip) {
-            logger.log('[handleClipDelete] Selecting nearest clip:', nearestClip.id);
-            dispatch(selectClip(nearestClip.id));
+        if (deletedPattern) {
+          const nearestPattern = findNearestNeighbor(deletedPattern, remainingPatterns);
+          logger.log('[handleClipDelete] Nearest neighbor found:', nearestPattern);
+          if (nearestPattern) {
+            logger.log('[handleClipDelete] Selecting nearest pattern:', nearestPattern.id);
+            dispatch(selectPattern(nearestPattern.id));
           } else {
             logger.log('[handleClipDelete] No nearest clip, clearing selection');
             dispatch(clearSelection());
@@ -269,8 +269,8 @@ export function usePatternOperations(
         // Find min/max track indices to constrain the movement
         const selectedPatterns = patternsRef.current.filter(c => selectedClipIds.includes(c.id));
         const clipLaneIndices = selectedPatterns.map(pattern => {
-          const idx = tracks.findIndex(track => lane.id === clip.trackId);
-          return { patternId: clip.id, laneIndex: idx };
+          const idx = tracks.findIndex(track => track.id === pattern.trackId);
+          return { patternId: pattern.id, laneIndex: idx };
         }).filter(item => item.laneIndex !== -1);
 
         if (clipLaneIndices.length === 0) return;
@@ -291,8 +291,8 @@ export function usePatternOperations(
         clipLaneIndices.forEach(({ patternId: cId, laneIndex }) => {
           const newLaneIndex = laneIndex + constrainedDelta;
           const newTrack = tracks[newLaneIndex];
-          if (newLane) {
-            dispatch(updateClipLane({ patternId: cId, trackId: newLane.id }));
+          if (newTrack) {
+            dispatch(updatePatternTrack({ patternId: cId, trackId: newTrack.id }));
           }
         });
       } else {
@@ -302,8 +302,8 @@ export function usePatternOperations(
           Math.min(tracks.length - 1, startingLaneIndex + laneDelta)
         );
         const targetTrack = tracks[targetLaneIndex];
-        if (targetLane) {
-          dispatch(updateClipLane({ patternId, trackId: targetLane.id }));
+        if (targetTrack) {
+          dispatch(updatePatternTrack({ patternId, trackId: targetTrack.id }));
         }
       }
     },

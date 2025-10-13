@@ -8,9 +8,9 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import HUD from './HUD';
 import timelineReducer from '@/store/slices/timelineSlice';
-import lanesReducer from '@/store/slices/lanesSlice';
+import tracksReducer from '@/store/slices/tracksSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
-import clipsReducer from '@/store/slices/clipsSlice';
+import patternsReducer from '@/store/slices/patternsSlice';
 import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
 import type { ViewportState } from '@/types';
 
@@ -40,9 +40,9 @@ const createTestStore = (preloadedState = {}) => {
   return configureStore({
     reducer: {
       timeline: timelineReducer,
-      lanes: lanesReducer,
+      tracks: tracksReducer,
       selection: selectionReducer,
-      clips: clipsReducer,
+      patterns: patternsReducer,
       crtEffects: crtEffectsReducer,
     },
     preloadedState,
@@ -106,40 +106,40 @@ describe('HUD', () => {
     expect(screen.getByText(/3:1/)).toBeInTheDocument();
   });
 
-  it('should display clip count', () => {
+  it('should display pattern count', () => {
     renderWithStore(<HUD />, {
-      clips: {
-        clips: [
-          { id: '1', laneId: 'lane1', position: 0, duration: 4 },
-          { id: '2', laneId: 'lane1', position: 4, duration: 4 },
-          { id: '3', laneId: 'lane1', position: 8, duration: 4 },
+      patterns: {
+        patterns: [
+          { id: '1', trackId: 'track1', position: 0, duration: 4 },
+          { id: '2', trackId: 'track1', position: 4, duration: 4 },
+          { id: '3', trackId: 'track1', position: 8, duration: 4 },
         ],
       },
     });
 
-    const clipsSection = screen.getByText(/CLIPS/i).parentElement;
-    expect(clipsSection).toHaveTextContent('3');
+    const patternsSection = screen.getByText(/PATTERNS/i).parentElement;
+    expect(patternsSection).toHaveTextContent('3');
   });
 
-  it('should display lane count', () => {
+  it('should display track count', () => {
     renderWithStore(<HUD />, {
-      lanes: {
-        lanes: [
-          { id: 'lane1', name: 'Lane 1' },
-          { id: 'lane2', name: 'Lane 2' },
-          { id: 'lane3', name: 'Lane 3' },
+      tracks: {
+        tracks: [
+          { id: 'track1', name: 'Track 1' },
+          { id: 'track2', name: 'Track 2' },
+          { id: 'track3', name: 'Track 3' },
         ],
       },
     });
 
-    expect(screen.getByText(/LANES/i)).toBeInTheDocument();
+    expect(screen.getByText(/TRACKS/i)).toBeInTheDocument();
     expect(screen.getByText(/3/)).toBeInTheDocument();
   });
 
   it('should display selection count', () => {
     renderWithStore(<HUD />, {
       selection: {
-        selectedClipIds: ['1', '2', '3'],
+        selectedPatternIds: ['1', '2', '3'],
       },
     });
 

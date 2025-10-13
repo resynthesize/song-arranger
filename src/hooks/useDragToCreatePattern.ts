@@ -82,8 +82,8 @@ export function useDragToCreatePattern({
       const laneBottom = rect.bottom;
       const isInsideTrack = mouseY >= laneTop && mouseY <= laneBottom;
 
-      if (!isInsideLane) {
-        // Cancel creation if dragged outside lane
+      if (!isInsideTrack) {
+        // Cancel creation if dragged outside track
         setDragCreateState(null);
         return;
       }

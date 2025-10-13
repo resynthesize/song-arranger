@@ -6,7 +6,7 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { zoomIn, zoomOut, setViewportOffset } from '@/store/slices/timelineSlice';
-import { addLane } from '@/store/slices/lanesSlice';
+import { addTrack } from '@/store/slices/tracksSlice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
 import { selectAllPatterns, selectAllTracks, selectTimelineEndPosition } from '@/store/selectors';
 import { TerminalButton } from '../../atoms/TerminalButton';
@@ -24,8 +24,8 @@ const MenuBar = () => {
   const timelineEndPosition = useAppSelector(selectTimelineEndPosition);
   const timelineLength = Math.max(64, timelineEndPosition); // Minimum 64 beats
 
-  const handleAddLane = useCallback(() => {
-    dispatch(addLane({}));
+  const handleAddTrack = useCallback(() => {
+    dispatch(addTrack({}));
   }, [dispatch]);
 
   const handleToggleCRT = useCallback(() => {
@@ -84,12 +84,12 @@ const MenuBar = () => {
           +
         </TerminalButton>
         <TerminalButton
-          onClick={handleAddLane}
+          onClick={handleAddTrack}
           size="sm"
           variant="secondary"
-          title="Add lane (i)"
+          title="Add track (i)"
         >
-          +L
+          +T
         </TerminalButton>
         <TerminalButton
           onClick={handleToggleCRT}

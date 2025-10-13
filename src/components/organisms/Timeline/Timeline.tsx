@@ -35,7 +35,7 @@ const Timeline = () => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [verticalDragState, setVerticalDragState] = useState<{
     deltaY: number;
-    draggedClipId: ID;
+    draggedPatternId: ID;
   } | null>(null);
 
   // Select data from Redux using centralized selectors
@@ -98,7 +98,7 @@ const Timeline = () => {
   // Handle vertical clip drag updates (called during drag for visual feedback)
   const handleClipVerticalDragUpdate = useCallback(
     (clipId: ID, deltaY: number) => {
-      setVerticalDragState({ deltaY, draggedClipId: clipId });
+      setVerticalDragState({ deltaY, draggedPatternId: clipId });
     },
     []
   );
@@ -165,34 +165,34 @@ const Timeline = () => {
           />
           <div className="timeline__lanes">
             {lanes.map((lane) => (
-              <Lane
+              <Track
                 key={lane.id}
                 id={lane.id}
                 name={lane.name}
                 color={lane.color}
-                clips={clips}
+                patterns={clips}
                 viewport={viewport}
                 snapValue={effectiveSnapValue}
-                selectedClipIds={selectedClipIds}
+                selectedPatternIds={selectedClipIds}
                 verticalDragState={verticalDragState}
                 verticalZoom={verticalZoom}
                 isCurrent={lane.id === currentLaneId}
                 isEditing={editingLaneId === lane.id}
                 isMoving={movingLaneId === lane.id}
-                onLaneSelect={laneOperations.handleLaneSelect}
+                onTrackSelect={laneOperations.handleLaneSelect}
                 onNameChange={laneOperations.handleNameChange}
                 onColorChange={laneOperations.handleColorChange}
                 onStartEditing={laneOperations.handleStartEditing}
                 onStopEditing={laneOperations.handleStopEditing}
                 onRemove={laneOperations.handleRemoveLane}
-                onClipSelect={handleClipSelect}
-                onClipMove={clipOperations.handleClipMove}
-                onClipResize={clipOperations.handleClipResize}
-                onClipLabelChange={clipOperations.handleClipLabelChange}
-                onClipCopy={clipOperations.handleClipCopy}
-                onClipDelete={clipOperations.handleClipDelete}
-                onClipVerticalDrag={handleClipVerticalDrag}
-                onClipVerticalDragUpdate={handleClipVerticalDragUpdate}
+                onPatternSelect={handleClipSelect}
+                onPatternMove={clipOperations.handleClipMove}
+                onPatternResize={clipOperations.handleClipResize}
+                onPatternLabelChange={clipOperations.handleClipLabelChange}
+                onPatternCopy={clipOperations.handleClipCopy}
+                onPatternDelete={clipOperations.handleClipDelete}
+                onPatternVerticalDrag={handleClipVerticalDrag}
+                onPatternVerticalDragUpdate={handleClipVerticalDragUpdate}
                 onDoubleClick={laneOperations.handleLaneDoubleClick}
               />
             ))}

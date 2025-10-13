@@ -4,21 +4,21 @@
  */
 
 import {
-  selectSelectedClipIds,
-  selectCurrentLaneId,
+  selectSelectedPatternIds,
+  selectCurrentTrackId,
   selectHasSelection,
   selectSelectionCount,
   selectHasMultipleSelection,
-  selectFirstSelectedClipId,
+  selectFirstSelectedPatternId,
 } from './selection';
 import type { RootState } from '@/store/store';
 
 // Helper to create mock RootState
-const createMockState = (selectedIds: string[] = [], currentLaneId: string | null = null): RootState => {
+const createMockState = (selectedIds: string[] = [], currentTrackId: string | null = null): RootState => {
   return {
-    clips: { clips: [], editingClipId: null },
-    lanes: { lanes: [], editingLaneId: null, movingLaneId: null },
-    selection: { selectedClipIds: selectedIds, currentLaneId },
+    patterns: { patterns: [], editingPatternId: null },
+    tracks: { tracks: [], editingTrackId: null, movingTrackId: null },
+    selection: { selectedPatternIds: selectedIds, currentTrackId },
     timeline: {
       viewport: { offsetBeats: 0, zoom: 50, widthPx: 1000, heightPx: 600 },
       verticalZoom: 100,
@@ -42,37 +42,37 @@ const createMockState = (selectedIds: string[] = [], currentLaneId: string | nul
 };
 
 describe('Selection Selectors', () => {
-  describe('selectSelectedClipIds', () => {
-    it('should return selected clip IDs', () => {
-      const state = createMockState(['clip-1', 'clip-2']);
+  describe('selectSelectedPatternIds', () => {
+    it('should return selected pattern IDs', () => {
+      const state = createMockState(['pattern-1', 'pattern-2']);
 
-      expect(selectSelectedClipIds(state)).toEqual(['clip-1', 'clip-2']);
+      expect(selectSelectedPatternIds(state)).toEqual(['pattern-1', 'pattern-2']);
     });
 
     it('should return empty array when nothing selected', () => {
       const state = createMockState([]);
 
-      expect(selectSelectedClipIds(state)).toEqual([]);
+      expect(selectSelectedPatternIds(state)).toEqual([]);
     });
   });
 
-  describe('selectCurrentLaneId', () => {
-    it('should return current lane ID', () => {
-      const state = createMockState([], 'lane-1');
+  describe('selectCurrentTrackId', () => {
+    it('should return current track ID', () => {
+      const state = createMockState([], 'track-1');
 
-      expect(selectCurrentLaneId(state)).toBe('lane-1');
+      expect(selectCurrentTrackId(state)).toBe('track-1');
     });
 
-    it('should return null when no current lane', () => {
+    it('should return null when no current track', () => {
       const state = createMockState([], null);
 
-      expect(selectCurrentLaneId(state)).toBeNull();
+      expect(selectCurrentTrackId(state)).toBeNull();
     });
   });
 
   describe('selectHasSelection', () => {
-    it('should return true when clips are selected', () => {
-      const state = createMockState(['clip-1']);
+    it('should return true when patterns are selected', () => {
+      const state = createMockState(['pattern-1']);
 
       expect(selectHasSelection(state)).toBe(true);
     });
@@ -85,8 +85,8 @@ describe('Selection Selectors', () => {
   });
 
   describe('selectSelectionCount', () => {
-    it('should return number of selected clips', () => {
-      const state = createMockState(['clip-1', 'clip-2', 'clip-3']);
+    it('should return number of selected patterns', () => {
+      const state = createMockState(['pattern-1', 'pattern-2', 'pattern-3']);
 
       expect(selectSelectionCount(state)).toBe(3);
     });
@@ -99,14 +99,14 @@ describe('Selection Selectors', () => {
   });
 
   describe('selectHasMultipleSelection', () => {
-    it('should return true when multiple clips selected', () => {
-      const state = createMockState(['clip-1', 'clip-2']);
+    it('should return true when multiple patterns selected', () => {
+      const state = createMockState(['pattern-1', 'pattern-2']);
 
       expect(selectHasMultipleSelection(state)).toBe(true);
     });
 
-    it('should return false when single clip selected', () => {
-      const state = createMockState(['clip-1']);
+    it('should return false when single pattern selected', () => {
+      const state = createMockState(['pattern-1']);
 
       expect(selectHasMultipleSelection(state)).toBe(false);
     });
@@ -118,17 +118,17 @@ describe('Selection Selectors', () => {
     });
   });
 
-  describe('selectFirstSelectedClipId', () => {
-    it('should return first selected clip ID', () => {
-      const state = createMockState(['clip-1', 'clip-2', 'clip-3']);
+  describe('selectFirstSelectedPatternId', () => {
+    it('should return first selected pattern ID', () => {
+      const state = createMockState(['pattern-1', 'pattern-2', 'pattern-3']);
 
-      expect(selectFirstSelectedClipId(state)).toBe('clip-1');
+      expect(selectFirstSelectedPatternId(state)).toBe('pattern-1');
     });
 
     it('should return null when nothing selected', () => {
       const state = createMockState([]);
 
-      expect(selectFirstSelectedClipId(state)).toBeNull();
+      expect(selectFirstSelectedPatternId(state)).toBeNull();
     });
   });
 });

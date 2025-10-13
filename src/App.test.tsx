@@ -8,8 +8,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import App from './App';
 import timelineReducer from './store/slices/timelineSlice';
-import lanesReducer from './store/slices/lanesSlice';
-import clipsReducer from './store/slices/clipsSlice';
+import tracksReducer from './store/slices/tracksSlice';
+import patternsReducer from './store/slices/patternsSlice';
 import selectionReducer from './store/slices/selectionSlice';
 import crtEffectsReducer from './store/slices/crtEffectsSlice';
 import projectReducer from './store/slices/projectSlice';
@@ -26,8 +26,8 @@ describe('App', () => {
     return configureStore({
       reducer: {
         timeline: timelineReducer,
-        lanes: lanesReducer,
-        clips: clipsReducer,
+        tracks: tracksReducer,
+        patterns: patternsReducer,
         selection: selectionReducer,
         crtEffects: crtEffectsReducer,
         project: projectReducer,
@@ -83,7 +83,7 @@ describe('App', () => {
     expect(screen.getByDisplayValue('120')).toBeInTheDocument(); // Default tempo
   });
 
-  it('should have Add Lane button', () => {
+  it('should have Add Track button', () => {
     const store = createTestStore();
 
     render(
@@ -92,10 +92,10 @@ describe('App', () => {
       </Provider>
     );
 
-    expect(screen.getByText('+ LANE')).toBeInTheDocument();
+    expect(screen.getByText('+ TRACK')).toBeInTheDocument();
   });
 
-  it('should show empty state when no lanes', () => {
+  it('should show empty state when no tracks', () => {
     const store = createTestStore();
 
     render(
@@ -104,6 +104,6 @@ describe('App', () => {
       </Provider>
     );
 
-    expect(screen.getByText(/No lanes yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/No tracks yet/i)).toBeInTheDocument();
   });
 });

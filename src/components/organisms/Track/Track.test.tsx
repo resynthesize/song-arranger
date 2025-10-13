@@ -5,8 +5,8 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Lane from './Track';
-import type { Clip, ViewportState } from '@/types';
+import Track from './Track';
+import type { Pattern, ViewportState } from '@/types';
 
 describe('Lane', () => {
   // Helper function to simulate a double-click (two mousedowns within 500ms)
@@ -18,7 +18,7 @@ describe('Lane', () => {
     fireEvent.mouseDown(element, { clientX, clientY, button: 0 });
   };
 
-  const mockClips: Clip[] = [
+  const mockPatterns: Pattern[] = [
     { id: 'clip-1', trackId: 'lane-1', position: 0, duration: 4, label: 'Intro' },
     {
       id: 'clip-2',
@@ -39,7 +39,7 @@ describe('Lane', () => {
   const defaultProps = {
     id: 'lane-1',
     name: 'Kick',
-    clips: mockClips,
+    patterns: mockPatterns,
     viewport: defaultViewport,
     snapValue: 1,
     selectedPatternIds: [],
@@ -48,13 +48,19 @@ describe('Lane', () => {
     isCurrent: false,
     isEditing: false,
     isMoving: false,
+    onTrackSelect: jest.fn(),
     onNameChange: jest.fn(),
     onStartEditing: jest.fn(),
     onStopEditing: jest.fn(),
     onRemove: jest.fn(),
-    onClipSelect: jest.fn(),
-    onClipMove: jest.fn(),
-    onClipResize: jest.fn(),
+    onPatternSelect: jest.fn(),
+    onPatternMove: jest.fn(),
+    onPatternResize: jest.fn(),
+    onPatternLabelChange: jest.fn(),
+    onPatternCopy: jest.fn(),
+    onPatternDelete: jest.fn(),
+    onPatternVerticalDrag: jest.fn(),
+    onPatternVerticalDragUpdate: jest.fn(),
     onDoubleClick: jest.fn(),
   };
 
@@ -63,22 +69,22 @@ describe('Lane', () => {
   });
 
   it('should render lane with name', () => {
-    render(<Lane {...defaultProps} />);
+    render(<Track {...defaultProps} />);
     expect(screen.getByText('Kick')).toBeInTheDocument();
   });
 
   it('should render all clips in the lane', () => {
-    render(<Lane {...defaultProps} />);
+    render(<Track {...defaultProps} />);
     expect(screen.getByTestId('clip-clip-1')).toBeInTheDocument();
     expect(screen.getByTestId('clip-clip-2')).toBeInTheDocument();
   });
 
   it('should only render clips that belong to this lane', () => {
-    const clipsWithDifferentLanes = [
-      ...mockClips,
+    const patternsWithDifferentTracks = [
+      ...mockPatterns,
       { id: 'clip-3', trackId: 'lane-2', position: 0, duration: 4 },
     ];
-    render(<Lane {...defaultProps} clips={clipsWithDifferentLanes} />);
+    render(<Track {...defaultProps} patterns={patternsWithDifferentTracks} />);
 
     expect(screen.getByTestId('clip-clip-1')).toBeInTheDocument();
     expect(screen.getByTestId('clip-clip-2')).toBeInTheDocument();
@@ -86,7 +92,7 @@ describe('Lane', () => {
   });
 
   it('should show input when editing', () => {
-    render(<Lane {...defaultProps} isEditing={true} />);
+    render(<Track {...defaultProps} isEditing={true} />);
     const input = screen.getByDisplayValue('Kick');
     expect(input).toBeInTheDocument();
     expect(input).toHaveFocus();
@@ -94,7 +100,7 @@ describe('Lane', () => {
 
   it('should call onStartEditing when name is double-clicked', async () => {
     const onStartEditing = jest.fn();
-    render(<Lane {...defaultProps} onStartEditing={onStartEditing} />);
+    render(<Track {...defaultProps} onStartEditing={onStartEditing} />);
 
     const nameLabel = screen.getByText('Kick');
     await userEvent.dblClick(nameLabel);
@@ -106,7 +112,7 @@ describe('Lane', () => {
     const onNameChange = jest.fn();
     const onStopEditing = jest.fn();
     render(
-      <Lane
+      <Track
         {...defaultProps}
         isEditing={true}
         onNameChange={onNameChange}
@@ -126,7 +132,7 @@ describe('Lane', () => {
     const onNameChange = jest.fn();
     const onStopEditing = jest.fn();
     render(
-      <Lane
+      <Track
         {...defaultProps}
         isEditing={true}
         onNameChange={onNameChange}
@@ -145,7 +151,7 @@ describe('Lane', () => {
     const onNameChange = jest.fn();
     const onStopEditing = jest.fn();
     render(
-      <Lane
+      <Track
         {...defaultProps}
         isEditing={true}
         onNameChange={onNameChange}
@@ -165,14 +171,14 @@ describe('Lane', () => {
   });
 
   it('should pass selected state to clips', () => {
-    render(<Lane {...defaultProps} selectedClipIds={['clip-1']} />);
+    render(<Track {...defaultProps} selectedPatternIds={['clip-1']} />);
     const clip1 = screen.getByTestId('clip-clip-1');
     expect(clip1).toHaveClass('clip--selected');
   });
 
   it('should call onDoubleClick when lane area is double-clicked', async () => {
     const onDoubleClick = jest.fn();
-    render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+    render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
     const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -206,7 +212,7 @@ describe('Lane', () => {
 
   it('should calculate click position in beats', async () => {
     const onDoubleClick = jest.fn();
-    render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+    render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
     const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -247,7 +253,7 @@ describe('Lane', () => {
   describe('Click-and-drag clip creation', () => {
     it('should create clip with dragged width when user drags on empty space', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -288,7 +294,7 @@ describe('Lane', () => {
 
     it('should show ghost clip preview while dragging', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -324,7 +330,7 @@ describe('Lane', () => {
 
     it('should enforce minimum clip duration of snap value', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -363,7 +369,7 @@ describe('Lane', () => {
 
     it('should create default 4-beat clip on quick double-click without drag', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -398,7 +404,7 @@ describe('Lane', () => {
 
     it('should snap start position to grid when snap is enabled', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -438,7 +444,7 @@ describe('Lane', () => {
 
     it('should not trigger on existing clip', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
       // Get the first clip element
       const clip = screen.getByTestId('clip-clip-1');
@@ -464,7 +470,7 @@ describe('Lane', () => {
 
     it('should cancel creation if dragging outside lane boundaries', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -505,7 +511,7 @@ describe('Lane', () => {
 
     it('should create clip backwards when dragging left (backward in time)', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -547,7 +553,7 @@ describe('Lane', () => {
 
     it('should show correct ghost clip preview when dragging backwards', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 
@@ -585,7 +591,7 @@ describe('Lane', () => {
 
     it('should handle backward drag with snapping correctly', async () => {
       const onDoubleClick = jest.fn();
-      render(<Lane {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+      render(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
 
       const laneContent = screen.getByTestId('lane-lane-1-content');
 

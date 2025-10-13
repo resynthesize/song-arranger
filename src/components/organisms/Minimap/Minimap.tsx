@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { ViewportState, Lane, Clip } from '@/types';
+import type { ViewportState, Track, Pattern } from '@/types';
 import {
   MINIMAP_EMBEDDED_HEIGHT,
   MINIMAP_EMBEDDED_MIN_WIDTH,
@@ -16,8 +16,8 @@ import {
 import './Minimap.css';
 
 interface MinimapProps {
-  lanes: Lane[];
-  clips: Clip[];
+  lanes: Track[];
+  clips: Pattern[];
   viewport: ViewportState;
   timelineLength: number; // Total timeline length in beats
   visible: boolean;
@@ -107,7 +107,7 @@ const Minimap = ({
 
     // Draw clips
     clips.forEach((clip) => {
-      const laneIndex = lanes.findIndex((lane) => lane.id === clip.laneId);
+      const laneIndex = lanes.findIndex((lane) => lane.id === clip.trackId);
       if (laneIndex === -1) return;
 
       const lane = lanes[laneIndex];

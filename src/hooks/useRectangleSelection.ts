@@ -5,10 +5,10 @@
 
 import { useCallback, useEffect, useState, RefObject } from 'react';
 import { useAppDispatch } from '@/store/hooks';
-import { selectClip, toggleClipSelection, clearSelection } from '@/store/slices/selectionSlice';
+import { selectPattern, togglePatternSelection, clearSelection } from '@/store/slices/selectionSlice';
 import { first } from '@/utils/array';
 import { LANE_HEADER_WIDTH, RULER_HEIGHT, LANE_HEIGHT } from '@/constants';
-import type { Clip, Lane, ID } from '@/types';
+import type { Pattern, Track, ID } from '@/types';
 
 interface SelectionRect {
   startX: number;
@@ -25,8 +25,8 @@ interface Viewport {
 interface UseRectangleSelectionOptions {
   timelineRef: RefObject<HTMLDivElement>;
   viewport: Viewport;
-  clips: Clip[];
-  lanes: Lane[];
+  clips: Pattern[];
+  lanes: Track[];
 }
 
 interface UseRectangleSelectionReturn {
@@ -121,7 +121,7 @@ export function useRectangleSelection({
 
         if (horizontalOverlap) {
           // Find the lane's Y position to check vertical overlap
-          const laneIndex = lanes.findIndex((lane) => lane.id === clip.laneId);
+          const laneIndex = lanes.findIndex((lane) => lane.id === clip.trackId);
           if (laneIndex !== -1) {
             const laneY = RULER_HEIGHT + laneIndex * LANE_HEIGHT;
             const laneBottom = laneY + LANE_HEIGHT;
@@ -139,9 +139,9 @@ export function useRectangleSelection({
         // Select first clip and toggle the rest
         const firstClipId = first(selectedIds);
         if (firstClipId) {
-          dispatch(selectClip(firstClipId));
+          dispatch(selectPattern(firstClipId));
           selectedIds.slice(1).forEach((clipId) => {
-            dispatch(toggleClipSelection(clipId));
+            dispatch(togglePatternSelection(clipId));
           });
         }
       } else {

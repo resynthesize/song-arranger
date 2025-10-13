@@ -9,15 +9,15 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { CommandPalette } from './CommandPalette';
 import timelineReducer from '@/store/slices/timelineSlice';
-import lanesReducer from '@/store/slices/lanesSlice';
-import clipsReducer from '@/store/slices/clipsSlice';
+import tracksReducer from '@/store/slices/tracksSlice';
+import patternsReducer from '@/store/slices/patternsSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
 
 const createMockStore = () => configureStore({
   reducer: {
     timeline: timelineReducer,
-    lanes: lanesReducer,
-    clips: clipsReducer,
+    tracks: tracksReducer,
+    patterns: patternsReducer,
     selection: selectionReducer,
   },
 });

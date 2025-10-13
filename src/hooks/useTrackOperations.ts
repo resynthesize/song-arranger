@@ -6,15 +6,14 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
-  renameLane,
-  setEditingLane,
-  clearEditingLane,
-  removeLane,
-  setLaneColor,
+  renameTrack,
+  setEditingTrack,
+  clearEditingTrack,
+  removeTrack,
+  setTrackColor,
 } from '@/store/slices/tracksSlice';
-import { addPattern } from '@/store/slices/patternsSlice';
-import { setCurrentLane, clearSelection } from '@/store/slices/selectionSlice';
-import { removePatterns } from '@/store/slices/patternsSlice';
+import { addPattern, removePatterns } from '@/store/slices/patternsSlice';
+import { setCurrentTrack, clearSelection } from '@/store/slices/selectionSlice';
 import { snapToGridFloor } from '@/utils/snap';
 import { DEFAULT_CLIP_DURATION } from '@/constants';
 import type { ID, Position, Duration } from '@/types';
@@ -42,7 +41,7 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
    */
   const handleNameChange = useCallback(
     (trackId: ID, newName: string) => {
-      dispatch(renameLane({ trackId, name: newName }));
+      dispatch(renameTrack({ trackId, name: newName }));
     },
     [dispatch]
   );
@@ -52,7 +51,7 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
    */
   const handleStartEditing = useCallback(
     (trackId: ID) => {
-      dispatch(setEditingLane(trackId));
+      dispatch(setEditingTrack(trackId));
     },
     [dispatch]
   );
@@ -61,7 +60,7 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
    * Stop editing a track name
    */
   const handleStopEditing = useCallback(() => {
-    dispatch(clearEditingLane());
+    dispatch(clearEditingTrack());
   }, [dispatch]);
 
   /**
@@ -69,18 +68,18 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
    */
   const handleColorChange = useCallback(
     (trackId: ID, color: string) => {
-      dispatch(setLaneColor({ trackId, color }));
+      dispatch(setTrackColor({ trackId, color }));
     },
     [dispatch]
   );
 
   /**
    * Handle track removal
-   * Also removes all patterns in the lane
+   * Also removes all patterns in the track
    */
   const handleRemoveTrack = useCallback(
     (trackId: ID) => {
-      // Find all patterns in this lane
+      // Find all patterns in this track
       const patternsToRemove = patterns.filter((clip) => clip.trackId === trackId);
       const patternIdsToRemove = patternsToRemove.map((clip) => clip.id);
 
@@ -89,20 +88,20 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
         dispatch(removePatterns(patternIdsToRemove));
       }
 
-      // Remove lane
-      dispatch(removeLane(trackId));
+      // Remove track
+      dispatch(removeTrack(trackId));
     },
     [dispatch, patterns]
   );
 
   /**
    * Handle track selection
-   * Clears pattern selection when selecting a lane
+   * Clears pattern selection when selecting a track
    */
   const handleLaneSelect = useCallback(
     (trackId: ID) => {
-      dispatch(setCurrentLane(trackId));
-      dispatch(clearSelection()); // Clear pattern selection when selecting a lane
+      dispatch(setCurrentTrack(trackId));
+      dispatch(clearSelection()); // Clear pattern selection when selecting a track
     },
     [dispatch]
   );
@@ -117,7 +116,7 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
       if (duration !== undefined) {
         // Drag-to-create - position and duration already snapped in Track component
         dispatch(
-          addClip({
+          addPattern({
             trackId,
             position,
             duration,
@@ -127,7 +126,7 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
         // Traditional double-click - snap to left edge of grid cell (floor)
         const snappedPosition = snapToGridFloor(position, effectiveSnapValue);
         dispatch(
-          addClip({
+          addPattern({
             trackId,
             position: snappedPosition,
             duration: DEFAULT_CLIP_DURATION,
@@ -143,7 +142,7 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
     handleStartEditing,
     handleStopEditing,
     handleColorChange,
-    handleRemoveLane,
+    handleRemoveLane: handleRemoveTrack,
     handleLaneSelect,
     handleLaneDoubleClick,
   };

@@ -8,8 +8,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import Timeline from './Timeline';
 import timelineReducer from '@/store/slices/timelineSlice';
-import lanesReducer from '@/store/slices/lanesSlice';
-import clipsReducer from '@/store/slices/clipsSlice';
+import tracksReducer from '@/store/slices/tracksSlice';
+import patternsReducer from '@/store/slices/patternsSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
 import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
 import type { RootState } from '@/types';
@@ -18,8 +18,8 @@ const createMockStore = (initialState?: Partial<RootState>) => {
   return configureStore({
     reducer: {
       timeline: timelineReducer,
-      tracks: lanesReducer,
-      clips: clipsReducer,
+      tracks: tracksReducer,
+      patterns: patternsReducer,
       selection: selectionReducer,
       crtEffects: crtEffectsReducer,
     },
@@ -46,10 +46,10 @@ describe('Timeline', () => {
           { id: 'lane-1', name: 'Kick' },
           { id: 'lane-2', name: 'Snare' },
         ],
-        editingLaneId: null,
-        movingLaneId: null,
+        editingTrackId: null,
+        movingTrackId: null,
       },
-      clips: { clips: [], editingClipId: null },
+      patterns: { patterns: [], editingPatternId: null },
       selection: { selectedPatternIds: [], currentTrackId: null },
     });
 
@@ -67,11 +67,11 @@ describe('Timeline', () => {
     const store = createMockStore({
       tracks: {
         tracks: [{ id: 'lane-1', name: 'Kick' }],
-        editingLaneId: null,
-        movingLaneId: null,
+        editingTrackId: null,
+        movingTrackId: null,
       },
-      clips: {
-        clips: [
+      patterns: {
+        patterns: [
           {
             id: 'clip-1',
             trackId: 'lane-1',
@@ -80,7 +80,7 @@ describe('Timeline', () => {
             label: 'Intro',
           },
         ],
-        editingClipId: null,
+        editingPatternId: null,
       },
       selection: { selectedPatternIds: [], currentTrackId: null },
     });
@@ -127,14 +127,14 @@ describe('Timeline', () => {
       },
       tracks: {
         tracks: [{ id: 'lane-1', name: 'Kick' }],
-        editingLaneId: null,
-        movingLaneId: null,
+        editingTrackId: null,
+        movingTrackId: null,
       },
-      clips: {
-        clips: [
+      patterns: {
+        patterns: [
           { id: 'clip-1', trackId: 'lane-1', position: 0, duration: 4 },
         ],
-        editingClipId: null,
+        editingPatternId: null,
       },
       selection: { selectedPatternIds: [], currentTrackId: null },
     });
