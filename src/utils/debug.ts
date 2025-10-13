@@ -5,9 +5,10 @@
 
 /**
  * Check if we're in development mode
- * Uses import.meta.env.MODE for Vite, defaults to true for Jest/tests
+ * Always returns true to enable logging in all environments
+ * Production builds should use tree-shaking to remove console calls
  */
-const isDevelopment = import.meta.env?.MODE !== 'production';
+const isDevelopment = true;
 
 /**
  * Debug logger that only logs in development mode
