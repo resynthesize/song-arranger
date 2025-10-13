@@ -1,0 +1,125 @@
+{
+	"song_data" :
+	{
+		"song 20" : 
+		{
+			
+			"instrument_assignments" :
+			{
+				"track_9" : { "output" : "ob-6" }
+			},
+			
+			"patterns" :
+			{
+				"Trk9 P1" :
+				{
+					"type" : "P3",
+					"creator_track" : 9,
+					"saved" : true,
+					"bar_count" : 1,
+					"loop_start" : 1,
+					"loop_end" : 1,
+					
+					"aux_A" : "aux note rel",
+					"aux_B" : "aux note rel",
+					"aux_C" : "offset note rel",
+					"aux_D" : "note acc defeat",
+					
+					"accumulator_config" :
+					{
+						
+						"note" :
+						{
+							"limit" : 12,
+							"mode" : "rtz",
+							"out" : "clip"
+						},
+						
+						
+						"velo" :
+						{
+							"limit" : 127,
+							"mode" : "rtz",
+							"out" : "clip"
+						},
+						
+						
+						"auxD" :
+						{
+							"limit" : 127,
+							"mode" : "rtz",
+							"out" : "clip"
+						},
+						
+						"RoPS" : true,
+						"XdAcD" : false
+					},
+					
+					
+					"bars" :
+					[
+						{
+							"direction" : "forward",
+							"tbase" : " 16",
+							"last_step" : 16,
+							"xpos" : 0,
+							"reps" : 1,
+							"gbar" : false,
+							"note" : [ "C 3", "C 4", "C 3", "C 3", "C 3", "C 3", "C 3", "D#3", "F 3", "C 3", "D 3", "C 3", "C 3", "A#3", "C 3", "C 4" ],
+							"velo" : [ 67, 87, 37, 127, 31, 37, 87, 37, 76, 127, 87, 127, 57, 107, 37, 127 ],
+							"length" : [ 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24 ],
+							"delay" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+							"gate" : [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1 ],
+							"tie" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+							"skip" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+							"note_X" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+							"aux_A_value" : [ 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15 ],
+							"aux_A_flag" : [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+							"aux_B_value" : [ 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7 ],
+							"aux_B_flag" : [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+							"aux_C_value" : [ 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+							"aux_C_flag" : [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+							"aux_D_value" : [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+							"aux_D_flag" : [ 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
+						}
+					]
+				}
+			},
+			
+			"scenes" :
+			{
+				"workscene" :
+				{
+					"gbar" : 16,
+					"length" : 1,
+					"advance" : "auto",
+					"FTS_root" : "C",
+					"FTS_scale" : "aeolian",
+					"xpos" : 0,
+					"xpos_fts" : "off",
+					
+					"pattern_assignments" :
+					{
+						"track_9" : "Trk9 P1"
+					}
+				},
+				
+				"scene 1" :
+				{
+					"gbar" : 16,
+					"length" : 1,
+					"advance" : "auto",
+					"FTS_root" : "C",
+					"FTS_scale" : "aeolian",
+					"xpos" : 0,
+					"xpos_fts" : "off",
+					
+					"pattern_assignments" :
+					{
+						"track_9" : "Trk9 P1"
+					}
+				}
+			}
+		}
+	}
+}

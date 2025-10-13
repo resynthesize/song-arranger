@@ -245,13 +245,22 @@ describe('Ruler', () => {
     it('should adapt grid density based on zoom level', () => {
       // At very low zoom (many bars visible), grid should be sparser
       const viewportLowZoom: ViewportState = { ...defaultViewport, zoom: 5, widthPx: 2000 };
-      const { rerender } = renderWithProvider(<Ruler {...defaultProps} viewport={viewportLowZoom} />);
+      const store = createTestStore();
+      const { rerender } = render(
+        <Provider store={store}>
+          <Ruler {...defaultProps} viewport={viewportLowZoom} />
+        </Provider>
+      );
       const gridTicksLowZoom = document.querySelectorAll('.ruler__grid-tick');
       const lowZoomCount = gridTicksLowZoom.length;
 
       // At high zoom (fewer bars visible), grid can be denser
       const viewportHighZoom: ViewportState = { ...defaultViewport, zoom: 200 };
-      rerender(<Ruler {...defaultProps} viewport={viewportHighZoom} />);
+      rerender(
+        <Provider store={store}>
+          <Ruler {...defaultProps} viewport={viewportHighZoom} />
+        </Provider>
+      );
       const gridTicksHighZoom = document.querySelectorAll('.ruler__grid-tick');
       const highZoomCount = gridTicksHighZoom.length;
 

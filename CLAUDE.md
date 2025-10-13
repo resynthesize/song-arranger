@@ -227,11 +227,85 @@ src/
 
 1. Clone repository
 2. `npm install`
-3. `npm test` - Run tests
+3. `npm test` - Run tests once
 4. `npm run dev` - Start dev server
 5. Create feature branch for Linear issue
 6. Follow TDD approach
 7. Commit often with Linear issue references
+
+## Running Tests
+
+The project uses Jest with React Testing Library for testing.
+
+**Available Test Commands:**
+
+- `npm test` - Run all tests once and exit (recommended for CI/CD and general use)
+- `npm run test:watch` - Run tests in watch mode (re-runs on file changes)
+- `npm run test:ci` - Run tests in CI mode with additional optimizations
+
+**Best Practices:**
+
+1. **Run tests before committing:**
+   ```bash
+   npm test
+   ```
+   Ensure all tests pass before creating commits.
+
+2. **Watch mode during development:**
+   ```bash
+   npm run test:watch
+   ```
+   Use watch mode while actively developing to get instant feedback.
+
+3. **Test file naming:**
+   - Component tests: `ComponentName.test.tsx`
+   - Utility tests: `utilityName.test.ts`
+   - Redux tests: `sliceName.test.ts`
+
+4. **Test organization:**
+   - Place test files alongside the code they test
+   - Use descriptive test names that explain expected behavior
+   - Group related tests using `describe` blocks
+
+5. **Redux testing:**
+   - Components using Redux hooks need to be wrapped with a `<Provider>`
+   - Create a test store helper function for consistent setup
+   - When using `rerender`, ensure the component is still wrapped with the Provider
+
+**Example Test Setup with Redux:**
+
+```typescript
+import { render } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import myReducer from '@/store/slices/mySlice';
+
+const createTestStore = () => {
+  return configureStore({
+    reducer: { my: myReducer },
+    preloadedState: { /* initial state */ },
+  });
+};
+
+const renderWithProvider = (ui: React.ReactElement) => {
+  const store = createTestStore();
+  return render(<Provider store={store}>{ui}</Provider>);
+};
+
+// For tests that need rerender:
+const store = createTestStore();
+const { rerender } = render(
+  <Provider store={store}>
+    <MyComponent {...props} />
+  </Provider>
+);
+
+rerender(
+  <Provider store={store}>
+    <MyComponent {...newProps} />
+  </Provider>
+);
+```
 
 ## Resources
 
