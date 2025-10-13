@@ -8,59 +8,59 @@ import type { RootState } from '@/store/store';
 import type { ID } from '@/types';
 
 /**
- * Base selector - get selected clip IDs
+ * Base selector - get selected pattern IDs
  */
-export const selectSelectedClipIds = (state: RootState): ID[] => state.selection.selectedClipIds;
+export const selectSelectedPatternIds = (state: RootState): ID[] => state.selection.selectedPatternIds;
 
 /**
- * Base selector - get current lane ID
+ * Base selector - get current track ID
  */
-export const selectCurrentLaneId = (state: RootState): ID | null => state.selection.currentLaneId;
+export const selectCurrentTrackId = (state: RootState): ID | null => state.selection.currentTrackId;
 
 /**
- * Memoized selector - check if any clips are selected
+ * Memoized selector - check if any patterns are selected
  */
 export const selectHasSelection = createSelector(
-  [selectSelectedClipIds],
+  [selectSelectedPatternIds],
   (selectedIds) => selectedIds.length > 0
 );
 
 /**
- * Memoized selector - get number of selected clips
+ * Memoized selector - get number of selected patterns
  */
 export const selectSelectionCount = createSelector(
-  [selectSelectedClipIds],
+  [selectSelectedPatternIds],
   (selectedIds) => selectedIds.length
 );
 
 /**
- * Memoized selector - check if multiple clips are selected
+ * Memoized selector - check if multiple patterns are selected
  */
 export const selectHasMultipleSelection = createSelector(
-  [selectSelectedClipIds],
+  [selectSelectedPatternIds],
   (selectedIds) => selectedIds.length > 1
 );
 
 /**
- * Memoized selector - check if a specific clip is selected
+ * Memoized selector - check if a specific pattern is selected
  */
-export const selectIsClipSelectedById = createSelector(
-  [selectSelectedClipIds, (_state: RootState, clipId: ID) => clipId],
-  (selectedIds, clipId) => selectedIds.includes(clipId)
+export const selectIsPatternSelectedById = createSelector(
+  [selectSelectedPatternIds, (_state: RootState, patternId: ID) => patternId],
+  (selectedIds, patternId) => selectedIds.includes(patternId)
 );
 
 /**
- * Memoized selector - get first selected clip ID
+ * Memoized selector - get first selected pattern ID
  */
-export const selectFirstSelectedClipId = createSelector(
-  [selectSelectedClipIds],
+export const selectFirstSelectedPatternId = createSelector(
+  [selectSelectedPatternIds],
   (selectedIds) => selectedIds.length > 0 ? selectedIds[0] : null
 );
 
 /**
- * Memoized selector - check if a lane is current
+ * Memoized selector - check if a track is current
  */
-export const selectIsLaneCurrent = createSelector(
-  [selectCurrentLaneId, (_state: RootState, laneId: ID) => laneId],
-  (currentId, laneId) => currentId === laneId
+export const selectIsTrackCurrent = createSelector(
+  [selectCurrentTrackId, (_state: RootState, trackId: ID) => trackId],
+  (currentId, trackId) => currentId === trackId
 );

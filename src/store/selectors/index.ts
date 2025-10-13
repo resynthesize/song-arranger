@@ -3,40 +3,40 @@
  * Central export point for all selectors
  */
 
-// Clip selectors
+// Pattern selectors
 export {
-  selectAllClips,
-  selectEditingClipId,
-  selectClipsByLane,
-  selectSelectedClips,
-  selectClipEndPosition,
+  selectAllPatterns,
+  selectEditingPatternId,
+  selectPatternsByTrack,
+  selectSelectedPatterns,
+  selectPatternEndPosition,
   selectTimelineEndPosition,
-  selectClipById,
-  selectIsClipSelected,
-  selectClipCount,
-} from './clips';
+  selectPatternById,
+  selectIsPatternSelected,
+  selectPatternCount,
+} from './patterns';
 
-// Lane selectors
+// Track selectors
 export {
-  selectAllLanes,
-  selectEditingLaneId,
-  selectMovingLaneId,
-  selectLaneById,
-  selectLaneOrder,
-  selectLaneCount,
-  selectLaneIndexById,
-  selectIsLaneEditing,
-  selectIsLaneMoving,
-} from './lanes';
+  selectAllTracks,
+  selectEditingTrackId,
+  selectMovingTrackId,
+  selectTrackById,
+  selectTrackOrder,
+  selectTrackCount,
+  selectTrackIndexById,
+  selectIsTrackEditing,
+  selectIsTrackMoving,
+} from './tracks';
 
 // Selection selectors
 export {
-  selectSelectedClipIds,
-  selectCurrentLaneId,
+  selectSelectedPatternIds,
+  selectCurrentTrackId,
   selectHasSelection,
   selectSelectionCount,
   selectHasMultipleSelection,
-  selectIsClipSelectedById,
-  selectFirstSelectedClipId,
-  selectIsLaneCurrent,
+  selectIsPatternSelectedById,
+  selectFirstSelectedPatternId,
+  selectIsTrackCurrent,
 } from './selection';

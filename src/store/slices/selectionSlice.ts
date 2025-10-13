@@ -1,6 +1,6 @@
 /**
  * Song Arranger - Selection Slice
- * Redux state management for clip selection
+ * Redux state management for pattern selection
  */
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
@@ -9,88 +9,88 @@ import { first, last } from '@/utils/array';
 import { logger } from '@/utils/debug';
 
 const initialState: SelectionState = {
-  selectedClipIds: [],
-  currentLaneId: null,
+  selectedPatternIds: [],
+  currentTrackId: null,
 };
 
 const selectionSlice = createSlice({
   name: 'selection',
   initialState,
   reducers: {
-    selectClip: (state, action: PayloadAction<ID>) => {
-      logger.log('[selectClip reducer] Selecting clip', {
-        clipId: action.payload,
-        previousSelection: state.selectedClipIds
+    selectPattern: (state, action: PayloadAction<ID>) => {
+      logger.log('[selectPattern reducer] Selecting pattern', {
+        patternId: action.payload,
+        previousSelection: state.selectedPatternIds
       });
-      state.selectedClipIds = [action.payload];
-      // Clear current lane when selecting a clip
-      state.currentLaneId = null;
+      state.selectedPatternIds = [action.payload];
+      // Clear current track when selecting a pattern
+      state.currentTrackId = null;
     },
 
-    deselectClip: (state, action: PayloadAction<ID>) => {
-      state.selectedClipIds = state.selectedClipIds.filter(
+    deselectPattern: (state, action: PayloadAction<ID>) => {
+      state.selectedPatternIds = state.selectedPatternIds.filter(
         (id) => id !== action.payload
       );
     },
 
-    toggleClipSelection: (state, action: PayloadAction<ID>) => {
-      const clipId = action.payload;
-      const index = state.selectedClipIds.indexOf(clipId);
+    togglePatternSelection: (state, action: PayloadAction<ID>) => {
+      const patternId = action.payload;
+      const index = state.selectedPatternIds.indexOf(patternId);
 
       if (index === -1) {
         // Add to selection
-        state.selectedClipIds.push(clipId);
+        state.selectedPatternIds.push(patternId);
       } else {
         // Remove from selection
-        state.selectedClipIds.splice(index, 1);
+        state.selectedPatternIds.splice(index, 1);
       }
     },
 
-    selectMultipleClips: (state, action: PayloadAction<ID[]>) => {
+    selectMultiplePatterns: (state, action: PayloadAction<ID[]>) => {
       // Remove duplicates using Set
-      state.selectedClipIds = Array.from(new Set(action.payload));
+      state.selectedPatternIds = Array.from(new Set(action.payload));
     },
 
-    selectAllClips: (state, action: PayloadAction<ID[]>) => {
-      // Select all clips - payload contains all clip IDs
-      state.selectedClipIds = action.payload;
+    selectAllPatterns: (state, action: PayloadAction<ID[]>) => {
+      // Select all patterns - payload contains all pattern IDs
+      state.selectedPatternIds = action.payload;
     },
 
     clearSelection: (state) => {
       logger.log('[clearSelection reducer] Clearing selection', {
-        previousSelection: state.selectedClipIds
+        previousSelection: state.selectedPatternIds
       });
-      state.selectedClipIds = [];
+      state.selectedPatternIds = [];
     },
 
-    cycleSelection: (state, action: PayloadAction<{ clipIds: ID[]; direction: 'forward' | 'backward' }>) => {
-      const { clipIds, direction } = action.payload;
+    cycleSelection: (state, action: PayloadAction<{ patternIds: ID[]; direction: 'forward' | 'backward' }>) => {
+      const { patternIds, direction } = action.payload;
 
-      if (clipIds.length === 0) {
-        state.selectedClipIds = [];
+      if (patternIds.length === 0) {
+        state.selectedPatternIds = [];
         return;
       }
 
       // If nothing selected, select first/last
-      if (state.selectedClipIds.length === 0) {
-        const firstOrLast = direction === 'forward' ? first(clipIds) : last(clipIds);
+      if (state.selectedPatternIds.length === 0) {
+        const firstOrLast = direction === 'forward' ? first(patternIds) : last(patternIds);
         if (firstOrLast) {
-          state.selectedClipIds = [firstOrLast];
+          state.selectedPatternIds = [firstOrLast];
         }
         return;
       }
 
       // Find current selection index
-      const currentId = first(state.selectedClipIds);
+      const currentId = first(state.selectedPatternIds);
       if (!currentId) return;
 
-      const currentIndex = clipIds.indexOf(currentId);
+      const currentIndex = patternIds.indexOf(currentId);
 
       if (currentIndex === -1) {
         // Current selection not in list, select first/last
-        const firstOrLast = direction === 'forward' ? first(clipIds) : last(clipIds);
+        const firstOrLast = direction === 'forward' ? first(patternIds) : last(patternIds);
         if (firstOrLast) {
-          state.selectedClipIds = [firstOrLast];
+          state.selectedPatternIds = [firstOrLast];
         }
         return;
       }
@@ -98,85 +98,85 @@ const selectionSlice = createSlice({
       // Cycle to next/previous
       let nextIndex;
       if (direction === 'forward') {
-        nextIndex = (currentIndex + 1) % clipIds.length;
+        nextIndex = (currentIndex + 1) % patternIds.length;
       } else {
-        nextIndex = (currentIndex - 1 + clipIds.length) % clipIds.length;
+        nextIndex = (currentIndex - 1 + patternIds.length) % patternIds.length;
       }
 
-      const nextId = clipIds[nextIndex];
+      const nextId = patternIds[nextIndex];
       if (nextId) {
-        state.selectedClipIds = [nextId];
+        state.selectedPatternIds = [nextId];
       }
     },
 
-    setCurrentLane: (state, action: PayloadAction<ID>) => {
-      state.currentLaneId = action.payload;
+    setCurrentTrack: (state, action: PayloadAction<ID>) => {
+      state.currentTrackId = action.payload;
     },
 
-    clearCurrentLane: (state) => {
-      state.currentLaneId = null;
+    clearCurrentTrack: (state) => {
+      state.currentTrackId = null;
     },
 
     navigateUp: (state, action: PayloadAction<ID[]>) => {
-      const laneIds = action.payload;
+      const trackIds = action.payload;
 
-      if (laneIds.length === 0) {
+      if (trackIds.length === 0) {
         return;
       }
 
-      if (state.currentLaneId === null) {
-        // No current lane, select last lane
-        const lastLane = last(laneIds);
-        state.currentLaneId = lastLane || null;
+      if (state.currentTrackId === null) {
+        // No current track, select last track
+        const lastTrack = last(trackIds);
+        state.currentTrackId = lastTrack || null;
       } else {
-        // Find current lane index
-        const currentIndex = laneIds.indexOf(state.currentLaneId);
+        // Find current track index
+        const currentIndex = trackIds.indexOf(state.currentTrackId);
 
         if (currentIndex > 0) {
-          // Move to previous lane
-          const prevLane = laneIds[currentIndex - 1];
-          state.currentLaneId = prevLane || null;
+          // Move to previous track
+          const prevTrack = trackIds[currentIndex - 1];
+          state.currentTrackId = prevTrack || null;
         }
-        // If at first lane or not found, stay at current lane
+        // If at first track or not found, stay at current track
       }
     },
 
     navigateDown: (state, action: PayloadAction<ID[]>) => {
-      const laneIds = action.payload;
+      const trackIds = action.payload;
 
-      if (laneIds.length === 0) {
+      if (trackIds.length === 0) {
         return;
       }
 
-      if (state.currentLaneId === null) {
-        // No current lane, select first lane
-        const firstLane = first(laneIds);
-        state.currentLaneId = firstLane || null;
+      if (state.currentTrackId === null) {
+        // No current track, select first track
+        const firstTrack = first(trackIds);
+        state.currentTrackId = firstTrack || null;
       } else {
-        // Find current lane index
-        const currentIndex = laneIds.indexOf(state.currentLaneId);
+        // Find current track index
+        const currentIndex = trackIds.indexOf(state.currentTrackId);
 
-        if (currentIndex !== -1 && currentIndex < laneIds.length - 1) {
-          // Move to next lane
-          const nextLane = laneIds[currentIndex + 1];
-          state.currentLaneId = nextLane || null;
+        if (currentIndex !== -1 && currentIndex < trackIds.length - 1) {
+          // Move to next track
+          const nextTrack = trackIds[currentIndex + 1];
+          state.currentTrackId = nextTrack || null;
         }
-        // If at last lane or not found, stay at current lane
+        // If at last track or not found, stay at current track
       }
     },
   },
 });
 
 export const {
-  selectClip,
-  deselectClip,
-  toggleClipSelection,
-  selectMultipleClips,
-  selectAllClips,
+  selectPattern,
+  deselectPattern,
+  togglePatternSelection,
+  selectMultiplePatterns,
+  selectAllPatterns,
   clearSelection,
   cycleSelection,
-  setCurrentLane,
-  clearCurrentLane,
+  setCurrentTrack,
+  clearCurrentTrack,
   navigateUp,
   navigateDown,
 } = selectionSlice.actions;

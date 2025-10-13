@@ -3,7 +3,7 @@
  * TDD tests for localStorage-based project file management
  */
 
-import type { Clip, Lane, TimelineState } from '@/types';
+import type { Pattern, Track, TimelineState } from '@/types';
 import {
   saveProject,
   loadProject,
@@ -23,10 +23,10 @@ describe('storage utilities', () => {
 
   describe('saveProject', () => {
     it('should save a new project to localStorage', () => {
-      const clips: Clip[] = [
-        { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 4 },
+      const patterns: Pattern[] = [
+        { id: 'pattern-1', trackId: 'track-1', position: 0, duration: 4 },
       ];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -40,8 +40,8 @@ describe('storage utilities', () => {
 
       const projectId = saveProject({
         name: 'Test Project',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
       });
 
@@ -54,17 +54,17 @@ describe('storage utilities', () => {
 
       const parsed = JSON.parse(stored!) as ProjectFile;
       expect(parsed.name).toBe('Test Project');
-      expect(parsed.data.clips).toEqual(clips);
-      expect(parsed.data.lanes).toEqual(lanes);
+      expect(parsed.data.patterns).toEqual(patterns);
+      expect(parsed.data.tracks).toEqual(tracks);
       expect(parsed.data.timeline).toEqual(timeline);
       expect(parsed.isTemplate).toBe(false);
     });
 
     it('should update an existing project when id is provided', () => {
-      const initialClips: Clip[] = [
-        { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 4 },
+      const initialPatterns: Pattern[] = [
+        { id: 'pattern-1', trackId: 'track-1', position: 0, duration: 4 },
       ];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -82,8 +82,8 @@ describe('storage utilities', () => {
       // Save initial project
       const projectId = saveProject({
         name: 'Initial Name',
-        clips: initialClips,
-        lanes,
+        patterns: initialPatterns,
+        tracks,
         timeline,
       });
 
@@ -91,16 +91,16 @@ describe('storage utilities', () => {
       jest.advanceTimersByTime(1000);
 
       // Update the project
-      const updatedClips: Clip[] = [
-        { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 8 },
-        { id: 'clip-2', laneId: 'lane-1', position: 8, duration: 4 },
+      const updatedPatterns: Pattern[] = [
+        { id: 'pattern-1', trackId: 'track-1', position: 0, duration: 8 },
+        { id: 'pattern-2', trackId: 'track-1', position: 8, duration: 4 },
       ];
 
       saveProject({
         id: projectId,
         name: 'Updated Name',
-        clips: updatedClips,
-        lanes,
+        patterns: updatedPatterns,
+        tracks,
         timeline,
       });
 
@@ -108,15 +108,15 @@ describe('storage utilities', () => {
       const parsed = JSON.parse(stored!) as ProjectFile;
 
       expect(parsed.name).toBe('Updated Name');
-      expect(parsed.data.clips).toEqual(updatedClips);
+      expect(parsed.data.patterns).toEqual(updatedPatterns);
       expect(parsed.updatedAt).not.toBe(parsed.createdAt);
 
       jest.useRealTimers();
     });
 
     it('should preserve template status when updating', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -131,8 +131,8 @@ describe('storage utilities', () => {
       // Save as template
       const projectId = saveProject({
         name: 'Template',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
         isTemplate: true,
       });
@@ -141,8 +141,8 @@ describe('storage utilities', () => {
       saveProject({
         id: projectId,
         name: 'Updated Template',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
       });
 
@@ -155,10 +155,10 @@ describe('storage utilities', () => {
 
   describe('loadProject', () => {
     it('should load a project from localStorage', () => {
-      const clips: Clip[] = [
-        { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 4 },
+      const patterns: Pattern[] = [
+        { id: 'pattern-1', trackId: 'track-1', position: 0, duration: 4 },
       ];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -172,8 +172,8 @@ describe('storage utilities', () => {
 
       const projectId = saveProject({
         name: 'Test Project',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
       });
 
@@ -182,8 +182,8 @@ describe('storage utilities', () => {
       expect(loaded).toBeTruthy();
       expect(loaded!.id).toBe(projectId);
       expect(loaded!.name).toBe('Test Project');
-      expect(loaded!.data.clips).toEqual(clips);
-      expect(loaded!.data.lanes).toEqual(lanes);
+      expect(loaded!.data.patterns).toEqual(patterns);
+      expect(loaded!.data.tracks).toEqual(tracks);
       expect(loaded!.data.timeline).toEqual(timeline);
     });
 
@@ -201,8 +201,8 @@ describe('storage utilities', () => {
 
   describe('deleteProject', () => {
     it('should delete a project from localStorage', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -216,8 +216,8 @@ describe('storage utilities', () => {
 
       const projectId = saveProject({
         name: 'To Delete',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
       });
 
@@ -240,8 +240,8 @@ describe('storage utilities', () => {
     });
 
     it('should list all saved projects', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -253,9 +253,9 @@ describe('storage utilities', () => {
         minimapVisible: false,
       };
 
-      const id1 = saveProject({ name: 'Project 1', clips, lanes, timeline });
-      const id2 = saveProject({ name: 'Project 2', clips, lanes, timeline });
-      const id3 = saveProject({ name: 'Project 3', clips, lanes, timeline });
+      const id1 = saveProject({ name: 'Project 1', patterns, tracks, timeline });
+      const id2 = saveProject({ name: 'Project 2', patterns, tracks, timeline });
+      const id3 = saveProject({ name: 'Project 3', patterns, tracks, timeline });
 
       const projects = listProjects();
 
@@ -266,8 +266,8 @@ describe('storage utilities', () => {
     });
 
     it('should sort projects by updatedAt descending (most recent first)', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -280,13 +280,13 @@ describe('storage utilities', () => {
       };
 
       // Save projects with different timestamps
-      saveProject({ name: 'Old Project', clips, lanes, timeline });
+      saveProject({ name: 'Old Project', patterns, tracks, timeline });
 
       // Wait a bit to ensure different timestamps
       jest.useFakeTimers();
       jest.advanceTimersByTime(1000);
 
-      saveProject({ name: 'New Project', clips, lanes, timeline });
+      saveProject({ name: 'New Project', patterns, tracks, timeline });
 
       jest.useRealTimers();
 
@@ -305,8 +305,8 @@ describe('storage utilities', () => {
     });
 
     it('should skip corrupted project entries', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -318,7 +318,7 @@ describe('storage utilities', () => {
         minimapVisible: false,
       };
 
-      saveProject({ name: 'Valid Project', clips, lanes, timeline });
+      saveProject({ name: 'Valid Project', patterns, tracks, timeline });
       localStorage.setItem('project:corrupted', 'invalid json');
 
       const projects = listProjects();
@@ -330,10 +330,10 @@ describe('storage utilities', () => {
 
   describe('template management', () => {
     it('should set and get template project', () => {
-      const clips: Clip[] = [
-        { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 4 },
+      const patterns: Pattern[] = [
+        { id: 'pattern-1', trackId: 'track-1', position: 0, duration: 4 },
       ];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -347,8 +347,8 @@ describe('storage utilities', () => {
 
       const projectId = saveProject({
         name: 'Template Project',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
         isTemplate: true,
       });
@@ -374,8 +374,8 @@ describe('storage utilities', () => {
     });
 
     it('should clear template project', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -389,8 +389,8 @@ describe('storage utilities', () => {
 
       const projectId = saveProject({
         name: 'Template',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
         isTemplate: true,
       });
@@ -403,8 +403,8 @@ describe('storage utilities', () => {
     });
 
     it('should update template flag when setting as template', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -418,8 +418,8 @@ describe('storage utilities', () => {
 
       const projectId = saveProject({
         name: 'Regular Project',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
         isTemplate: false,
       });
@@ -431,8 +431,8 @@ describe('storage utilities', () => {
     });
 
     it('should clear previous template when setting new one', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -446,16 +446,16 @@ describe('storage utilities', () => {
 
       const id1 = saveProject({
         name: 'Template 1',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
         isTemplate: true,
       });
 
       const id2 = saveProject({
         name: 'Template 2',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
         isTemplate: true,
       });
@@ -484,8 +484,8 @@ describe('storage utilities', () => {
         throw quotaError;
       });
 
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -498,7 +498,7 @@ describe('storage utilities', () => {
       };
 
       expect(() => {
-        saveProject({ name: 'Too Big', clips, lanes, timeline });
+        saveProject({ name: 'Too Big', patterns, tracks, timeline });
       }).toThrow('Storage quota exceeded');
 
       localStorage.setItem = originalSetItem;
@@ -507,8 +507,8 @@ describe('storage utilities', () => {
 
   describe('data versioning', () => {
     it('should include version number in saved projects', () => {
-      const clips: Clip[] = [];
-      const lanes: Lane[] = [{ id: 'lane-1', name: 'Lane 1' }];
+      const patterns: Pattern[] = [];
+      const tracks: Track[] = [{ id: 'track-1', name: 'Track 1' }];
       const timeline: TimelineState = {
         viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
         playheadPosition: 0,
@@ -522,8 +522,8 @@ describe('storage utilities', () => {
 
       const projectId = saveProject({
         name: 'Versioned Project',
-        clips,
-        lanes,
+        patterns,
+        tracks,
         timeline,
       });
 

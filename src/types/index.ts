@@ -19,24 +19,36 @@ export type Duration = number;
 export type Position = number;
 
 /**
- * Clip - A segment on the timeline representing a section of the song
+ * Pattern - A segment on the timeline representing a section of the song
  */
-export interface Clip {
+export interface Pattern {
   id: ID;
-  laneId: ID;
+  trackId: ID;
   position: Position;
   duration: Duration;
   label?: string;
+  muted?: boolean;
+  patternType?: 'P3' | 'CK';
 }
 
 /**
- * Lane - A horizontal track that contains clips
+ * Track - A horizontal track that contains patterns
  */
-export interface Lane {
+export interface Track {
   id: ID;
   name: string;
   color?: string;
 }
+
+/**
+ * @deprecated Use Pattern instead
+ */
+export type Clip = Pattern;
+
+/**
+ * @deprecated Use Track instead
+ */
+export type Lane = Track;
 
 /**
  * Snap mode type
@@ -68,36 +80,46 @@ export interface TimelineState {
 }
 
 /**
- * Lane State - Manages lanes in the timeline
+ * Track State - Manages tracks in the timeline
  */
-export interface LanesState {
-  lanes: Lane[];
-  editingLaneId: ID | null; // Lane currently being edited
-  movingLaneId: ID | null; // Lane currently animating from a move
+export interface TracksState {
+  tracks: Track[];
+  editingTrackId: ID | null; // Track currently being edited
+  movingTrackId: ID | null; // Track currently animating from a move
 }
 
 /**
- * Clip State - Manages clips in the timeline
+ * Pattern State - Manages patterns in the timeline
  */
-export interface ClipsState {
-  clips: Clip[];
-  editingClipId: ID | null; // Currently editing clip for label changes
+export interface PatternsState {
+  patterns: Pattern[];
+  editingPatternId: ID | null; // Currently editing pattern for label changes
 }
 
 /**
- * Selection State - Manages selected clips and current lane
+ * Selection State - Manages selected patterns and current track
  */
 export interface SelectionState {
-  selectedClipIds: ID[];
-  currentLaneId: ID | null; // Currently selected lane (for navigation when no clips selected)
+  selectedPatternIds: ID[];
+  currentTrackId: ID | null; // Currently selected track (for navigation when no patterns selected)
 }
+
+/**
+ * @deprecated Use TracksState instead
+ */
+export type LanesState = TracksState;
+
+/**
+ * @deprecated Use PatternsState instead
+ */
+export type ClipsState = PatternsState;
 
 /**
  * Application State Root
  */
 export interface RootState {
   timeline: TimelineState;
-  lanes: LanesState;
-  clips: ClipsState;
+  tracks: TracksState;
+  patterns: PatternsState;
   selection: SelectionState;
 }

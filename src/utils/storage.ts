@@ -3,11 +3,11 @@
  * localStorage-based project file management
  */
 
-import type { Clip, Lane, TimelineState } from '@/types';
+import type { Pattern, Track, TimelineState } from '@/types';
 import { logger } from './debug';
 
-// Current data version for future migration support
-const DATA_VERSION = '1.0.0';
+// Current data version - v2.0.0 is a breaking change (Lane→Track, Clip→Pattern)
+const DATA_VERSION = '2.0.0';
 
 // localStorage key prefixes
 const PROJECT_KEY_PREFIX = 'project:';
@@ -23,8 +23,8 @@ export interface ProjectFile {
   updatedAt: string;
   isTemplate: boolean;
   data: {
-    clips: Clip[];
-    lanes: Lane[];
+    patterns: Pattern[];
+    tracks: Track[];
     timeline: TimelineState;
     version: string;
   };
@@ -36,8 +36,8 @@ export interface ProjectFile {
 export interface SaveProjectParams {
   id?: string;
   name: string;
-  clips: Clip[];
-  lanes: Lane[];
+  patterns: Pattern[];
+  tracks: Track[];
   timeline: TimelineState;
   isTemplate?: boolean;
 }
@@ -59,8 +59,8 @@ export const saveProject = (params: SaveProjectParams): string => {
   const {
     id: existingId,
     name,
-    clips,
-    lanes,
+    patterns,
+    tracks,
     timeline,
     isTemplate = false,
   } = params;
@@ -92,8 +92,8 @@ export const saveProject = (params: SaveProjectParams): string => {
     updatedAt: now,
     isTemplate: templateStatus,
     data: {
-      clips,
-      lanes,
+      patterns,
+      tracks,
       timeline,
       version: DATA_VERSION,
     },
@@ -211,8 +211,8 @@ export const setTemplateProject = (projectId: string): void => {
       saveProject({
         id: oldTemplate.id,
         name: oldTemplate.name,
-        clips: oldTemplate.data.clips,
-        lanes: oldTemplate.data.lanes,
+        patterns: oldTemplate.data.patterns,
+        tracks: oldTemplate.data.tracks,
         timeline: oldTemplate.data.timeline,
         isTemplate: false,
       });
@@ -228,8 +228,8 @@ export const setTemplateProject = (projectId: string): void => {
     saveProject({
       id: project.id,
       name: project.name,
-      clips: project.data.clips,
-      lanes: project.data.lanes,
+      patterns: project.data.patterns,
+      tracks: project.data.tracks,
       timeline: project.data.timeline,
       isTemplate: true,
     });

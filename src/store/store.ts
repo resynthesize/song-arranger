@@ -5,8 +5,8 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import timelineReducer from './slices/timelineSlice';
-import lanesReducer from './slices/lanesSlice';
-import clipsReducer from './slices/clipsSlice';
+import tracksReducer from './slices/tracksSlice';
+import patternsReducer from './slices/patternsSlice';
 import selectionReducer from './slices/selectionSlice';
 import crtEffectsReducer from './slices/crtEffectsSlice';
 import projectReducer from './slices/projectSlice';
@@ -16,8 +16,8 @@ import commandPaletteReducer from './slices/commandPaletteSlice';
 export const store = configureStore({
   reducer: {
     timeline: timelineReducer,
-    lanes: lanesReducer,
-    clips: clipsReducer,
+    tracks: tracksReducer,
+    patterns: patternsReducer,
     selection: selectionReducer,
     crtEffects: crtEffectsReducer,
     project: projectReducer,
