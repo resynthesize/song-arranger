@@ -126,6 +126,9 @@ describe('clipsSlice', () => {
 - Explicit types for props and state
 - No `any` types (use `unknown` if needed)
 - Interfaces for data structures, types for unions/utilities
+- **NEVER use non-null assertion operator (`!`)** - always use proper guards and checks instead
+  - Bad: `const item = array[0]!;`
+  - Good: `const item = array[0]; if (!item) return;`
 
 **React Patterns:**
 - Functional components only

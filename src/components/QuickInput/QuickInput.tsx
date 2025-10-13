@@ -94,8 +94,13 @@ const COMMAND_CONFIGS: Record<QuickInputProps['command'], CommandConfig> = {
       if (!match) {
         return { valid: false, error: 'Invalid format. Use bar:beat (e.g., 1:1, 4:3)' };
       }
-      const bar = parseInt(match[1], 10);
-      const beat = parseInt(match[2], 10);
+      const barStr = match[1];
+      const beatStr = match[2];
+      if (!barStr || !beatStr) {
+        return { valid: false, error: 'Invalid format' };
+      }
+      const bar = parseInt(barStr, 10);
+      const beat = parseInt(beatStr, 10);
       if (bar < 1 || beat < 1) {
         return { valid: false, error: 'Bar and beat must be at least 1' };
       }

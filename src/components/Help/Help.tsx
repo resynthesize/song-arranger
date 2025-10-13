@@ -56,19 +56,19 @@ const Help = ({ isOpen, onClose }: HelpProps) => {
 
     // Categorize shortcuts
     if (['delete', 'duplicate', 'duplicateOffset', 'edit', 'changeColor', 'split', 'join'].includes(shortcut.action)) {
-      categories['Clip Operations'].push(entry);
+      categories['Clip Operations']?.push(entry);
     } else if (['selectAll', 'deselectAll', 'cycleForward', 'cycleBackward'].includes(shortcut.action)) {
-      categories['Selection'].push(entry);
+      categories['Selection']?.push(entry);
     } else if (['stop', 'jumpToStart', 'jumpToEnd', 'movePlayheadLeft', 'movePlayheadRight', 'movePlayheadPrevClip', 'movePlayheadNextClip'].includes(shortcut.action)) {
-      categories['Playhead Navigation'].push(entry);
+      categories['Playhead Navigation']?.push(entry);
     } else if (['setDuration1', 'setDuration2', 'setDuration3', 'setDuration4', 'setDuration5', 'setDuration6', 'setDuration7', 'setDuration8', 'setDuration9', 'trimStart', 'trimEnd', 'adjustTempoUp', 'adjustTempoDown'].includes(shortcut.action)) {
-      categories['Clip Duration'].push(entry);
+      categories['Clip Duration']?.push(entry);
     } else if (['frameSelection', 'frameAll', 'zoomIn', 'zoomOut', 'navigateUp', 'navigateDown'].includes(shortcut.action)) {
-      categories['View'].push(entry);
+      categories['View']?.push(entry);
     } else if (['togglePlay'].includes(shortcut.action)) {
-      categories['Playback'].push(entry);
+      categories['Playback']?.push(entry);
     } else {
-      categories['System'].push(entry);
+      categories['System']?.push(entry);
     }
   });
 
@@ -77,8 +77,7 @@ const Help = ({ isOpen, onClose }: HelpProps) => {
       <div className="help-container" ref={panelRef}>
         <TerminalPanel
           title="HELP DOCUMENTATION"
-          width="800px"
-          height="600px"
+          style={{ width: '800px', height: '600px' }}
         >
           <div className="help-content">
             <div className="help-section">

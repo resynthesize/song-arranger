@@ -9,6 +9,7 @@ import type { LanesState, ID } from '@/types';
 const initialState: LanesState = {
   lanes: [],
   editingLaneId: null,
+  movingLaneId: null,
 };
 
 const lanesSlice = createSlice({
@@ -80,6 +81,40 @@ const lanesSlice = createSlice({
         lane.color = color;
       }
     },
+
+    moveLaneUp: (state, action: PayloadAction<ID>) => {
+      const laneId = action.payload;
+      const index = state.lanes.findIndex((l) => l.id === laneId);
+
+      // Can't move first lane up
+      if (index > 0) {
+        // Swap with previous lane
+        const temp = state.lanes[index - 1];
+        state.lanes[index - 1] = state.lanes[index];
+        state.lanes[index] = temp;
+      }
+    },
+
+    moveLaneDown: (state, action: PayloadAction<ID>) => {
+      const laneId = action.payload;
+      const index = state.lanes.findIndex((l) => l.id === laneId);
+
+      // Can't move last lane down
+      if (index >= 0 && index < state.lanes.length - 1) {
+        // Swap with next lane
+        const temp = state.lanes[index + 1];
+        state.lanes[index + 1] = state.lanes[index];
+        state.lanes[index] = temp;
+      }
+    },
+
+    setMovingLane: (state, action: PayloadAction<ID>) => {
+      state.movingLaneId = action.payload;
+    },
+
+    clearMovingLane: (state) => {
+      state.movingLaneId = null;
+    },
   },
 });
 
@@ -90,6 +125,10 @@ export const {
   setEditingLane,
   clearEditingLane,
   setLaneColor,
+  moveLaneUp,
+  moveLaneDown,
+  setMovingLane,
+  clearMovingLane,
 } = lanesSlice.actions;
 
 export default lanesSlice.reducer;

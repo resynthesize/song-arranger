@@ -12,7 +12,6 @@ import { calculateGlobalDuration, calculateSelectedDuration, formatDuration } fr
 import { TerminalButton } from '../TerminalButton';
 import { TerminalInput } from '../TerminalInput';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
-import { DurationDisplay } from '../DurationDisplay';
 import { FileMenu } from '../FileMenu';
 import './MenuBar.css';
 
@@ -185,8 +184,6 @@ const MenuBar = () => {
       {/* Compact controls */}
       <div className="menu-bar__controls">
         <FileMenu />
-
-        <DurationDisplay />
 
         <div className="menu-bar__control">
           <TerminalInput

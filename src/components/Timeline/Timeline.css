@@ -5,7 +5,8 @@
 
 .timeline {
   flex: 1;
-  overflow: hidden; /* Viewport-based scrolling, no native scroll */
+  overflow-y: auto; /* Allow vertical scrolling for lanes */
+  overflow-x: hidden; /* Viewport-based horizontal scrolling */
   background: var(--color-bg);
   position: relative;
 }

@@ -64,17 +64,25 @@ const selectionSlice = createSlice({
 
       // If nothing selected, select first/last
       if (state.selectedClipIds.length === 0) {
-        state.selectedClipIds = [direction === 'forward' ? clipIds[0] : clipIds[clipIds.length - 1]];
+        const firstOrLast = direction === 'forward' ? clipIds[0] : clipIds[clipIds.length - 1];
+        if (firstOrLast) {
+          state.selectedClipIds = [firstOrLast];
+        }
         return;
       }
 
       // Find current selection index
       const currentId = state.selectedClipIds[0];
+      if (!currentId) return;
+
       const currentIndex = clipIds.indexOf(currentId);
 
       if (currentIndex === -1) {
         // Current selection not in list, select first/last
-        state.selectedClipIds = [direction === 'forward' ? clipIds[0] : clipIds[clipIds.length - 1]];
+        const firstOrLast = direction === 'forward' ? clipIds[0] : clipIds[clipIds.length - 1];
+        if (firstOrLast) {
+          state.selectedClipIds = [firstOrLast];
+        }
         return;
       }
 
@@ -86,7 +94,10 @@ const selectionSlice = createSlice({
         nextIndex = (currentIndex - 1 + clipIds.length) % clipIds.length;
       }
 
-      state.selectedClipIds = [clipIds[nextIndex]];
+      const nextId = clipIds[nextIndex];
+      if (nextId) {
+        state.selectedClipIds = [nextId];
+      }
     },
 
     setCurrentLane: (state, action: PayloadAction<ID>) => {

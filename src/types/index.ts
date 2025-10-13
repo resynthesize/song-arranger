@@ -73,6 +73,7 @@ export interface TimelineState {
 export interface LanesState {
   lanes: Lane[];
   editingLaneId: ID | null; // Lane currently being edited
+  movingLaneId: ID | null; // Lane currently animating from a move
 }
 
 /**

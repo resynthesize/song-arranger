@@ -67,17 +67,18 @@ export const DurationDisplay = () => {
         ┌{'─'.repeat(borderWidth)}┐
       </div>
       <div className="duration-display__content" ref={contentRef}>
-        <div className="duration-display__item">
-          <span className="duration-display__label">GLOBAL</span>
-          <span className="duration-display__value" data-testid="duration-global">
-            {globalDurationFormatted}
-          </span>
-        </div>
-        {hasSelection && (
+        {hasSelection ? (
           <div className="duration-display__item">
             <span className="duration-display__label">SELECTED</span>
             <span className="duration-display__value" data-testid="duration-selected">
               {selectedDurationFormatted}
+            </span>
+          </div>
+        ) : (
+          <div className="duration-display__item">
+            <span className="duration-display__label">TOTAL</span>
+            <span className="duration-display__value" data-testid="duration-global">
+              {globalDurationFormatted}
             </span>
           </div>
         )}

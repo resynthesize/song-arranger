@@ -34,6 +34,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const projectId = saveProject({
@@ -70,6 +72,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       // Use fake timers for this test
@@ -120,6 +124,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       // Save as template
@@ -160,6 +166,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const projectId = saveProject({
@@ -202,6 +210,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const projectId = saveProject({
@@ -239,6 +249,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const id1 = saveProject({ name: 'Project 1', clips, lanes, timeline });
@@ -263,16 +275,18 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       // Save projects with different timestamps
-      const id1 = saveProject({ name: 'Old Project', clips, lanes, timeline });
+      saveProject({ name: 'Old Project', clips, lanes, timeline });
 
       // Wait a bit to ensure different timestamps
       jest.useFakeTimers();
       jest.advanceTimersByTime(1000);
 
-      const id2 = saveProject({ name: 'New Project', clips, lanes, timeline });
+      saveProject({ name: 'New Project', clips, lanes, timeline });
 
       jest.useRealTimers();
 
@@ -300,6 +314,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       saveProject({ name: 'Valid Project', clips, lanes, timeline });
@@ -325,6 +341,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const projectId = saveProject({
@@ -365,6 +383,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const projectId = saveProject({
@@ -392,6 +412,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const projectId = saveProject({
@@ -418,6 +440,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const id1 = saveProject({
@@ -469,6 +493,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       expect(() => {
@@ -490,6 +516,8 @@ describe('storage utilities', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'grid',
+        verticalZoom: 100,
+        minimapVisible: false,
       };
 
       const projectId = saveProject({

@@ -16,7 +16,7 @@ interface RulerProps {
 
 const BEATS_PER_BAR = 4; // 4/4 time signature
 
-const Ruler = ({ viewport, snapValue, onPositionClick }: RulerProps) => {
+const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps) => {
   // Calculate visible bars and adaptive grid lines
   const { bars, gridLines } = useMemo(() => {
     // Handle zero width gracefully

@@ -123,7 +123,7 @@ const ColorPicker = ({ selectedColor, onSelectColor, onClose }: ColorPickerProps
           <div className="color-picker__palette">
             {COLOR_PALETTE.map((row, rowIdx) => (
               <div key={rowIdx} className="color-picker__row">
-                {row.map((color, colIdx) => (
+                {row.map((color) => (
                   <button
                     key={color}
                     data-testid={`color-swatch-${color}`}

@@ -72,6 +72,7 @@ const Clip = ({
   const dragStartLaneId = useRef<ID>('');
   const verticalDragDeltaYRef = useRef(0); // Store actual value for mouseup handler
   const inputRef = useRef<HTMLInputElement>(null);
+  const clipRef = useRef<HTMLDivElement>(null);
 
   // Remove 'new' state after animation completes (400ms as defined in CSS)
   useEffect(() => {
@@ -268,8 +269,30 @@ const Clip = ({
   // otherwise use local vertical drag deltaY (for single clip drag)
   const effectiveVerticalDragDeltaY = externalVerticalDragDeltaY ?? verticalDragDeltaY;
 
+  // Debug logging for vertical drag
+  useEffect(() => {
+    if (effectiveVerticalDragDeltaY !== 0 && clipRef.current) {
+      const clipEl = clipRef.current;
+      const laneContent = clipEl.parentElement;
+      const lane = laneContent?.parentElement;
+
+      console.log('Clip vertical drag debug:', {
+        clipId: id,
+        isDragging,
+        effectiveVerticalDragDeltaY,
+        clipTransform: getComputedStyle(clipEl).transform,
+        clipZIndex: getComputedStyle(clipEl).zIndex,
+        laneContentOverflow: laneContent ? getComputedStyle(laneContent).overflow : 'N/A',
+        laneContentOverflowY: laneContent ? getComputedStyle(laneContent).overflowY : 'N/A',
+        laneOverflow: lane ? getComputedStyle(lane).overflow : 'N/A',
+        laneOverflowY: lane ? getComputedStyle(lane).overflowY : 'N/A',
+      });
+    }
+  }, [effectiveVerticalDragDeltaY, isDragging, id]);
+
   return (
     <div
+      ref={clipRef}
       data-testid={`clip-${id}`}
       className={`clip ${isNew ? 'clip--new' : ''} ${
         isSelected ? 'clip--selected' : ''

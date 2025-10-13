@@ -48,8 +48,8 @@ describe('Timeline', () => {
         ],
         editingLaneId: null,
       },
-      clips: { clips: [] },
-      selection: { selectedClipIds: [] },
+      clips: { clips: [], editingClipId: null },
+      selection: { selectedClipIds: [], currentLaneId: null },
     });
 
     render(
@@ -78,8 +78,9 @@ describe('Timeline', () => {
             label: 'Intro',
           },
         ],
+        editingClipId: null,
       },
-      selection: { selectedClipIds: [] },
+      selection: { selectedClipIds: [], currentLaneId: null },
     });
 
     render(
@@ -119,6 +120,8 @@ describe('Timeline', () => {
         tempo: 120,
         snapValue: 1,
         snapMode: 'fixed',
+        verticalZoom: 100,
+        minimapVisible: false,
       },
       lanes: {
         lanes: [{ id: 'lane-1', name: 'Kick' }],
@@ -128,8 +131,9 @@ describe('Timeline', () => {
         clips: [
           { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 4 },
         ],
+        editingClipId: null,
       },
-      selection: { selectedClipIds: [] },
+      selection: { selectedClipIds: [], currentLaneId: null },
     });
 
     render(

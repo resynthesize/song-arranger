@@ -15,6 +15,12 @@ export type KeyboardAction =
   | 'changeColor'
   | 'split'
   | 'join'
+  | 'addClip'
+  // Lane operations
+  | 'addLane'
+  | 'deleteLane'
+  | 'moveLaneUp'
+  | 'moveLaneDown'
   // Selection
   | 'selectAll'
   | 'deselectAll'
@@ -128,6 +134,43 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     key: 'j',
     action: 'join',
     description: 'Join adjacent selected clips'
+  },
+  {
+    key: 'C',
+    shiftKey: true,
+    action: 'addClip',
+    description: 'Add clip to current lane at playhead'
+  },
+
+  // Lane operations
+  {
+    key: 'i',
+    action: 'addLane',
+    description: 'Add new lane'
+  },
+  {
+    key: 'Delete',
+    altKey: true,
+    action: 'deleteLane',
+    description: 'Delete current lane'
+  },
+  {
+    key: 'Backspace',
+    altKey: true,
+    action: 'deleteLane',
+    description: 'Delete current lane'
+  },
+  {
+    key: 'ArrowUp',
+    shiftKey: true,
+    action: 'moveLaneUp',
+    description: 'Move current lane up'
+  },
+  {
+    key: 'ArrowDown',
+    shiftKey: true,
+    action: 'moveLaneDown',
+    description: 'Move current lane down'
   },
 
   // Selection
@@ -291,7 +334,7 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     description: 'Redo'
   },
 
-  // Navigation
+  // Navigation (plain arrow keys - must come AFTER Shift+Arrow shortcuts for proper priority)
   {
     key: 'ArrowUp',
     action: 'navigateUp',
@@ -425,7 +468,8 @@ export const getShortcutsForContext = (
     'commandPalette', 'stop', 'jumpToStart', 'jumpToEnd',
     'movePlayheadLeft', 'movePlayheadRight',
     'movePlayheadPrevClip', 'movePlayheadNextClip',
-    'adjustTempoUp', 'adjustTempoDown', 'frameAll'
+    'adjustTempoUp', 'adjustTempoDown', 'frameAll',
+    'addLane', 'addClip', 'deleteLane', 'moveLaneUp', 'moveLaneDown'
   ];
 
   shortcuts.push(...ALL_SHORTCUTS.filter(s => globalActions.includes(s.action)));

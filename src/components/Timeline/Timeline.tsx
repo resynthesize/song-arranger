@@ -69,7 +69,26 @@ const Timeline = () => {
   );
   const currentLaneId = useAppSelector((state) => state.selection.currentLaneId);
   const editingLaneId = useAppSelector((state) => state.lanes.editingLaneId);
+  const movingLaneId = useAppSelector((state) => state.lanes.movingLaneId);
   const verticalZoom = useAppSelector((state) => state.timeline.verticalZoom);
+
+  // Debug: log vertical zoom and calculated visible lanes
+  useEffect(() => {
+    const laneHeight = (80 * verticalZoom) / 100;
+    const maxVisibleLanes = Math.floor(viewport.heightPx / laneHeight);
+    console.log('Timeline Vertical Zoom Debug:', {
+      verticalZoom: `${verticalZoom}%`,
+      laneHeight: `${laneHeight}px`,
+      viewportHeight: `${viewport.heightPx}px`,
+      maxVisibleLanes,
+      totalLanes: lanes.length
+    });
+  }, [verticalZoom, viewport.heightPx, lanes.length]);
+
+  // Debug: log movingLaneId changes
+  useEffect(() => {
+    console.log('Timeline: movingLaneId changed to', movingLaneId);
+  }, [movingLaneId]);
 
   // Keep clips in a ref so callbacks can access them without changing reference
   const clipsRef = useRef(clips);
@@ -134,7 +153,7 @@ const Timeline = () => {
 
   // Handle clip movement
   const handleClipMove = useCallback(
-    (clipId: ID, newPosition: Position, delta: number) => {
+    (clipId: ID, newPosition: Position, _delta: number) => {
       if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
         // Ganged move: calculate incremental delta from last position
         // If this is the first move, get the current position from Redux
@@ -438,10 +457,13 @@ const Timeline = () => {
       // Update selection
       if (selectedIds.length > 0) {
         // Select first clip and toggle the rest
-        dispatch(selectClip(selectedIds[0]));
-        selectedIds.slice(1).forEach((clipId) => {
-          dispatch(toggleClipSelection(clipId));
-        });
+        const firstClipId = selectedIds[0];
+        if (firstClipId) {
+          dispatch(selectClip(firstClipId));
+          selectedIds.slice(1).forEach((clipId) => {
+            dispatch(toggleClipSelection(clipId));
+          });
+        }
       } else {
         // Clear selection if no clips were selected
         dispatch(clearSelection());
@@ -528,6 +550,7 @@ const Timeline = () => {
                 verticalZoom={verticalZoom}
                 isCurrent={lane.id === currentLaneId}
                 isEditing={editingLaneId === lane.id}
+                isMoving={movingLaneId === lane.id}
                 onNameChange={handleNameChange}
                 onColorChange={handleColorChange}
                 onStartEditing={handleStartEditing}

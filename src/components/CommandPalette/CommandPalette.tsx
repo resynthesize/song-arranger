@@ -17,15 +17,8 @@ export interface CommandPaletteProps {
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose }) => {
   const dispatch = useAppDispatch();
-  // Select only the state we need instead of the entire root state
-  const clips = useAppSelector(state => state.clips.clips);
-  const lanes = useAppSelector(state => state.lanes.lanes);
-  const selectedClipIds = useAppSelector(state => state.selection.selectedClipIds);
-  const tempo = useAppSelector(state => state.timeline.tempo);
-  const viewport = useAppSelector(state => state.timeline.viewport);
-
-  // Build a minimal state object for commands that need it
-  const state = { clips: { clips }, lanes: { lanes }, selection: { selectedClipIds }, timeline: { tempo, viewport } };
+  // Get the full state for command functions
+  const state = useAppSelector(state => state);
 
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1);

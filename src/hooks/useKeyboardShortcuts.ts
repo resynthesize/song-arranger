@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { findMatchingShortcut, getShortcutsForContext, type KeyboardContext } from '@/utils/keyboard';
+import { findMatchingShortcut, type KeyboardContext } from '@/utils/keyboard';
 import {
   removeClips,
   duplicateClips,
@@ -14,6 +14,7 @@ import {
   setClipsDuration,
   trimClipStart,
   trimClipEnd,
+  addClip,
 } from '@/store/slices/clipsSlice';
 import {
   zoomIn,
@@ -38,6 +39,7 @@ import {
   navigateUp as navigateUpAction,
   navigateDown as navigateDownAction,
 } from '@/store/slices/selectionSlice';
+import { addLane, removeLane, moveLaneUp, moveLaneDown, setMovingLane, clearMovingLane } from '@/store/slices/lanesSlice';
 import { selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
 import {
   findNearestClipEast,
@@ -57,6 +59,7 @@ export const useKeyboardShortcuts = () => {
   const lanes = useAppSelector((state) => state.lanes.lanes);
   const playheadPosition = useAppSelector((state) => state.timeline.playheadPosition);
   const effectiveSnapValue = useAppSelector(selectEffectiveSnapValue);
+  const currentLaneId = useAppSelector((state) => state.selection.currentLaneId);
 
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -66,18 +69,6 @@ export const useKeyboardShortcuts = () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Debug logging for bracket keys with modifiers
-      if ((event.key === '[' || event.key === ']' || event.key === '{' || event.key === '}') && (event.ctrlKey || event.shiftKey)) {
-        console.log('Bracket key detected:', {
-          key: event.key,
-          code: event.code,
-          ctrlKey: event.ctrlKey,
-          shiftKey: event.shiftKey,
-          altKey: event.altKey,
-          metaKey: event.metaKey
-        });
-      }
-
       // Build current context
       const context: KeyboardContext = {
         hasSelection: selectedClipIds.length > 0,
@@ -89,19 +80,7 @@ export const useKeyboardShortcuts = () => {
       const shortcut = findMatchingShortcut(event, context);
 
       if (!shortcut) {
-        // Debug log when no shortcut matches for bracket keys
-        if ((event.key === '[' || event.key === ']' || event.key === '{' || event.key === '}') && (event.ctrlKey || event.shiftKey)) {
-          console.log('No matching shortcut found for:', event.key, 'Context:', context);
-          console.log('Available shortcuts:', getShortcutsForContext(context).filter(s =>
-            s.action === 'verticalZoomIn' || s.action === 'verticalZoomOut'
-          ));
-        }
         return;
-      }
-
-      // Debug log when shortcut is found
-      if (shortcut.action === 'verticalZoomIn' || shortcut.action === 'verticalZoomOut') {
-        console.log('Vertical zoom shortcut matched:', shortcut);
       }
 
       // Prevent default browser behavior
@@ -133,7 +112,9 @@ export const useKeyboardShortcuts = () => {
           if (selectedClipIds.length > 0) {
             // Split the first selected clip at playhead position
             const clipId = selectedClipIds[0];
-            dispatch(splitClip({ clipId, position: playheadPosition }));
+            if (clipId) {
+              dispatch(splitClip({ clipId, position: playheadPosition }));
+            }
           }
           break;
 
@@ -247,14 +228,18 @@ export const useKeyboardShortcuts = () => {
         case 'trimStart':
           if (selectedClipIds.length > 0) {
             const clipId = selectedClipIds[0];
-            dispatch(trimClipStart({ clipId, amount: effectiveSnapValue }));
+            if (clipId) {
+              dispatch(trimClipStart({ clipId, amount: effectiveSnapValue }));
+            }
           }
           break;
 
         case 'trimEnd':
           if (selectedClipIds.length > 0) {
             const clipId = selectedClipIds[0];
-            dispatch(trimClipEnd({ clipId, amount: effectiveSnapValue }));
+            if (clipId) {
+              dispatch(trimClipEnd({ clipId, amount: effectiveSnapValue }));
+            }
           }
           break;
 
@@ -405,6 +390,55 @@ export const useKeyboardShortcuts = () => {
           console.log('Change color (not yet implemented)');
           break;
 
+        case 'addLane':
+          dispatch(addLane({}));
+          break;
+
+        case 'deleteLane':
+          if (currentLaneId) {
+            dispatch(removeLane(currentLaneId));
+          }
+          break;
+
+        case 'moveLaneUp':
+          if (currentLaneId) {
+            console.log('moveLaneUp: Setting moving lane', currentLaneId);
+            dispatch(setMovingLane(currentLaneId));
+            dispatch(moveLaneUp(currentLaneId));
+            setTimeout(() => {
+              console.log('moveLaneUp: Clearing moving lane');
+              dispatch(clearMovingLane());
+            }, 400);
+          } else {
+            console.log('moveLaneUp: No current lane ID');
+          }
+          break;
+
+        case 'moveLaneDown':
+          if (currentLaneId) {
+            console.log('moveLaneDown: Setting moving lane', currentLaneId);
+            dispatch(setMovingLane(currentLaneId));
+            dispatch(moveLaneDown(currentLaneId));
+            setTimeout(() => {
+              console.log('moveLaneDown: Clearing moving lane');
+              dispatch(clearMovingLane());
+            }, 400);
+          } else {
+            console.log('moveLaneDown: No current lane ID');
+          }
+          break;
+
+        case 'addClip':
+          if (currentLaneId) {
+            // Add clip at playhead position on current lane
+            dispatch(addClip({
+              laneId: currentLaneId,
+              position: playheadPosition,
+              duration: 4, // Default 1 bar (4 beats)
+            }));
+          }
+          break;
+
         case 'help':
           setShowHelp(true);
           break;
@@ -429,7 +463,7 @@ export const useKeyboardShortcuts = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [dispatch, selectedClipIds, isEditingLane, clips, lanes, playheadPosition, effectiveSnapValue]);
+  }, [dispatch, selectedClipIds, isEditingLane, clips, lanes, playheadPosition, effectiveSnapValue, currentLaneId]);
 
   return {
     showHelp,

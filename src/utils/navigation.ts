@@ -3,7 +3,7 @@
  * Functions for finding clips in different directions for arrow key navigation
  */
 
-import type { Clip, Lane, ID } from '@/types';
+import type { Clip, Lane } from '@/types';
 
 /**
  * Calculate the center position of a clip

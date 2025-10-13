@@ -10,13 +10,13 @@ import { calculateGridSnap } from '@/utils/snap';
 // Discrete zoom levels for better UX
 // From 0.25px/beat (ultra zoomed out, ~1024 bars visible) to 800px/beat (very zoomed in, 1/16th notes)
 const ZOOM_LEVELS = [0.25, 0.5, 1, 2, 5, 10, 25, 50, 100, 200, 400, 800] as const; // pixels per beat
-const MIN_ZOOM = ZOOM_LEVELS[0];
-const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
+const MIN_ZOOM = ZOOM_LEVELS[0] ?? 0.25;
+const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1] ?? 800;
 
 // Vertical zoom constants
-const MIN_VERTICAL_ZOOM = 10; // 10% - 8px lane height (fits ~50-100 tracks)
-const MAX_VERTICAL_ZOOM = 150; // 150% - 120px lane height
-const VERTICAL_ZOOM_STEP = 10; // Zoom in/out by 10% at a time
+const MIN_VERTICAL_ZOOM = 10; // 10% - 8px lane height (~75 tracks in 600px viewport)
+const MAX_VERTICAL_ZOOM = 150; // 150% - 120px lane height (~5 tracks in 600px viewport)
+const VERTICAL_ZOOM_STEP = 10; // Zoom in/out by 10% at a time for faster control
 
 const initialState: TimelineState = {
   viewport: {

@@ -35,7 +35,7 @@ function App() {
   const clips = useAppSelector((state) => state.clips.clips);
 
   // Initialize keyboard shortcuts and get modal states
-  const { showHelp, setShowHelp, showSettings, setShowSettings, showCommandPalette, setShowCommandPalette, showQuickInput, setShowQuickInput, quickInputCommand } = useKeyboardShortcuts();
+  const { showHelp, setShowHelp, showCommandPalette, setShowCommandPalette, showQuickInput, setShowQuickInput, quickInputCommand } = useKeyboardShortcuts();
 
   // Calculate total timeline length
   const timelineLength = clips.reduce((max, clip) => {

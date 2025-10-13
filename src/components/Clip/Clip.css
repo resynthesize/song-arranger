@@ -5,7 +5,9 @@
 
 .clip {
   position: absolute;
-  height: 60px;
+  /* Stretch to fill lane height with minimal margin (works even at small zoom) */
+  top: 2px;
+  bottom: 2px;
   background: var(--color-bg-elevated);
   border: var(--border-width-base) solid var(--clip-color, var(--color-secondary));
   cursor: pointer;

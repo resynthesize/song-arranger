@@ -38,12 +38,16 @@ const createTestStore = (config?: {
         tempo,
         snapValue: 1,
         snapMode: 'grid' as const,
+        verticalZoom: 100,
+        minimapVisible: false,
       },
       clips: {
         clips,
+        editingClipId: null,
       },
       selection: {
         selectedClipIds,
+        currentLaneId: null,
       },
     },
   });

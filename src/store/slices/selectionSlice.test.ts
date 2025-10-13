@@ -39,7 +39,7 @@ describe('selectionSlice', () => {
     });
 
     it('should not add duplicates', () => {
-      const state = { selectedClipIds: ['clip-1'] };
+      const state: SelectionState = { selectedClipIds: ['clip-1'], currentLaneId: null };
       const newState = reducer(state, selectClip('clip-1'));
       expect(newState.selectedClipIds).toEqual(['clip-1']);
     });

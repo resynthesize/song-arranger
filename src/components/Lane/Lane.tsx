@@ -23,6 +23,7 @@ interface LaneProps {
   verticalZoom: number; // Vertical zoom percentage (50-150)
   isCurrent: boolean; // Is this the current lane for navigation
   isEditing: boolean;
+  isMoving: boolean; // Is this lane currently animating from a move
   onNameChange: (laneId: ID, newName: string) => void;
   onColorChange?: (laneId: ID, color: string) => void;
   onStartEditing: (laneId: ID) => void;
@@ -51,6 +52,7 @@ const Lane = ({
   verticalZoom,
   isCurrent,
   isEditing,
+  isMoving,
   onNameChange,
   onColorChange,
   onStartEditing,
@@ -68,6 +70,21 @@ const Lane = ({
 }: LaneProps) => {
   // Calculate lane height from vertical zoom (base height is 80px)
   const laneHeight = (80 * verticalZoom) / 100;
+
+  // Debug: log when isMoving changes
+  useEffect(() => {
+    console.log(`Lane ${id} (${name}): isMoving = ${isMoving}, timestamp = ${Date.now()}`);
+  }, [isMoving, id, name]);
+
+  // Debug: log className when it changes
+  const laneClassName = `lane ${isCurrent ? 'lane--current' : ''} ${isMoving ? 'lane--moving' : ''}`;
+  useEffect(() => {
+    console.log(`Lane ${id}: className = "${laneClassName}", timestamp = ${Date.now()}`);
+  }, [id, laneClassName]);
+
+  // Scale padding for lane header based on zoom (base padding is 16px)
+  const headerPadding = Math.max(2, (16 * verticalZoom) / 100);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const gridCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -94,6 +111,34 @@ const Lane = ({
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  // Force overflow: visible on lane content (both axes must be same)
+  // CSS spec: if overflow-x is hidden and overflow-y is visible, browser converts overflow-y to auto
+  useEffect(() => {
+    if (contentRef.current) {
+      const element = contentRef.current;
+      element.style.overflow = 'visible';
+
+      console.log('Lane.tsx: Setting overflow to visible on mount');
+      console.log('Lane.tsx: Initial computed overflow:', getComputedStyle(element).overflow);
+
+      // Watch for changes
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            console.log('Lane.tsx: Style attribute changed!', {
+              overflow: getComputedStyle(element).overflow,
+              overflowY: getComputedStyle(element).overflowY,
+            });
+          }
+        });
+      });
+
+      observer.observe(element, { attributes: true, attributeFilter: ['style'] });
+
+      return () => observer.disconnect();
+    }
+  }, []);
 
   // Draw adaptive grid lines on canvas - matches ruler's 4-division grid system
   useEffect(() => {
@@ -269,8 +314,12 @@ const Lane = ({
   ];
 
   return (
-    <div className={`lane ${isCurrent ? 'lane--current' : ''}`} data-testid={`lane-${id}`} style={{ minHeight: `${laneHeight}px` }}>
-      <div className="lane__header">
+    <div
+      className={laneClassName}
+      data-testid={`lane-${id}`}
+      style={{ height: `${laneHeight}px` }}
+    >
+      <div className="lane__header" style={{ padding: `${headerPadding}px` }}>
         {isCurrent && <span className="lane__current-indicator">&gt;</span>}
         <button
           className="lane__color-swatch"
@@ -294,14 +343,6 @@ const Lane = ({
             {name}
           </div>
         )}
-        <button
-          className="lane__remove-button"
-          onClick={handleRemove}
-          title="Remove lane"
-          data-testid={`lane-${id}-remove-button`}
-        >
-          ×
-        </button>
       </div>
       <div
         ref={contentRef}
