@@ -3,19 +3,28 @@
  * Central export for all terminal-styled components
  */
 
-export { TerminalButton } from './TerminalButton';
-export type { TerminalButtonProps } from './TerminalButton';
+// Atoms - Primitive UI building blocks
+export { TerminalButton } from './atoms/TerminalButton';
+export type { TerminalButtonProps } from './atoms/TerminalButton';
 
-export { TerminalInput } from './TerminalInput';
-export type { TerminalInputProps } from './TerminalInput';
+export { TerminalInput } from './atoms/TerminalInput';
+export type { TerminalInputProps } from './atoms/TerminalInput';
 
+export { BlockCursor } from './atoms/BlockCursor';
+export type { BlockCursorProps } from './atoms/BlockCursor';
+
+export { default as CRTEffects } from './atoms/CRTEffects';
+
+export { TerminalNoise } from './atoms/TerminalNoise';
+export type { TerminalNoiseProps } from './atoms/TerminalNoise';
+
+export { DurationDisplay } from './atoms/DurationDisplay';
+export type { DurationDisplayProps } from './atoms/DurationDisplay';
+
+// Molecules - Simple component combinations
 export { TerminalPanel } from './TerminalPanel';
 export type { TerminalPanelProps } from './TerminalPanel';
 
-export { BlockCursor } from './BlockCursor';
-export type { BlockCursorProps } from './BlockCursor';
-
+// Organisms - Complex, standalone components
 export { TerminalMenu } from './TerminalMenu';
 export type { TerminalMenuProps, TerminalMenuItem } from './TerminalMenu';
-
-export { default as CRTEffects } from './CRTEffects';

@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { TerminalPanel } from '@/components/TerminalPanel';
-import { TerminalInput } from '@/components/TerminalInput';
+import { TerminalInput } from '@/components/atoms/TerminalInput';
 import { searchCommands, addToRecentCommands, getRecentCommandObjects } from '@/utils/commands';
 import './CommandPalette.css';
 

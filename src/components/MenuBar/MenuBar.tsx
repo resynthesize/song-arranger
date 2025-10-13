@@ -9,7 +9,7 @@ import { zoomIn, zoomOut, setViewportOffset } from '@/store/slices/timelineSlice
 import { addLane } from '@/store/slices/lanesSlice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
 import { selectAllClips, selectAllLanes, selectTimelineEndPosition } from '@/store/selectors';
-import { TerminalButton } from '../TerminalButton';
+import { TerminalButton } from '../atoms/TerminalButton';
 import { FileMenu } from '../FileMenu';
 import Minimap from '../Minimap';
 import './MenuBar.css';

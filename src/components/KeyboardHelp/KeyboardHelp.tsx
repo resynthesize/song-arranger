@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { TerminalPanel } from '@/components/TerminalPanel';
-import { TerminalButton } from '@/components/TerminalButton';
+import { TerminalButton } from '@/components/atoms/TerminalButton';
 import './KeyboardHelp.css';
 
 export interface KeyboardHelpProps {
