@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import { useAppSelector } from '@/store/hooks';
-import { RulerTick } from '../molecules/RulerTick';
+import { RulerTick } from '../../molecules/RulerTick';
 import type { ViewportState } from '@/types';
 import { beatsToViewportPx, viewportPxToBeats } from '@/utils/viewport';
 import { calculateGridMetrics } from '@/utils/grid';

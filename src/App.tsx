@@ -11,7 +11,7 @@ import { getTemplateProject } from './utils/storage';
 import { logger } from './utils/debug';
 import BootSequence from './components/BootSequence';
 import MenuBar from './components/MenuBar';
-import Timeline from './components/Timeline';
+import Timeline from './components/organisms/Timeline';
 import CommandFooter from './components/CommandFooter';
 import CRTEffects from './components/atoms/CRTEffects';
 import TerminalNoise from './components/atoms/TerminalNoise';

@@ -11,7 +11,7 @@ import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
 import { selectAllClips, selectAllLanes, selectTimelineEndPosition } from '@/store/selectors';
 import { TerminalButton } from '../atoms/TerminalButton';
 import { FileMenu } from '../FileMenu';
-import Minimap from '../Minimap';
+import Minimap from '../organisms/Minimap';
 import './MenuBar.css';
 
 const MenuBar = () => {

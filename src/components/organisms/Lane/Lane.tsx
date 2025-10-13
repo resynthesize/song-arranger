@@ -5,10 +5,10 @@
 
 import { useRef, useEffect, useMemo, useState, MouseEvent, memo } from 'react';
 import Clip from '../Clip';
-import ContextMenu, { type MenuItem } from '../ContextMenu';
+import ContextMenu, { type MenuItem } from '../../ContextMenu';
 import ColorPicker from '../ColorPicker';
 import GridCanvas from './GridCanvas';
-import { LaneHeader } from '../molecules/LaneHeader';
+import { LaneHeader } from '../../molecules/LaneHeader';
 import type { ID, Clip as ClipType, Position, Duration, ViewportState } from '@/types';
 import { isRangeVisible } from '@/utils/viewport';
 import { useDragToCreateClip } from '@/hooks/useDragToCreateClip';
