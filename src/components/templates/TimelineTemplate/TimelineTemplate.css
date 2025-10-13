@@ -1,0 +1,11 @@
+/**
+ * TimelineTemplate Styles
+ * Layout for the main timeline view
+ */
+
+.timeline-template {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}

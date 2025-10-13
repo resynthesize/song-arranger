@@ -10,9 +10,7 @@ import { loadProjectById } from './store/slices/projectSlice';
 import { getTemplateProject } from './utils/storage';
 import { logger } from './utils/debug';
 import BootSequence from './components/BootSequence';
-import MenuBar from './components/MenuBar';
-import Timeline from './components/organisms/Timeline';
-import CommandFooter from './components/CommandFooter';
+import { TimelineTemplate } from './components/templates';
 import CRTEffects from './components/atoms/CRTEffects';
 import TerminalNoise from './components/atoms/TerminalNoise';
 import Help from './components/Help';
@@ -54,9 +52,7 @@ function App() {
 
   return (
     <div className={`app ${crtEffectsEnabled ? '' : 'no-crt-effects'}`}>
-      <MenuBar />
-      <Timeline />
-      <CommandFooter
+      <TimelineTemplate
         hasSelection={selectedClipIds.length > 0}
         selectionCount={selectedClipIds.length}
         isEditing={isEditingLane}
