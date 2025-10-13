@@ -218,11 +218,11 @@ describe('Minimap', () => {
     });
 
     it('should render all lanes with fixed height', () => {
-      render(<Minimap {...defaultProps} />);
+      render(<Minimap {...defaultProps} embedded={false} />);
       const canvas = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
-      // Canvas height should accommodate all lanes
-      // With 3 lanes, expect height to be at least 3 * lane height
-      expect(canvas.height).toBeGreaterThanOrEqual(60); // 3 lanes * 20px each
+      // Canvas height should accommodate all lanes in overlay mode
+      // With 3 lanes, expect height: 3 * 20px + 2 * 4px padding = 68px
+      expect(canvas.height).toBe(68);
     });
   });
 

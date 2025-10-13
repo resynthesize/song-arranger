@@ -13,6 +13,8 @@ import clipsReducer from './store/slices/clipsSlice';
 import selectionReducer from './store/slices/selectionSlice';
 import crtEffectsReducer from './store/slices/crtEffectsSlice';
 import projectReducer from './store/slices/projectSlice';
+import quickInputReducer from './store/slices/quickInputSlice';
+import commandPaletteReducer from './store/slices/commandPaletteSlice';
 
 // Mock the storage util
 jest.mock('./utils/storage', () => ({
@@ -29,6 +31,8 @@ describe('App', () => {
         selection: selectionReducer,
         crtEffects: crtEffectsReducer,
         project: projectReducer,
+        quickInput: quickInputReducer,
+        commandPalette: commandPaletteReducer,
       },
       preloadedState: initialState,
     });

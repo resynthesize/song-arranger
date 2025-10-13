@@ -175,12 +175,36 @@ describe('Lane', () => {
     render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
 
     const laneContent = screen.getByTestId('lane-lane-1-content');
-    await userEvent.dblClick(laneContent);
 
-    expect(onDoubleClick).toHaveBeenCalled();
+    // Mock getBoundingClientRect
+    const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+      left: 100,
+      top: 0,
+      right: 900,
+      bottom: 80,
+      width: 800,
+      height: 80,
+      x: 100,
+      y: 0,
+      toJSON: () => {},
+    });
+    laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+    // Use the simulateDoubleClick helper which works with the new drag-to-create implementation
+    simulateDoubleClick(laneContent, 200, 40);
+
+    // Complete the interaction with mouseup
+    fireEvent.mouseUp(document, {
+      clientX: 200,
+      clientY: 40,
+    });
+
+    await waitFor(() => {
+      expect(onDoubleClick).toHaveBeenCalled();
+    });
   });
 
-  it('should calculate click position in beats', () => {
+  it('should calculate click position in beats', async () => {
     const onDoubleClick = jest.fn();
     render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
 
@@ -203,16 +227,21 @@ describe('Lane', () => {
 
     // Simulate double-click at x=500, which is 400px from left
     // With viewport.offsetBeats=0 and viewport.zoom=100, position = 0 + 400/100 = 4 beats
-    const dblClickEvent = new MouseEvent('dblclick', {
-      bubbles: true,
-      clientX: 500,
-    });
-    laneContent.dispatchEvent(dblClickEvent);
+    simulateDoubleClick(laneContent, 500, 40);
 
-    expect(onDoubleClick).toHaveBeenCalled();
-    const callArgs = onDoubleClick.mock.calls[0] as [string, number];
+    // Simulate mouseup at same position (quick click creates default 4-beat clip)
+    fireEvent.mouseUp(document, {
+      clientX: 500,
+      clientY: 40,
+    });
+
+    await waitFor(() => {
+      expect(onDoubleClick).toHaveBeenCalled();
+    });
+    const callArgs = onDoubleClick.mock.calls[0] as [string, number, number];
     expect(callArgs[0]).toBe('lane-1');
     expect(callArgs[1]).toBe(4); // Position should be 4 beats
+    expect(callArgs[2]).toBe(4); // Default duration is 4 beats
   });
 
   describe('Click-and-drag clip creation', () => {
