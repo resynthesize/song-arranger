@@ -1,0 +1,45 @@
+/**
+ * LaneHeader Molecule Styles
+ * Extracted from Lane.css
+ */
+
+.lane-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 255, 0, 0.03);
+  border-right: 1px solid var(--color-grid, #003300);
+  min-width: 200px;
+  max-width: 200px;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.lane-header__current-indicator {
+  color: var(--color-primary, #00ff00);
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* ColorSwatch styles are now handled by the ColorSwatch molecule */
+
+.lane-header__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.lane-header__name-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--color-primary, #00ff00);
+  color: var(--color-primary, #00ff00);
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: inherit;
+}

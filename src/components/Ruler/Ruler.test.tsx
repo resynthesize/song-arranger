@@ -169,7 +169,7 @@ describe('Ruler', () => {
     it('should style bar numbers with primary color', () => {
       renderWithProvider(<Ruler {...defaultProps} />);
       const barNumber = screen.getByTestId('ruler-bar-1');
-      expect(barNumber).toHaveClass('ruler__bar-number');
+      expect(barNumber).toHaveClass('ruler-tick__bar-number');
     });
 
     it('should style grid markers differently from bar numbers', () => {
@@ -229,10 +229,10 @@ describe('Ruler', () => {
   describe('Visual Hierarchy', () => {
     it('should render bars (downbeats) with bar class', () => {
       renderWithProvider(<Ruler {...defaultProps} />);
-      const barNumbers = document.querySelectorAll('.ruler__bar-number');
+      const barNumbers = document.querySelectorAll('.ruler-tick__bar-number');
       expect(barNumbers.length).toBeGreaterThan(0);
       // Bar numbers should have the bar class
-      expect(barNumbers[0]).toHaveClass('ruler__bar-number');
+      expect(barNumbers[0]).toHaveClass('ruler-tick__bar-number');
     });
 
     it('should render grid lines with adaptive spacing', () => {

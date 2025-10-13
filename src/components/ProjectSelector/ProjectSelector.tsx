@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { TerminalPanel } from '../TerminalPanel';
+import { TerminalPanel } from '../molecules/TerminalPanel';
 import type { ProjectFile } from '@/utils/storage';
 import './ProjectSelector.css';
 

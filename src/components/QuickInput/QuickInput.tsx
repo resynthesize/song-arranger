@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { TerminalPanel } from '@/components/TerminalPanel';
+import { TerminalPanel } from '@/components/molecules/TerminalPanel';
 import { TerminalInput } from '@/components/atoms/TerminalInput';
 import { TerminalButton } from '@/components/atoms/TerminalButton';
 import './QuickInput.css';

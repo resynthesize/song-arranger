@@ -191,13 +191,13 @@ describe('Clip', () => {
     it('should have w-resize cursor on left handle', () => {
       render(<Clip {...defaultProps} />);
       const leftHandle = screen.getByTestId('clip-clip-1-handle-left');
-      expect(leftHandle).toHaveClass('clip__handle--left');
+      expect(leftHandle).toHaveClass('clip-handle--left');
     });
 
     it('should have e-resize cursor on right handle', () => {
       render(<Clip {...defaultProps} />);
       const rightHandle = screen.getByTestId('clip-clip-1-handle-right');
-      expect(rightHandle).toHaveClass('clip__handle--right');
+      expect(rightHandle).toHaveClass('clip-handle--right');
     });
   });
 

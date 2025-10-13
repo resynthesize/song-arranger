@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState, useRef } from 'react';
-import { TerminalPanel } from '../TerminalPanel';
+import { TerminalPanel } from '../molecules/TerminalPanel';
 import './SaveAsDialog.css';
 
 interface SaveAsDialogProps {

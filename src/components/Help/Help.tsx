@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { TerminalPanel } from '../TerminalPanel';
+import { TerminalPanel } from '../molecules/TerminalPanel';
 import { TerminalButton } from '../atoms/TerminalButton';
 import { getAllShortcuts, formatShortcut, type KeyboardAction } from '@/utils/keyboard';
 import './Help.css';

@@ -5,6 +5,7 @@
 
 import { useMemo } from 'react';
 import { useAppSelector } from '@/store/hooks';
+import { RulerTick } from '../molecules/RulerTick';
 import type { ViewportState } from '@/types';
 import { beatsToViewportPx, viewportPxToBeats } from '@/utils/viewport';
 import { calculateGridMetrics } from '@/utils/grid';
@@ -92,26 +93,13 @@ const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps)
       <div className="ruler__content">
         {/* Bar numbers and time markers */}
         {bars.map(({ barNumber, position, beats }) => (
-          <div
+          <RulerTick
             key={`bar-${barNumber.toString()}`}
-            className="ruler__bar-container"
-            style={{ left: `${position.toString()}px` }}
-          >
-            <div
-              className="ruler__bar-number"
-              data-testid={`ruler-bar-${barNumber.toString()}`}
-              onClick={() => { handleClick(position); }}
-            >
-              {barNumber}
-            </div>
-            <div
-              className="ruler__time-marker"
-              data-testid={`ruler-time-${barNumber.toString()}`}
-              onClick={() => { handleClick(position); }}
-            >
-              {beatsToTimeString(beats, tempo)}
-            </div>
-          </div>
+            barNumber={barNumber}
+            position={position}
+            timeString={beatsToTimeString(beats, tempo)}
+            onClick={handleClick}
+          />
         ))}
 
         {/* Grid markers - always 4 divisions between bar numbers */}

@@ -1,0 +1,43 @@
+/**
+ * DialogHeader Molecule Styles
+ */
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-grid, #003300);
+  background: rgba(0, 255, 0, 0.02);
+}
+
+.dialog-header__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--color-primary, #00ff00);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dialog-header__close {
+  background: transparent;
+  border: 1px solid var(--color-grid, #003300);
+  color: var(--color-primary, #00ff00);
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 16px;
+  line-height: 1;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.dialog-header__close:hover {
+  border-color: var(--color-primary, #00ff00);
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.dialog-header__close:focus {
+  outline: 1px solid var(--color-primary, #00ff00);
+  outline-offset: 2px;
+}

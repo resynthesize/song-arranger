@@ -3,11 +3,12 @@
  * Horizontal lane that contains clips
  */
 
-import { useRef, useEffect, useMemo, useState, KeyboardEvent, MouseEvent, memo } from 'react';
+import { useRef, useEffect, useMemo, useState, MouseEvent, memo } from 'react';
 import Clip from '../Clip';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
 import ColorPicker from '../ColorPicker';
 import GridCanvas from './GridCanvas';
+import { LaneHeader } from '../molecules/LaneHeader';
 import type { ID, Clip as ClipType, Position, Duration, ViewportState } from '@/types';
 import { isRangeVisible } from '@/utils/viewport';
 import { useDragToCreateClip } from '@/hooks/useDragToCreateClip';
@@ -91,7 +92,6 @@ const Lane = ({
   // Scale padding for lane header based on zoom (base padding is 16px)
   const headerPadding = Math.max(2, (16 * verticalZoom) / 100);
 
-  const inputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; position: number } | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -116,14 +116,6 @@ const Lane = ({
       return isRangeVisible(clipStart, clipEnd, viewport, 200);
     });
   }, [laneClips, viewport]);
-
-  // Auto-focus input when editing starts
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isEditing]);
 
   // Force overflow: visible on lane content (both axes must be same)
   // CSS spec: if overflow-x is hidden and overflow-y is visible, browser converts overflow-y to auto
@@ -152,28 +144,6 @@ const Lane = ({
       return () => observer.disconnect();
     }
   }, []);
-
-  const handleNameDoubleClick = () => {
-    onStartEditing(id);
-  };
-
-  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const newName = (e.target as HTMLInputElement).value;
-      onNameChange(id, newName);
-      onStopEditing();
-    } else if (e.key === 'Escape') {
-      onStopEditing();
-    }
-  };
-
-  const handleInputBlur = () => {
-    if (inputRef.current) {
-      const newName = inputRef.current.value;
-      onNameChange(id, newName);
-    }
-    onStopEditing();
-  };
 
   const handleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
     // Don't show menu if clicking on a clip
@@ -215,40 +185,22 @@ const Lane = ({
       data-testid={`lane-${id}`}
       style={{ height: `${laneHeight}px` }}
     >
-      <div
-        className="lane__header"
-        style={{ padding: `${headerPadding}px` }}
-        onClick={() => onLaneSelect?.(id)}
-        data-testid={`lane-${id}-header`}
-      >
-        {isCurrent && <span className="lane__current-indicator">&gt;</span>}
-        <button
-          className="lane__color-swatch"
-          onClick={(e) => {
-            e.stopPropagation(); // Don't trigger lane selection
-            setShowColorPicker(true);
-          }}
-          title="Change lane color"
-          data-testid={`lane-${id}-color-swatch`}
-          style={{ color: color || DEFAULT_LANE_COLOR }}
-        >
-          █
-        </button>
-        {isEditing ? (
-          <input
-            ref={inputRef}
-            className="lane__name-input terminal-input"
-            defaultValue={name}
-            onKeyDown={handleInputKeyDown}
-            onBlur={handleInputBlur}
-            onClick={(e) => e.stopPropagation()} // Don't trigger lane selection while editing
-          />
-        ) : (
-          <div className="lane__name" onDoubleClick={handleNameDoubleClick}>
-            {name}
-          </div>
-        )}
-      </div>
+      <LaneHeader
+        id={id}
+        name={name}
+        color={color || DEFAULT_LANE_COLOR}
+        isCurrent={isCurrent}
+        isEditing={isEditing}
+        headerPadding={headerPadding}
+        onLaneSelect={onLaneSelect}
+        onNameChange={onNameChange}
+        onStartEditing={onStartEditing}
+        onStopEditing={onStopEditing}
+        onColorSwatchClick={(e) => {
+          e.stopPropagation(); // Don't trigger lane selection
+          setShowColorPicker(true);
+        }}
+      />
       <div
         ref={contentRef}
         className="lane__content"

@@ -22,8 +22,8 @@ export { DurationDisplay } from './atoms/DurationDisplay';
 export type { DurationDisplayProps } from './atoms/DurationDisplay';
 
 // Molecules - Simple component combinations
-export { TerminalPanel } from './TerminalPanel';
-export type { TerminalPanelProps } from './TerminalPanel';
+export { TerminalPanel } from './molecules/TerminalPanel';
+export type { TerminalPanelProps } from './molecules/TerminalPanel';
 
 // Organisms - Complex, standalone components
 export { TerminalMenu } from './TerminalMenu';

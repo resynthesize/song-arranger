@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { TerminalPanel } from '@/components/TerminalPanel';
+import { TerminalPanel } from '@/components/molecules/TerminalPanel';
 import { TerminalButton } from '@/components/atoms/TerminalButton';
 import './KeyboardHelp.css';
 

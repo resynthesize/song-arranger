@@ -5,6 +5,7 @@
 
 import { useState, useRef, useEffect, MouseEvent, KeyboardEvent, memo } from 'react';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
+import { ClipHandle } from '../molecules/ClipHandle';
 import type { ID, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx } from '@/utils/viewport';
 import { snapToGrid } from '@/utils/snap';
@@ -319,11 +320,7 @@ const Clip = ({
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >
-      <div
-        className="clip__handle clip__handle--left"
-        data-testid={`clip-${id}-handle-left`}
-        onMouseDown={handleResizeStart('left')}
-      />
+      <ClipHandle clipId={id} edge="left" onResizeStart={handleResizeStart} />
       <div
         className="clip__content"
         onMouseDown={handleDragStart}
@@ -357,11 +354,7 @@ const Clip = ({
           <span className="clip__corner clip__corner--br">┘</span>
         </div>
       </div>
-      <div
-        className="clip__handle clip__handle--right"
-        data-testid={`clip-${id}-handle-right`}
-        onMouseDown={handleResizeStart('right')}
-      />
+      <ClipHandle clipId={id} edge="right" onResizeStart={handleResizeStart} />
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
