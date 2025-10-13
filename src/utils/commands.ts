@@ -6,11 +6,11 @@
 import { AppDispatch } from '@/store/store';
 import type { RootState } from '@/store/store';
 import {
-  removeClips,
-  duplicateClips,
-  duplicateClipsWithOffset,
-  splitClip,
-} from '@/store/slices/clipsSlice';
+  removePatterns,
+  duplicatePatterns,
+  duplicatePatternsWithOffset,
+  splitPattern,
+} from '@/store/slices/patternsSlice';
 import {
   zoomIn,
   zoomOut,
@@ -20,9 +20,9 @@ import {
 } from '@/store/slices/timelineSlice';
 import {
   clearSelection,
-  selectAllClips,
+  selectAllPatterns,
 } from '@/store/slices/selectionSlice';
-import { addLane } from '@/store/slices/lanesSlice';
+import { addTrack } from '@/store/slices/tracksSlice';
 import { openQuickInput } from '@/store/slices/quickInputSlice';
 import { first } from '@/utils/array';
 import { logger } from './debug';
@@ -80,7 +80,7 @@ export const commands: Command[] = [
     category: 'Edit',
     shortcut: 'L',
     keywords: ['length', 'duration', 'resize'],
-    condition: (state) => state.selection.selectedClipIds.length > 0,
+    condition: (state) => state.selection.selectedPatternIds.length > 0,
     action: (dispatch) => {
       dispatch(openQuickInput('length'));
     },
@@ -96,15 +96,15 @@ export const commands: Command[] = [
     },
   },
 
-  // Lane Commands
+  // Track Commands
   {
-    id: 'add-lane',
-    label: 'Add Lane',
+    id: 'add-track',
+    label: 'Add Track',
     category: 'Arrange',
     shortcut: 'Cmd+Shift+N',
     keywords: ['lane', 'track', 'add', 'new'],
     action: (dispatch) => {
-      dispatch(addLane({ name: 'New Lane' }));
+      dispatch(addTrack({ name: 'New Track' }));
     },
   },
 
@@ -115,9 +115,9 @@ export const commands: Command[] = [
     category: 'Edit',
     shortcut: 'D',
     keywords: ['duplicate', 'copy', 'clone'],
-    condition: (state) => state.selection.selectedClipIds.length > 0,
+    condition: (state) => state.selection.selectedPatternIds.length > 0,
     action: (dispatch, state) => {
-      dispatch(duplicateClips(state.selection.selectedClipIds));
+      dispatch(duplicatePatterns(state.selection.selectedPatternIds));
     },
   },
   {
@@ -126,9 +126,9 @@ export const commands: Command[] = [
     category: 'Edit',
     shortcut: 'Shift+D',
     keywords: ['duplicate', 'offset', 'copy'],
-    condition: (state) => state.selection.selectedClipIds.length > 0,
+    condition: (state) => state.selection.selectedPatternIds.length > 0,
     action: (dispatch, state) => {
-      dispatch(duplicateClipsWithOffset(state.selection.selectedClipIds));
+      dispatch(duplicatePatternsWithOffset(state.selection.selectedPatternIds));
     },
   },
   {
@@ -137,11 +137,11 @@ export const commands: Command[] = [
     category: 'Edit',
     shortcut: 'S',
     keywords: ['split', 'cut', 'divide'],
-    condition: (state) => state.selection.selectedClipIds.length > 0,
+    condition: (state) => state.selection.selectedPatternIds.length > 0,
     action: (dispatch, state) => {
-      const clipId = first(state.selection.selectedClipIds);
-      if (clipId) {
-        dispatch(splitClip({ clipId, position: state.timeline.playheadPosition }));
+      const patternId = first(state.selection.selectedPatternIds);
+      if (patternId) {
+        dispatch(splitPattern({ patternId, position: state.timeline.playheadPosition }));
       }
     },
   },
@@ -151,9 +151,9 @@ export const commands: Command[] = [
     category: 'Edit',
     shortcut: 'Del',
     keywords: ['delete', 'remove', 'clear'],
-    condition: (state) => state.selection.selectedClipIds.length > 0,
+    condition: (state) => state.selection.selectedPatternIds.length > 0,
     action: (dispatch, state) => {
-      dispatch(removeClips(state.selection.selectedClipIds));
+      dispatch(removePatterns(state.selection.selectedPatternIds));
       dispatch(clearSelection());
     },
   },
@@ -166,7 +166,7 @@ export const commands: Command[] = [
     shortcut: 'Cmd+A',
     keywords: ['select', 'all'],
     action: (dispatch, state) => {
-      dispatch(selectAllClips(state.clips.clips.map(c => c.id)));
+      dispatch(selectAllPatterns(state.patterns.patterns.map(c => c.id)));
     },
   },
   {
@@ -175,7 +175,7 @@ export const commands: Command[] = [
     category: 'Edit',
     shortcut: 'Cmd+Shift+A',
     keywords: ['deselect', 'clear', 'none'],
-    condition: (state) => state.selection.selectedClipIds.length > 0,
+    condition: (state) => state.selection.selectedPatternIds.length > 0,
     action: (dispatch) => {
       dispatch(clearSelection());
     },
@@ -208,14 +208,14 @@ export const commands: Command[] = [
     category: 'View',
     shortcut: 'F',
     keywords: ['frame', 'fit', 'selection'],
-    condition: (state) => state.selection.selectedClipIds.length > 0,
+    condition: (state) => state.selection.selectedPatternIds.length > 0,
     action: (dispatch, state) => {
-      const selectedClips = state.clips.clips.filter(c =>
-        state.selection.selectedClipIds.includes(c.id)
+      const selectedPatterns = state.patterns.patterns.filter(p =>
+        state.selection.selectedPatternIds.includes(p.id)
       );
-      if (selectedClips.length > 0) {
-        const startBeats = Math.min(...selectedClips.map(c => c.position));
-        const endBeats = Math.max(...selectedClips.map(c => c.position + c.duration));
+      if (selectedPatterns.length > 0) {
+        const startBeats = Math.min(...selectedPatterns.map(p => p.position));
+        const endBeats = Math.max(...selectedPatterns.map(p => p.position + p.duration));
         dispatch(frameViewport({ startBeats, endBeats }));
       }
     },
@@ -226,12 +226,12 @@ export const commands: Command[] = [
     category: 'View',
     shortcut: 'A',
     keywords: ['frame', 'fit', 'all', 'entire'],
-    condition: (state) => state.clips.clips.length > 0,
+    condition: (state) => state.patterns.patterns.length > 0,
     action: (dispatch, state) => {
-      const clips = state.clips.clips;
-      if (clips.length > 0) {
-        const startBeats = Math.min(...clips.map(c => c.position));
-        const endBeats = Math.max(...clips.map(c => c.position + c.duration));
+      const patterns = state.patterns.patterns;
+      if (patterns.length > 0) {
+        const startBeats = Math.min(...patterns.map(p => p.position));
+        const endBeats = Math.max(...patterns.map(p => p.position + p.duration));
         dispatch(frameViewport({ startBeats, endBeats }));
       }
     },

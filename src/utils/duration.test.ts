@@ -48,9 +48,9 @@ describe('formatDuration', () => {
 });
 
 describe('calculateGlobalDuration', () => {
-  const createClip = (position: number, duration: number, laneId = 'lane-1'): Clip => ({
+  const createClip = (position: number, duration: number, trackId = 'lane-1'): Clip => ({
     id: `clip-${Math.random()}`,
-    laneId,
+    trackId,
     position,
     duration,
   });
@@ -114,7 +114,7 @@ describe('calculateGlobalDuration', () => {
 describe('calculateSelectedDuration', () => {
   const createClip = (id: string, duration: number): Clip => ({
     id,
-    laneId: 'lane-1',
+    trackId: 'lane-1',
     position: 0,
     duration,
   });

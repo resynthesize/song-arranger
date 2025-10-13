@@ -8,6 +8,7 @@ export const BEATS_PER_BAR = 4;
 
 /** Base lane height in pixels (before vertical zoom) */
 export const LANE_HEIGHT = 80;
+export const TRACK_HEIGHT = LANE_HEIGHT; // Alias for renamed concept
 
 /** Ruler height in pixels */
 export const RULER_HEIGHT = 50;
@@ -17,6 +18,7 @@ export const LANE_HEADER_WIDTH = 150;
 
 /** Default lane color */
 export const DEFAULT_LANE_COLOR = '#00ff00';
+export const DEFAULT_TRACK_COLOR = DEFAULT_LANE_COLOR; // Alias for renamed concept
 
 /** Default clip duration in beats */
 export const DEFAULT_CLIP_DURATION = 4;

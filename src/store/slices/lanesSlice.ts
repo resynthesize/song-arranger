@@ -1,15 +1,15 @@
 /**
- * Song Arranger - Lanes Slice
- * Redux state management for lanes
+ * Song Arranger - Tracks Slice (Legacy export as lanesSlice)
+ * Redux state management for tracks
  */
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { LanesState, ID } from '@/types';
+import type { TracksState, ID } from '@/types';
 
-const initialState: LanesState = {
-  lanes: [],
-  editingLaneId: null,
-  movingLaneId: null,
+const initialState: TracksState = {
+  tracks: [],
+  editingTrackId: null,
+  movingTrackId: null,
 };
 
 const lanesSlice = createSlice({
@@ -22,13 +22,13 @@ const lanesSlice = createSlice({
 
       if (!laneName) {
         // Generate default name based on existing lanes
-        const defaultLaneCount = state.lanes.filter((l) =>
+        const defaultLaneCount = state.tracks.filter((l) =>
           l.name.match(/^Lane \d+$/)
         ).length;
         laneName = `Lane ${(defaultLaneCount + 1).toString()}`;
       }
 
-      state.lanes.push({
+      state.tracks.push({
         id: `lane-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
         name: laneName,
         color: '#00ff00', // Default green terminal color
@@ -37,11 +37,11 @@ const lanesSlice = createSlice({
 
     removeLane: (state, action: PayloadAction<ID>) => {
       const laneId = action.payload;
-      state.lanes = state.lanes.filter((lane) => lane.id !== laneId);
+      state.tracks = state.tracks.filter((lane) => lane.id !== laneId);
 
       // Clear editing state if removed lane was being edited
-      if (state.editingLaneId === laneId) {
-        state.editingLaneId = null;
+      if (state.editingTrackId === laneId) {
+        state.editingTrackId = null;
       }
     },
 
@@ -57,18 +57,18 @@ const lanesSlice = createSlice({
         return;
       }
 
-      const lane = state.lanes.find((l) => l.id === laneId);
+      const lane = state.tracks.find((l) => l.id === laneId);
       if (lane) {
         lane.name = trimmedName;
       }
     },
 
     setEditingLane: (state, action: PayloadAction<ID>) => {
-      state.editingLaneId = action.payload;
+      state.editingTrackId = action.payload;
     },
 
     clearEditingLane: (state) => {
-      state.editingLaneId = null;
+      state.editingTrackId = null;
     },
 
     setLaneColor: (
@@ -76,7 +76,7 @@ const lanesSlice = createSlice({
       action: PayloadAction<{ laneId: ID; color: string }>
     ) => {
       const { laneId, color } = action.payload;
-      const lane = state.lanes.find((l) => l.id === laneId);
+      const lane = state.tracks.find((l) => l.id === laneId);
       if (lane) {
         lane.color = color;
       }
@@ -84,46 +84,46 @@ const lanesSlice = createSlice({
 
     moveLaneUp: (state, action: PayloadAction<ID>) => {
       const laneId = action.payload;
-      const index = state.lanes.findIndex((l) => l.id === laneId);
+      const index = state.tracks.findIndex((l) => l.id === laneId);
 
       // Can't move first lane up
       if (index > 0) {
         // Swap with previous lane
-        const prev = state.lanes[index - 1];
-        const current = state.lanes[index];
+        const prev = state.tracks[index - 1];
+        const current = state.tracks[index];
         if (prev && current) {
-          state.lanes[index - 1] = current;
-          state.lanes[index] = prev;
+          state.tracks[index - 1] = current;
+          state.tracks[index] = prev;
         }
       }
     },
 
     moveLaneDown: (state, action: PayloadAction<ID>) => {
       const laneId = action.payload;
-      const index = state.lanes.findIndex((l) => l.id === laneId);
+      const index = state.tracks.findIndex((l) => l.id === laneId);
 
       // Can't move last lane down
-      if (index >= 0 && index < state.lanes.length - 1) {
+      if (index >= 0 && index < state.tracks.length - 1) {
         // Swap with next lane
-        const current = state.lanes[index];
-        const next = state.lanes[index + 1];
+        const current = state.tracks[index];
+        const next = state.tracks[index + 1];
         if (current && next) {
-          state.lanes[index] = next;
-          state.lanes[index + 1] = current;
+          state.tracks[index] = next;
+          state.tracks[index + 1] = current;
         }
       }
     },
 
     setMovingLane: (state, action: PayloadAction<ID>) => {
-      state.movingLaneId = action.payload;
+      state.movingTrackId = action.payload;
     },
 
     clearMovingLane: (state) => {
-      state.movingLaneId = null;
+      state.movingTrackId = null;
     },
 
     setLanes: (state, action: PayloadAction<import('@/types').Lane[]>) => {
-      state.lanes = action.payload;
+      state.tracks = action.payload;
     },
   },
 });

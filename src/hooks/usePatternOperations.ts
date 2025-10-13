@@ -20,7 +20,7 @@ import {
   selectClip,
   clearSelection,
 } from '@/store/slices/selectionSlice';
-import { selectAllPatterns, selectSelectedClipIds } from '@/store/selectors';
+import { selectAllPatterns, selectSelectedPatternIds } from '@/store/selectors';
 import { findNearestNeighbor } from '@/utils/navigation';
 import { first } from '@/utils/array';
 import { LANE_HEIGHT } from '@/constants';
@@ -51,7 +51,7 @@ export function usePatternOperations(
 ): UsePatternOperationsReturn {
   const dispatch = useAppDispatch();
   const patterns = useAppSelector(selectAllPatterns);
-  const selectedClipIds = useAppSelector(selectSelectedClipIds);
+  const selectedClipIds = useAppSelector(selectSelectedPatternIds);
 
   // Keep patterns in a ref so callbacks can access them without changing reference
   const patternsRef = useRef(patterns);

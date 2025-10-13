@@ -5,7 +5,7 @@
 
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Clip from './Clip';
+import Clip from './Pattern';
 import type { ViewportState } from '@/types';
 
 describe('Clip', () => {
@@ -18,7 +18,7 @@ describe('Clip', () => {
 
   const defaultProps = {
     id: 'clip-1',
-    laneId: 'lane-1',
+    trackId: 'lane-1',
     position: 0,
     duration: 4,
     viewport: defaultViewport,

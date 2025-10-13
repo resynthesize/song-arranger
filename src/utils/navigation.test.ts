@@ -13,9 +13,9 @@ import {
 import type { Clip, Lane } from '@/types';
 
 // Helper to create test clips
-const createClip = (id: string, laneId: string, position: number, duration: number = 4): Clip => ({
+const createClip = (id: string, trackId: string, position: number, duration: number = 4): Clip => ({
   id,
-  laneId,
+  trackId,
   position,
   duration,
 });

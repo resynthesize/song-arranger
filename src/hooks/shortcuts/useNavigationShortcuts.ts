@@ -13,7 +13,7 @@ import {
 } from '@/store/slices/timelineSlice';
 import {
   cycleSelection,
-  selectClip,
+  selectPattern,
   navigateUp as navigateUpAction,
   navigateDown as navigateDownAction,
 } from '@/store/slices/selectionSlice';
@@ -48,9 +48,9 @@ export interface NavigationShortcutHandlers {
  */
 export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
   const dispatch = useAppDispatch();
-  const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
-  const clips = useAppSelector((state) => state.clips.clips);
-  const lanes = useAppSelector((state) => state.lanes.lanes);
+  const selectedClipIds = useAppSelector((state) => state.selection.selectedPatternIds);
+  const clips = useAppSelector((state) => state.patterns.patterns);
+  const lanes = useAppSelector((state) => state.tracks.tracks);
   const playheadPosition = useAppSelector((state) => state.timeline.playheadPosition);
 
   const handleStop = useCallback(() => {
@@ -122,7 +122,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
       if (firstSelectedId) {
         const selectedClip = clips.find(c => c.id === firstSelectedId);
         if (selectedClip) {
-          laneClips = clips.filter(c => c.laneId === selectedClip.laneId);
+          laneClips = clips.filter(c => c.trackId === selectedClip.laneId);
           // Sort by position
           laneClips.sort((a, b) => a.position - b.position);
         }
@@ -130,7 +130,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
     }
 
     dispatch(cycleSelection({
-      clipIds: laneClips.map(c => c.id),
+      patternIds: laneClips.map(c => c.id),
       direction: 'forward'
     }));
   }, [dispatch, selectedClipIds, clips]);
@@ -143,7 +143,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
       if (firstSelectedId) {
         const selectedClip = clips.find(c => c.id === firstSelectedId);
         if (selectedClip) {
-          laneClips = clips.filter(c => c.laneId === selectedClip.laneId);
+          laneClips = clips.filter(c => c.trackId === selectedClip.laneId);
           // Sort by position
           laneClips.sort((a, b) => a.position - b.position);
         }
@@ -151,7 +151,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
     }
 
     dispatch(cycleSelection({
-      clipIds: laneClips.map(c => c.id),
+      patternIds: laneClips.map(c => c.id),
       direction: 'backward'
     }));
   }, [dispatch, selectedClipIds, clips]);
@@ -165,7 +165,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
         if (currentClip) {
           const nearestClip = findNearestClipNorth(currentClip, clips, lanes);
           if (nearestClip) {
-            dispatch(selectClip(nearestClip.id));
+            dispatch(selectPattern(nearestClip.id));
           }
         }
       }
@@ -184,7 +184,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
         if (currentClip) {
           const nearestClip = findNearestClipSouth(currentClip, clips, lanes);
           if (nearestClip) {
-            dispatch(selectClip(nearestClip.id));
+            dispatch(selectPattern(nearestClip.id));
           }
         }
       }
@@ -203,7 +203,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
         if (currentClip) {
           const nearestClip = findNearestClipWest(currentClip, clips);
           if (nearestClip) {
-            dispatch(selectClip(nearestClip.id));
+            dispatch(selectPattern(nearestClip.id));
           }
         }
       }
@@ -219,7 +219,7 @@ export const useNavigationShortcuts = (): NavigationShortcutHandlers => {
         if (currentClip) {
           const nearestClip = findNearestClipEast(currentClip, clips);
           if (nearestClip) {
-            dispatch(selectClip(nearestClip.id));
+            dispatch(selectPattern(nearestClip.id));
           }
         }
       }

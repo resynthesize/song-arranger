@@ -7,9 +7,9 @@ import { useEffect, useState } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import { findMatchingShortcut, type KeyboardContext } from '@/utils/keyboard';
 import { logger } from '@/utils/debug';
-import { useClipShortcuts } from './useClipShortcuts';
+import { usePatternShortcuts } from './usePatternShortcuts';
 import { useViewShortcuts } from './useViewShortcuts';
-import { useLaneShortcuts } from './useLaneShortcuts';
+import { useTrackShortcuts } from './useTrackShortcuts';
 import { useNavigationShortcuts } from './useNavigationShortcuts';
 
 export interface KeyboardShortcutsState {
@@ -29,8 +29,8 @@ export interface KeyboardShortcutsState {
  * Main keyboard shortcuts hook that orchestrates all domain-specific hooks
  */
 export const useKeyboardShortcuts = (): KeyboardShortcutsState => {
-  const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
-  const isEditingLane = useAppSelector((state) => state.lanes.editingLaneId !== null);
+  const selectedClipIds = useAppSelector((state) => state.selection.selectedPatternIds);
+  const isEditingLane = useAppSelector((state) => state.tracks.editingTrackId !== null);
 
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -39,7 +39,7 @@ export const useKeyboardShortcuts = (): KeyboardShortcutsState => {
   const [quickInputCommand, setQuickInputCommand] = useState<'tempo' | 'zoom' | 'snap' | 'length' | 'position' | null>(null);
 
   // Initialize domain-specific shortcut hooks
-  const clipShortcuts = useClipShortcuts();
+  const clipShortcuts = usePatternShortcuts();
   const viewShortcuts = useViewShortcuts({
     showHelp,
     setShowHelp,
@@ -48,7 +48,7 @@ export const useKeyboardShortcuts = (): KeyboardShortcutsState => {
     showCommandPalette,
     setShowCommandPalette,
   });
-  const laneShortcuts = useLaneShortcuts();
+  const laneShortcuts = useTrackShortcuts();
   const navigationShortcuts = useNavigationShortcuts();
 
   useEffect(() => {

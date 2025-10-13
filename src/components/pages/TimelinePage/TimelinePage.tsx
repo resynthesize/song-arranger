@@ -16,8 +16,8 @@ import { QuickInput } from '../../organisms/QuickInput';
 
 const TimelinePage = () => {
   const dispatch = useAppDispatch();
-  const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
-  const isEditingLane = useAppSelector((state) => state.lanes.editingLaneId !== null);
+  const selectedClipIds = useAppSelector((state) => state.selection.selectedPatternIds);
+  const isEditingLane = useAppSelector((state) => state.tracks.editingTrackId !== null);
 
   // Initialize keyboard shortcuts and get modal states
   const { showHelp, setShowHelp, showCommandPalette, setShowCommandPalette, showQuickInput, setShowQuickInput, quickInputCommand } = useKeyboardShortcuts();

@@ -50,8 +50,8 @@ export const useViewShortcuts = (
   state: ViewShortcutState
 ): ViewShortcutHandlers => {
   const dispatch = useAppDispatch();
-  const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
-  const clips = useAppSelector((state) => state.clips.clips);
+  const selectedClipIds = useAppSelector((state) => state.selection.selectedPatternIds);
+  const clips = useAppSelector((state) => state.patterns.patterns);
 
   const handleZoomIn = useCallback(() => {
     if (selectedClipIds.length > 0) {

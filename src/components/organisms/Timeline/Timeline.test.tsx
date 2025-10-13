@@ -18,7 +18,7 @@ const createMockStore = (initialState?: Partial<RootState>) => {
   return configureStore({
     reducer: {
       timeline: timelineReducer,
-      lanes: lanesReducer,
+      tracks: lanesReducer,
       clips: clipsReducer,
       selection: selectionReducer,
       crtEffects: crtEffectsReducer,
@@ -41,8 +41,8 @@ describe('Timeline', () => {
 
   it('should render lanes', () => {
     const store = createMockStore({
-      lanes: {
-        lanes: [
+      tracks: {
+        tracks: [
           { id: 'lane-1', name: 'Kick' },
           { id: 'lane-2', name: 'Snare' },
         ],
@@ -50,7 +50,7 @@ describe('Timeline', () => {
         movingLaneId: null,
       },
       clips: { clips: [], editingClipId: null },
-      selection: { selectedClipIds: [], currentLaneId: null },
+      selection: { selectedPatternIds: [], currentTrackId: null },
     });
 
     render(
@@ -65,8 +65,8 @@ describe('Timeline', () => {
 
   it('should render clips in their lanes', () => {
     const store = createMockStore({
-      lanes: {
-        lanes: [{ id: 'lane-1', name: 'Kick' }],
+      tracks: {
+        tracks: [{ id: 'lane-1', name: 'Kick' }],
         editingLaneId: null,
         movingLaneId: null,
       },
@@ -74,7 +74,7 @@ describe('Timeline', () => {
         clips: [
           {
             id: 'clip-1',
-            laneId: 'lane-1',
+            trackId: 'lane-1',
             position: 0,
             duration: 4,
             label: 'Intro',
@@ -82,7 +82,7 @@ describe('Timeline', () => {
         ],
         editingClipId: null,
       },
-      selection: { selectedClipIds: [], currentLaneId: null },
+      selection: { selectedPatternIds: [], currentTrackId: null },
     });
 
     render(
@@ -125,18 +125,18 @@ describe('Timeline', () => {
         verticalZoom: 100,
         minimapVisible: false,
       },
-      lanes: {
-        lanes: [{ id: 'lane-1', name: 'Kick' }],
+      tracks: {
+        tracks: [{ id: 'lane-1', name: 'Kick' }],
         editingLaneId: null,
         movingLaneId: null,
       },
       clips: {
         clips: [
-          { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 4 },
+          { id: 'clip-1', trackId: 'lane-1', position: 0, duration: 4 },
         ],
         editingClipId: null,
       },
-      selection: { selectedClipIds: [], currentLaneId: null },
+      selection: { selectedPatternIds: [], currentTrackId: null },
     });
 
     render(

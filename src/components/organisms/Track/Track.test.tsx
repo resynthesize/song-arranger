@@ -5,7 +5,7 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Lane from './Lane';
+import Lane from './Track';
 import type { Clip, ViewportState } from '@/types';
 
 describe('Lane', () => {
@@ -19,10 +19,10 @@ describe('Lane', () => {
   };
 
   const mockClips: Clip[] = [
-    { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 4, label: 'Intro' },
+    { id: 'clip-1', trackId: 'lane-1', position: 0, duration: 4, label: 'Intro' },
     {
       id: 'clip-2',
-      laneId: 'lane-1',
+      trackId: 'lane-1',
       position: 8,
       duration: 4,
       label: 'Verse',
@@ -42,7 +42,7 @@ describe('Lane', () => {
     clips: mockClips,
     viewport: defaultViewport,
     snapValue: 1,
-    selectedClipIds: [],
+    selectedPatternIds: [],
     verticalDragState: null,
     verticalZoom: 100,
     isCurrent: false,
@@ -76,7 +76,7 @@ describe('Lane', () => {
   it('should only render clips that belong to this lane', () => {
     const clipsWithDifferentLanes = [
       ...mockClips,
-      { id: 'clip-3', laneId: 'lane-2', position: 0, duration: 4 },
+      { id: 'clip-3', trackId: 'lane-2', position: 0, duration: 4 },
     ];
     render(<Lane {...defaultProps} clips={clipsWithDifferentLanes} />);
 

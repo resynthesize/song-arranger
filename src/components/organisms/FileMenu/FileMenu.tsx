@@ -13,7 +13,7 @@ import {
   deleteProjectById,
   setCurrentProjectName,
 } from '@/store/slices/projectSlice';
-import { selectAllClips, selectAllLanes } from '@/store/selectors';
+import { selectAllPatterns, selectAllTracks } from '@/store/selectors';
 import {
   saveProject,
   loadProject,
@@ -40,8 +40,8 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
   const isDirty = useAppSelector((state) => state.project.isDirty);
 
   // Get all current state for saving using selectors
-  const clips = useAppSelector(selectAllClips);
-  const lanes = useAppSelector(selectAllLanes);
+  const clips = useAppSelector(selectAllPatterns);
+  const lanes = useAppSelector(selectAllTracks);
   const timeline = useAppSelector((state) => state.timeline);
 
   // Dialog states
@@ -130,10 +130,10 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     dispatch(loadProjectById({ projectId: loadedProject.id, projectName: loadedProject.name }));
 
     // Load clips data
-    dispatch({ type: 'clips/setClips', payload: loadedProject.data.clips });
+    dispatch({ type: 'clips/setClips', payload: loadedProject.data.patterns });
 
     // Load lanes data
-    dispatch({ type: 'lanes/setLanes', payload: loadedProject.data.lanes });
+    dispatch({ type: 'lanes/setLanes', payload: loadedProject.data.tracks });
 
     // Load timeline data (merge with existing viewport to preserve current view)
     dispatch({ type: 'timeline/loadTimeline', payload: loadedProject.data.timeline });

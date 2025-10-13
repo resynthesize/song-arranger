@@ -1,230 +1,230 @@
 /**
  * Song Arranger - Navigation Utilities
- * Functions for finding clips in different directions for arrow key navigation
+ * Functions for finding patterns in different directions for arrow key navigation
  */
 
-import type { Clip, Lane } from '@/types';
+import type { Pattern, Track } from '@/types';
 import { logger } from './debug';
 
 /**
- * Calculate the center position of a clip
+ * Calculate the center position of a pattern
  */
-const getClipCenter = (clip: Clip): number => {
-  return clip.position + clip.duration / 2;
+const getPatternCenter = (pattern: Pattern): number => {
+  return pattern.position + pattern.duration / 2;
 };
 
 /**
- * Find the nearest clip to the east (right) in the same lane
- * @param currentClip - The currently selected clip
- * @param allClips - All clips in the timeline
- * @returns The nearest clip to the right, or null if none exists
+ * Find the nearest pattern to the east (right) in the same track
+ * @param currentPattern - The currently selected pattern
+ * @param allPatterns - All patterns in the timeline
+ * @returns The nearest pattern to the right, or null if none exists
  */
 export const findNearestClipEast = (
-  currentClip: Clip,
-  allClips: Clip[]
-): Clip | null => {
-  // Filter clips in same lane that are to the right (greater position)
-  const clipsToRight = allClips.filter(
-    (clip) =>
-      clip.id !== currentClip.id &&
-      clip.laneId === currentClip.laneId &&
-      clip.position > currentClip.position
+  currentPattern: Pattern,
+  allPatterns: Pattern[]
+): Pattern | null => {
+  // Filter patterns in same track that are to the right (greater position)
+  const patternsToRight = allPatterns.filter(
+    (pattern) =>
+      pattern.id !== currentPattern.id &&
+      pattern.trackId === currentPattern.trackId &&
+      pattern.position > currentPattern.position
   );
 
-  if (clipsToRight.length === 0) {
+  if (patternsToRight.length === 0) {
     return null;
   }
 
-  // Find clip with smallest position (nearest)
-  return clipsToRight.reduce((nearest, clip) =>
-    clip.position < nearest.position ? clip : nearest
+  // Find pattern with smallest position (nearest)
+  return patternsToRight.reduce((nearest, pattern) =>
+    pattern.position < nearest.position ? pattern : nearest
   );
 };
 
 /**
- * Find the nearest clip to the west (left) in the same lane
- * @param currentClip - The currently selected clip
- * @param allClips - All clips in the timeline
- * @returns The nearest clip to the left, or null if none exists
+ * Find the nearest pattern to the west (left) in the same track
+ * @param currentPattern - The currently selected pattern
+ * @param allPatterns - All patterns in the timeline
+ * @returns The nearest pattern to the left, or null if none exists
  */
 export const findNearestClipWest = (
-  currentClip: Clip,
-  allClips: Clip[]
-): Clip | null => {
-  // Filter clips in same lane that are to the left (lesser position)
-  const clipsToLeft = allClips.filter(
-    (clip) =>
-      clip.id !== currentClip.id &&
-      clip.laneId === currentClip.laneId &&
-      clip.position < currentClip.position
+  currentPattern: Pattern,
+  allPatterns: Pattern[]
+): Pattern | null => {
+  // Filter patterns in same track that are to the left (lesser position)
+  const patternsToLeft = allPatterns.filter(
+    (pattern) =>
+      pattern.id !== currentPattern.id &&
+      pattern.trackId === currentPattern.trackId &&
+      pattern.position < currentPattern.position
   );
 
-  if (clipsToLeft.length === 0) {
+  if (patternsToLeft.length === 0) {
     return null;
   }
 
-  // Find clip with largest position (nearest)
-  return clipsToLeft.reduce((nearest, clip) =>
-    clip.position > nearest.position ? clip : nearest
+  // Find pattern with largest position (nearest)
+  return patternsToLeft.reduce((nearest, pattern) =>
+    pattern.position > nearest.position ? pattern : nearest
   );
 };
 
 /**
- * Find the nearest clip to the north (up) in the previous lane
- * Searches for clip in previous lane with center position closest to current clip's center
- * @param currentClip - The currently selected clip
- * @param allClips - All clips in the timeline
- * @param lanes - All lanes in order
- * @returns The nearest clip above, or null if none exists
+ * Find the nearest pattern to the north (up) in the previous track
+ * Searches for pattern in previous track with center position closest to current pattern's center
+ * @param currentPattern - The currently selected pattern
+ * @param allPatterns - All patterns in the timeline
+ * @param tracks - All tracks in order
+ * @returns The nearest pattern above, or null if none exists
  */
 export const findNearestClipNorth = (
-  currentClip: Clip,
-  allClips: Clip[],
-  lanes: Lane[]
-): Clip | null => {
-  // Find index of current lane
-  const currentLaneIndex = lanes.findIndex((lane) => lane.id === currentClip.laneId);
+  currentPattern: Pattern,
+  allPatterns: Pattern[],
+  tracks: Track[]
+): Pattern | null => {
+  // Find index of current track
+  const currentTrackIndex = tracks.findIndex((track) => track.id === currentPattern.trackId);
 
-  // If first lane or lane not found, can't go north
-  if (currentLaneIndex <= 0) {
+  // If first track or track not found, can't go north
+  if (currentTrackIndex <= 0) {
     return null;
   }
 
-  // Get previous lane
-  const previousLane = lanes[currentLaneIndex - 1];
-  if (!previousLane) {
+  // Get previous track
+  const previousTrack = tracks[currentTrackIndex - 1];
+  if (!previousTrack) {
     return null;
   }
 
-  // Filter clips in previous lane
-  const clipsInPreviousLane = allClips.filter(
-    (clip) => clip.laneId === previousLane.id
+  // Filter patterns in previous track
+  const patternsInPreviousTrack = allPatterns.filter(
+    (pattern) => pattern.trackId === previousTrack.id
   );
 
-  if (clipsInPreviousLane.length === 0) {
+  if (patternsInPreviousTrack.length === 0) {
     return null;
   }
 
-  // Find clip with center closest to current clip's center
-  const currentCenter = getClipCenter(currentClip);
+  // Find pattern with center closest to current pattern's center
+  const currentCenter = getPatternCenter(currentPattern);
 
-  return clipsInPreviousLane.reduce((nearest, clip) => {
-    const clipCenter = getClipCenter(clip);
-    const nearestCenter = getClipCenter(nearest);
+  return patternsInPreviousTrack.reduce((nearest, pattern) => {
+    const patternCenter = getPatternCenter(pattern);
+    const nearestCenter = getPatternCenter(nearest);
 
-    const clipDistance = Math.abs(clipCenter - currentCenter);
+    const patternDistance = Math.abs(patternCenter - currentCenter);
     const nearestDistance = Math.abs(nearestCenter - currentCenter);
 
-    return clipDistance < nearestDistance ? clip : nearest;
+    return patternDistance < nearestDistance ? pattern : nearest;
   });
 };
 
 /**
- * Find the nearest clip to the south (down) in the next lane
- * Searches for clip in next lane with center position closest to current clip's center
- * @param currentClip - The currently selected clip
- * @param allClips - All clips in the timeline
- * @param lanes - All lanes in order
- * @returns The nearest clip below, or null if none exists
+ * Find the nearest pattern to the south (down) in the next track
+ * Searches for pattern in next track with center position closest to current pattern's center
+ * @param currentPattern - The currently selected pattern
+ * @param allPatterns - All patterns in the timeline
+ * @param tracks - All tracks in order
+ * @returns The nearest pattern below, or null if none exists
  */
 export const findNearestClipSouth = (
-  currentClip: Clip,
-  allClips: Clip[],
-  lanes: Lane[]
-): Clip | null => {
-  // Find index of current lane
-  const currentLaneIndex = lanes.findIndex((lane) => lane.id === currentClip.laneId);
+  currentPattern: Pattern,
+  allPatterns: Pattern[],
+  tracks: Track[]
+): Pattern | null => {
+  // Find index of current track
+  const currentTrackIndex = tracks.findIndex((track) => track.id === currentPattern.trackId);
 
-  // If last lane or lane not found, can't go south
-  if (currentLaneIndex === -1 || currentLaneIndex >= lanes.length - 1) {
+  // If last track or track not found, can't go south
+  if (currentTrackIndex === -1 || currentTrackIndex >= tracks.length - 1) {
     return null;
   }
 
-  // Get next lane
-  const nextLane = lanes[currentLaneIndex + 1];
-  if (!nextLane) {
+  // Get next track
+  const nextTrack = tracks[currentTrackIndex + 1];
+  if (!nextTrack) {
     return null;
   }
 
-  // Filter clips in next lane
-  const clipsInNextLane = allClips.filter(
-    (clip) => clip.laneId === nextLane.id
+  // Filter patterns in next track
+  const patternsInNextTrack = allPatterns.filter(
+    (pattern) => pattern.trackId === nextTrack.id
   );
 
-  if (clipsInNextLane.length === 0) {
+  if (patternsInNextTrack.length === 0) {
     return null;
   }
 
-  // Find clip with center closest to current clip's center
-  const currentCenter = getClipCenter(currentClip);
+  // Find pattern with center closest to current pattern's center
+  const currentCenter = getPatternCenter(currentPattern);
 
-  return clipsInNextLane.reduce((nearest, clip) => {
-    const clipCenter = getClipCenter(clip);
-    const nearestCenter = getClipCenter(nearest);
+  return patternsInNextTrack.reduce((nearest, pattern) => {
+    const patternCenter = getPatternCenter(pattern);
+    const nearestCenter = getPatternCenter(nearest);
 
-    const clipDistance = Math.abs(clipCenter - currentCenter);
+    const patternDistance = Math.abs(patternCenter - currentCenter);
     const nearestDistance = Math.abs(nearestCenter - currentCenter);
 
-    return clipDistance < nearestDistance ? clip : nearest;
+    return patternDistance < nearestDistance ? pattern : nearest;
   });
 };
 
 /**
- * Find the nearest neighboring clip after deleting the current clip
- * Priority: 1) Right in same lane, 2) Left in same lane, 3) Closest in any other lane
- * @param deletedClip - The clip being deleted
- * @param allClips - All clips in the timeline (excluding the deleted one)
- * @returns The nearest neighbor clip, or null if no clips exist
+ * Find the nearest neighboring pattern after deleting the current pattern
+ * Priority: 1) Right in same track, 2) Left in same track, 3) Closest in any other track
+ * @param deletedPattern - The pattern being deleted
+ * @param allPatterns - All patterns in the timeline (excluding the deleted one)
+ * @returns The nearest neighbor pattern, or null if no patterns exist
  */
 export const findNearestNeighbor = (
-  deletedClip: Clip,
-  allClips: Clip[]
-): Clip | null => {
+  deletedPattern: Pattern,
+  allPatterns: Pattern[]
+): Pattern | null => {
   logger.log('[findNearestNeighbor] Starting search', {
-    deletedClip: { id: deletedClip.id, laneId: deletedClip.laneId, position: deletedClip.position },
-    totalClips: allClips.length
+    deletedPattern: { id: deletedPattern.id, trackId: deletedPattern.trackId, position: deletedPattern.position },
+    totalPatterns: allPatterns.length
   });
 
-  // Filter out the deleted clip from consideration
-  const otherClips = allClips.filter((clip) => clip.id !== deletedClip.id);
+  // Filter out the deleted pattern from consideration
+  const otherPatterns = allPatterns.filter((pattern) => pattern.id !== deletedPattern.id);
 
-  logger.log('[findNearestNeighbor] After filtering deleted clip:', {
-    remainingClips: otherClips.length
+  logger.log('[findNearestNeighbor] After filtering deleted pattern:', {
+    remainingPatterns: otherPatterns.length
   });
 
-  if (otherClips.length === 0) {
-    logger.log('[findNearestNeighbor] No other clips remaining');
+  if (otherPatterns.length === 0) {
+    logger.log('[findNearestNeighbor] No other patterns remaining');
     return null;
   }
 
-  // Priority 1: Try to find clip to the right in same lane
-  const clipToRight = findNearestClipEast(deletedClip, otherClips);
-  if (clipToRight) {
-    logger.log('[findNearestNeighbor] Found clip to the right (Priority 1):', clipToRight.id);
-    return clipToRight;
+  // Priority 1: Try to find pattern to the right in same track
+  const patternToRight = findNearestClipEast(deletedPattern, otherPatterns);
+  if (patternToRight) {
+    logger.log('[findNearestNeighbor] Found pattern to the right (Priority 1):', patternToRight.id);
+    return patternToRight;
   }
 
-  // Priority 2: Try to find clip to the left in same lane
-  const clipToLeft = findNearestClipWest(deletedClip, otherClips);
-  if (clipToLeft) {
-    logger.log('[findNearestNeighbor] Found clip to the left (Priority 2):', clipToLeft.id);
-    return clipToLeft;
+  // Priority 2: Try to find pattern to the left in same track
+  const patternToLeft = findNearestClipWest(deletedPattern, otherPatterns);
+  if (patternToLeft) {
+    logger.log('[findNearestNeighbor] Found pattern to the left (Priority 2):', patternToLeft.id);
+    return patternToLeft;
   }
 
-  // Priority 3: Find closest clip in any lane
-  // Calculate distance based on clip center positions
-  const deletedCenter = getClipCenter(deletedClip);
+  // Priority 3: Find closest pattern in any track
+  // Calculate distance based on pattern center positions
+  const deletedCenter = getPatternCenter(deletedPattern);
 
-  const closestClip = otherClips.reduce((nearest, clip) => {
-    const clipCenter = getClipCenter(clip);
-    const nearestCenter = getClipCenter(nearest);
+  const closestPattern = otherPatterns.reduce((nearest, pattern) => {
+    const patternCenter = getPatternCenter(pattern);
+    const nearestCenter = getPatternCenter(nearest);
 
-    const clipDistance = Math.abs(clipCenter - deletedCenter);
+    const patternDistance = Math.abs(patternCenter - deletedCenter);
     const nearestDistance = Math.abs(nearestCenter - deletedCenter);
 
-    return clipDistance < nearestDistance ? clip : nearest;
+    return patternDistance < nearestDistance ? pattern : nearest;
   });
 
-  logger.log('[findNearestNeighbor] Found closest clip in any lane (Priority 3):', closestClip.id);
-  return closestClip;
+  logger.log('[findNearestNeighbor] Found closest pattern in any track (Priority 3):', closestPattern.id);
+  return closestPattern;
 };

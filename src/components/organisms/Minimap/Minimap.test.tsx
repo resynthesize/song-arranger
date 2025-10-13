@@ -15,10 +15,10 @@ describe('Minimap', () => {
   ];
 
   const mockClips: Clip[] = [
-    { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 8 },
-    { id: 'clip-2', laneId: 'lane-1', position: 16, duration: 8 },
-    { id: 'clip-3', laneId: 'lane-2', position: 8, duration: 16 },
-    { id: 'clip-4', laneId: 'lane-3', position: 0, duration: 32 },
+    { id: 'clip-1', trackId: 'lane-1', position: 0, duration: 8 },
+    { id: 'clip-2', trackId: 'lane-1', position: 16, duration: 8 },
+    { id: 'clip-3', trackId: 'lane-2', position: 8, duration: 16 },
+    { id: 'clip-4', trackId: 'lane-3', position: 0, duration: 32 },
   ];
 
   const defaultViewport: ViewportState = {

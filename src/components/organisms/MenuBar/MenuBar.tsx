@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { zoomIn, zoomOut, setViewportOffset } from '@/store/slices/timelineSlice';
 import { addLane } from '@/store/slices/lanesSlice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
-import { selectAllClips, selectAllLanes, selectTimelineEndPosition } from '@/store/selectors';
+import { selectAllPatterns, selectAllTracks, selectTimelineEndPosition } from '@/store/selectors';
 import { TerminalButton } from '../../atoms/TerminalButton';
 import { FileMenu } from '../FileMenu';
 import Minimap from '../Minimap';
@@ -17,8 +17,8 @@ import './MenuBar.css';
 const MenuBar = () => {
   const dispatch = useAppDispatch();
   const viewport = useAppSelector((state) => state.timeline.viewport);
-  const lanes = useAppSelector(selectAllLanes);
-  const clips = useAppSelector(selectAllClips);
+  const lanes = useAppSelector(selectAllTracks);
+  const clips = useAppSelector(selectAllPatterns);
 
   // Calculate total timeline length using memoized selector
   const timelineEndPosition = useAppSelector(selectTimelineEndPosition);

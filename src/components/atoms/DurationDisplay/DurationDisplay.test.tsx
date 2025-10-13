@@ -6,23 +6,23 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import timelineReducer from '@/store/slices/timelineSlice';
-import clipsReducer from '@/store/slices/clipsSlice';
+import patternsReducer from '@/store/slices/patternsSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
 import { DurationDisplay } from './DurationDisplay';
-import type { Clip } from '@/types';
+import type { Pattern } from '@/types';
 
 // Helper to create a test store with custom state
 const createTestStore = (config?: {
   tempo?: number;
-  clips?: Clip[];
-  selectedClipIds?: string[];
+  patterns?: Pattern[];
+  selectedPatternIds?: string[];
 }) => {
-  const { tempo = 120, clips = [], selectedClipIds = [] } = config || {};
+  const { tempo = 120, patterns = [], selectedPatternIds = [] } = config || {};
 
   return configureStore({
     reducer: {
       timeline: timelineReducer,
-      clips: clipsReducer,
+      patterns: patternsReducer,
       selection: selectionReducer,
     },
     preloadedState: {
@@ -41,13 +41,13 @@ const createTestStore = (config?: {
         verticalZoom: 100,
         minimapVisible: false,
       },
-      clips: {
-        clips,
-        editingClipId: null,
+      patterns: {
+        patterns,
+        editingPatternId: null,
       },
       selection: {
-        selectedClipIds,
-        currentLaneId: null,
+        selectedPatternIds,
+        currentTrackId: null,
       },
     },
   });
@@ -87,8 +87,8 @@ describe('DurationDisplay', () => {
       expect(screen.getByText('TOTAL')).toBeInTheDocument();
     });
 
-    it('should display 00:00 when no clips exist', () => {
-      const store = createTestStore({ clips: [] });
+    it('should display 00:00 when no patterns exist', () => {
+      const store = createTestStore({ patterns: [] });
       render(
         <Provider store={store}>
           <DurationDisplay />
@@ -98,13 +98,13 @@ describe('DurationDisplay', () => {
     });
 
     it('should calculate and display global duration correctly', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 4 },
-        { id: '2', laneId: 'lane1', position: 8, duration: 4 },
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 4 },
+        { id: '2', trackId: 'track1', position: 8, duration: 4 },
       ];
-      // Rightmost clip ends at position 12 (8 + 4)
+      // Rightmost pattern ends at position 12 (8 + 4)
       // At 120 BPM: 12 beats = 6 seconds = 00:06
-      const store = createTestStore({ tempo: 120, clips });
+      const store = createTestStore({ tempo: 120, patterns });
       render(
         <Provider store={store}>
           <DurationDisplay />
@@ -114,11 +114,11 @@ describe('DurationDisplay', () => {
     });
 
     it('should update when tempo changes', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 4 },
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 4 },
       ];
       // At 120 BPM: 4 beats = 2 seconds = 00:02
-      const store = createTestStore({ tempo: 120, clips });
+      const store = createTestStore({ tempo: 120, patterns });
       const { rerender } = render(
         <Provider store={store}>
           <DurationDisplay />
@@ -127,7 +127,7 @@ describe('DurationDisplay', () => {
       expect(screen.getByTestId('duration-global')).toHaveTextContent('00:02');
 
       // At 60 BPM: 4 beats = 4 seconds = 00:04
-      const store2 = createTestStore({ tempo: 60, clips });
+      const store2 = createTestStore({ tempo: 60, patterns });
       rerender(
         <Provider store={store2}>
           <DurationDisplay />
@@ -137,11 +137,11 @@ describe('DurationDisplay', () => {
     });
 
     it('should format large durations correctly', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 240 },
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 240 },
       ];
       // At 120 BPM: 240 beats = 120 seconds = 02:00
-      const store = createTestStore({ tempo: 120, clips });
+      const store = createTestStore({ tempo: 120, patterns });
       render(
         <Provider store={store}>
           <DurationDisplay />
@@ -153,10 +153,10 @@ describe('DurationDisplay', () => {
 
   describe('Selected Duration', () => {
     it('should not display selected duration when no clips are selected', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 4 },
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 4 },
       ];
-      const store = createTestStore({ clips, selectedClipIds: [] });
+      const store = createTestStore({ patterns, selectedPatternIds: [] });
       render(
         <Provider store={store}>
           <DurationDisplay />
@@ -166,11 +166,11 @@ describe('DurationDisplay', () => {
       expect(screen.queryByTestId('duration-selected')).not.toBeInTheDocument();
     });
 
-    it('should display selected duration label when clips are selected', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 4 },
+    it('should display selected duration label when patterns are selected', () => {
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 4 },
       ];
-      const store = createTestStore({ clips, selectedClipIds: ['1'] });
+      const store = createTestStore({ patterns, selectedPatternIds: ['1'] });
       render(
         <Provider store={store}>
           <DurationDisplay />
@@ -180,14 +180,14 @@ describe('DurationDisplay', () => {
     });
 
     it('should calculate selected duration correctly', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 4 },
-        { id: '2', laneId: 'lane2', position: 4, duration: 8 },
-        { id: '3', laneId: 'lane3', position: 8, duration: 2 },
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 4 },
+        { id: '2', trackId: 'track2', position: 4, duration: 8 },
+        { id: '3', trackId: 'track3', position: 8, duration: 2 },
       ];
-      // Selected clips: 1 (4 beats) + 3 (2 beats) = 6 beats
+      // Selected patterns: 1 (4 beats) + 3 (2 beats) = 6 beats
       // At 120 BPM: 6 beats = 3 seconds = 00:03
-      const store = createTestStore({ tempo: 120, clips, selectedClipIds: ['1', '3'] });
+      const store = createTestStore({ tempo: 120, patterns, selectedPatternIds: ['1', '3'] });
       render(
         <Provider store={store}>
           <DurationDisplay />
@@ -197,12 +197,12 @@ describe('DurationDisplay', () => {
     });
 
     it('should update when selection changes', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 4 },
-        { id: '2', laneId: 'lane2', position: 4, duration: 4 },
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 4 },
+        { id: '2', trackId: 'track2', position: 4, duration: 4 },
       ];
-      // First: 1 clip selected (4 beats = 2 seconds)
-      const store1 = createTestStore({ tempo: 120, clips, selectedClipIds: ['1'] });
+      // First: 1 pattern selected (4 beats = 2 seconds)
+      const store1 = createTestStore({ tempo: 120, patterns, selectedPatternIds: ['1'] });
       const { rerender } = render(
         <Provider store={store1}>
           <DurationDisplay />
@@ -210,8 +210,8 @@ describe('DurationDisplay', () => {
       );
       expect(screen.getByTestId('duration-selected')).toHaveTextContent('00:02');
 
-      // Second: both clips selected (8 beats = 4 seconds)
-      const store2 = createTestStore({ tempo: 120, clips, selectedClipIds: ['1', '2'] });
+      // Second: both patterns selected (8 beats = 4 seconds)
+      const store2 = createTestStore({ tempo: 120, patterns, selectedPatternIds: ['1', '2'] });
       rerender(
         <Provider store={store2}>
           <DurationDisplay />
@@ -220,7 +220,7 @@ describe('DurationDisplay', () => {
       expect(screen.getByTestId('duration-selected')).toHaveTextContent('00:04');
 
       // Third: no selection
-      const store3 = createTestStore({ tempo: 120, clips, selectedClipIds: [] });
+      const store3 = createTestStore({ tempo: 120, patterns, selectedPatternIds: [] });
       rerender(
         <Provider store={store3}>
           <DurationDisplay />
@@ -243,10 +243,10 @@ describe('DurationDisplay', () => {
     });
 
     it('should have phosphor glow effect on values', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 4 },
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 4 },
       ];
-      const store = createTestStore({ clips });
+      const store = createTestStore({ patterns });
       const { container } = render(
         <Provider store={store}>
           <DurationDisplay />
@@ -269,13 +269,13 @@ describe('DurationDisplay', () => {
   });
 
   describe('Integration', () => {
-    it('should display selected duration when clips are selected', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 4 },
-        { id: '2', laneId: 'lane2', position: 8, duration: 4 },
+    it('should display selected duration when patterns are selected', () => {
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 4 },
+        { id: '2', trackId: 'track2', position: 8, duration: 4 },
       ];
       // Selected: 4 beats at 120 BPM = 2 seconds
-      const store = createTestStore({ tempo: 120, clips, selectedClipIds: ['1'] });
+      const store = createTestStore({ tempo: 120, patterns, selectedPatternIds: ['1'] });
       render(
         <Provider store={store}>
           <DurationDisplay />
@@ -286,11 +286,11 @@ describe('DurationDisplay', () => {
     });
 
     it('should handle edge case of very long durations', () => {
-      const clips: Clip[] = [
-        { id: '1', laneId: 'lane1', position: 0, duration: 7200 },
+      const patterns: Pattern[] = [
+        { id: '1', trackId: 'track1', position: 0, duration: 7200 },
       ];
       // At 120 BPM: 7200 beats = 3600 seconds = 60:00
-      const store = createTestStore({ tempo: 120, clips });
+      const store = createTestStore({ tempo: 120, patterns });
       render(
         <Provider store={store}>
           <DurationDisplay />

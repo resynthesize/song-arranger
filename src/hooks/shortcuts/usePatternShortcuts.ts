@@ -9,13 +9,13 @@ import {
   removePatterns,
   duplicatePatterns,
   duplicatePatternsWithOffset,
-  splitClip,
+  splitPattern,
   setPatternsDuration,
-  trimClipStart,
-  trimClipEnd,
-  addClip,
+  trimPatternStart,
+  trimPatternEnd,
+  addPattern,
 } from '@/store/slices/patternsSlice';
-import { selectClip, clearSelection, selectAllPatterns } from '@/store/slices/selectionSlice';
+import { selectPattern, clearSelection, selectAllPatterns } from '@/store/slices/selectionSlice';
 import { selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
 import { findNearestNeighbor } from '@/utils/navigation';
 import { first } from '@/utils/array';
@@ -41,7 +41,7 @@ export interface ClipShortcutHandlers {
   setDuration9: () => void;
   trimStart: () => void;
   trimEnd: () => void;
-  addClip: () => void;
+  addPattern: () => void;
   edit: () => void;
   changeColor: () => void;
 }
@@ -51,43 +51,43 @@ export interface ClipShortcutHandlers {
  */
 export const usePatternShortcuts = (): ClipShortcutHandlers => {
   const dispatch = useAppDispatch();
-  const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
+  const selectedPatternIds = useAppSelector((state) => state.selection.selectedPatternIds);
   const patterns = useAppSelector((state) => state.patterns.patterns);
   const playheadPosition = useAppSelector((state) => state.timeline.playheadPosition);
   const effectiveSnapValue = useAppSelector(selectEffectiveSnapValue);
-  const currentLaneId = useAppSelector((state) => state.selection.currentLaneId);
+  const currentTrackId = useAppSelector((state) => state.selection.currentTrackId);
 
   const handleDelete = useCallback(() => {
-    if (selectedClipIds.length > 0) {
+    if (selectedPatternIds.length > 0) {
       logger.log('[usePatternShortcuts] Delete key pressed', {
-        selectedClipIds,
+        selectedPatternIds,
         totalPatterns: patterns.length
       });
 
       // Find nearest neighbor to the first deleted clip
-      const firstSelectedId = first(selectedClipIds);
+      const firstSelectedId = first(selectedPatternIds);
       if (!firstSelectedId) {
         dispatch(clearSelection());
         return;
       }
 
       const firstDeletedPattern = patterns.find((c) => c.id === firstSelectedId);
-      const remainingPatterns = patterns.filter((c) => !selectedClipIds.includes(c.id));
+      const remainingPatterns = patterns.filter((c) => !selectedPatternIds.includes(c.id));
 
       logger.log('[usePatternShortcuts] Delete data:', {
-        firstDeletedClip,
+        firstDeletedPattern,
         remainingCount: remainingPatterns.length
       });
 
-      dispatch(removePatterns(selectedClipIds));
+      dispatch(removePatterns(selectedPatternIds));
 
       // Try to select nearest neighbor if one exists
-      if (firstDeletedClip) {
-        const nearestPattern = findNearestNeighbor(firstDeletedClip, remainingPatterns);
-        logger.log('[usePatternShortcuts] Nearest neighbor found:', nearestClip);
-        if (nearestClip) {
-          logger.log('[usePatternShortcuts] Selecting nearest clip:', nearestClip.id);
-          dispatch(selectClip(nearestClip.id));
+      if (firstDeletedPattern) {
+        const nearestPattern = findNearestNeighbor(firstDeletedPattern, remainingPatterns);
+        logger.log('[usePatternShortcuts] Nearest neighbor found:', nearestPattern);
+        if (nearestPattern) {
+          logger.log('[usePatternShortcuts] Selecting nearest clip:', nearestPattern.id);
+          dispatch(selectPattern(nearestPattern.id));
         } else {
           logger.log('[usePatternShortcuts] No nearest clip, clearing selection');
           dispatch(clearSelection());
@@ -97,29 +97,29 @@ export const usePatternShortcuts = (): ClipShortcutHandlers => {
         dispatch(clearSelection());
       }
     }
-  }, [dispatch, selectedClipIds, patterns]);
+  }, [dispatch, selectedPatternIds, patterns]);
 
   const handleDuplicate = useCallback(() => {
-    if (selectedClipIds.length > 0) {
-      dispatch(duplicatePatterns(selectedClipIds));
+    if (selectedPatternIds.length > 0) {
+      dispatch(duplicatePatterns(selectedPatternIds));
     }
-  }, [dispatch, selectedClipIds]);
+  }, [dispatch, selectedPatternIds]);
 
   const handleDuplicateOffset = useCallback(() => {
-    if (selectedClipIds.length > 0) {
-      dispatch(duplicatePatternsWithOffset(selectedClipIds));
+    if (selectedPatternIds.length > 0) {
+      dispatch(duplicatePatternsWithOffset(selectedPatternIds));
     }
-  }, [dispatch, selectedClipIds]);
+  }, [dispatch, selectedPatternIds]);
 
   const handleSplit = useCallback(() => {
-    if (selectedClipIds.length > 0) {
+    if (selectedPatternIds.length > 0) {
       // Split the first selected pattern at playhead position
-      const patternId = first(selectedClipIds);
+      const patternId = first(selectedPatternIds);
       if (patternId) {
-        dispatch(splitClip({ patternId, position: playheadPosition }));
+        dispatch(splitPattern({ patternId, position: playheadPosition }));
       }
     }
-  }, [dispatch, selectedClipIds, playheadPosition]);
+  }, [dispatch, selectedPatternIds, playheadPosition]);
 
   const handleJoin = useCallback(() => {
     // TODO: Implement join adjacent patterns
@@ -136,40 +136,40 @@ export const usePatternShortcuts = (): ClipShortcutHandlers => {
 
   const createDurationHandler = useCallback((bars: number) => {
     return () => {
-      if (selectedClipIds.length > 0) {
-        dispatch(setPatternsDuration({ patternIds: selectedClipIds, duration: bars * BEATS_PER_BAR }));
+      if (selectedPatternIds.length > 0) {
+        dispatch(setPatternsDuration({ patternIds: selectedPatternIds, duration: bars * BEATS_PER_BAR }));
       }
     };
-  }, [dispatch, selectedClipIds]);
+  }, [dispatch, selectedPatternIds]);
 
   const handleTrimStart = useCallback(() => {
-    if (selectedClipIds.length > 0) {
-      const patternId = first(selectedClipIds);
+    if (selectedPatternIds.length > 0) {
+      const patternId = first(selectedPatternIds);
       if (patternId) {
-        dispatch(trimClipStart({ patternId, amount: effectiveSnapValue }));
+        dispatch(trimPatternStart({ patternId, amount: effectiveSnapValue }));
       }
     }
-  }, [dispatch, selectedClipIds, effectiveSnapValue]);
+  }, [dispatch, selectedPatternIds, effectiveSnapValue]);
 
   const handleTrimEnd = useCallback(() => {
-    if (selectedClipIds.length > 0) {
-      const patternId = first(selectedClipIds);
+    if (selectedPatternIds.length > 0) {
+      const patternId = first(selectedPatternIds);
       if (patternId) {
-        dispatch(trimClipEnd({ patternId, amount: effectiveSnapValue }));
+        dispatch(trimPatternEnd({ patternId, amount: effectiveSnapValue }));
       }
     }
-  }, [dispatch, selectedClipIds, effectiveSnapValue]);
+  }, [dispatch, selectedPatternIds, effectiveSnapValue]);
 
   const handleAddPattern = useCallback(() => {
-    if (currentLaneId) {
+    if (currentTrackId) {
       // Add pattern at playhead position on current lane
-      dispatch(addClip({
-        trackId: currentLaneId,
+      dispatch(addPattern({
+        trackId: currentTrackId,
         position: playheadPosition,
         duration: DEFAULT_CLIP_DURATION,
       }));
     }
-  }, [dispatch, currentLaneId, playheadPosition]);
+  }, [dispatch, currentTrackId, playheadPosition]);
 
   const handleEdit = useCallback(() => {
     // TODO: Implement pattern label editing
@@ -200,7 +200,7 @@ export const usePatternShortcuts = (): ClipShortcutHandlers => {
     setDuration9: createDurationHandler(9),
     trimStart: handleTrimStart,
     trimEnd: handleTrimEnd,
-    addClip: handleAddClip,
+    addPattern: handleAddPattern,
     edit: handleEdit,
     changeColor: handleChangeColor,
   };

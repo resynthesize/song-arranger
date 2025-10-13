@@ -5,22 +5,22 @@
 
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { useAppSelector } from '@/store/hooks';
-import { selectAllClips, selectSelectedClipIds, selectHasSelection } from '@/store/selectors';
+import { selectAllPatterns, selectSelectedPatternIds, selectHasSelection } from '@/store/selectors';
 import { formatDuration, calculateGlobalDuration, calculateSelectedDuration } from '@/utils/duration';
 import './DurationDisplay.css';
 
 export const DurationDisplay = () => {
   const tempo = useAppSelector((state) => state.timeline.tempo);
-  const clips = useAppSelector(selectAllClips);
-  const selectedClipIds = useAppSelector(selectSelectedClipIds);
+  const patterns = useAppSelector(selectAllPatterns);
+  const selectedPatternIds = useAppSelector(selectSelectedPatternIds);
   const hasSelection = useAppSelector(selectHasSelection);
   const contentRef = useRef<HTMLDivElement>(null);
   const [borderWidth, setBorderWidth] = useState(12);
 
   // Calculate global duration (already returns seconds)
   const globalDurationSeconds = useMemo(
-    () => calculateGlobalDuration(clips, tempo),
-    [clips, tempo]
+    () => calculateGlobalDuration(patterns, tempo),
+    [patterns, tempo]
   );
   const globalDurationFormatted = useMemo(
     () => formatDuration(globalDurationSeconds),
@@ -29,8 +29,8 @@ export const DurationDisplay = () => {
 
   // Calculate selected duration (already returns seconds)
   const selectedDurationSeconds = useMemo(
-    () => calculateSelectedDuration(clips, selectedClipIds, tempo),
-    [clips, selectedClipIds, tempo]
+    () => calculateSelectedDuration(patterns, selectedPatternIds, tempo),
+    [patterns, selectedPatternIds, tempo]
   );
   const selectedDurationFormatted = useMemo(
     () => formatDuration(selectedDurationSeconds),

@@ -6,22 +6,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { useViewport } from '@/hooks/useViewport';
-import { useClipOperations } from '@/hooks/useClipOperations';
-import { useLaneOperations } from '@/hooks/useLaneOperations';
+import { usePatternOperations } from '@/hooks/usePatternOperations';
+import { useTrackOperations } from '@/hooks/useTrackOperations';
 import { useRectangleSelection } from '@/hooks/useRectangleSelection';
-import Lane from '../Lane';
+import Track from '../Track';
 import Ruler from '../Ruler';
 import {
-  selectClip,
-  toggleClipSelection,
+  selectPattern,
+  togglePatternSelection,
 } from '@/store/slices/selectionSlice';
 import {
-  selectAllClips,
-  selectAllLanes,
-  selectSelectedClipIds,
-  selectCurrentLaneId,
-  selectEditingLaneId,
-  selectMovingLaneId,
+  selectAllPatterns,
+  selectAllTracks,
+  selectSelectedPatternIds,
+  selectCurrentTrackId,
+  selectEditingTrackId,
+  selectMovingTrackId,
 } from '@/store/selectors';
 import { setPlayheadPosition, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
 import { snapToGrid } from '@/utils/snap';
@@ -40,12 +40,12 @@ const Timeline = () => {
 
   // Select data from Redux using centralized selectors
   const effectiveSnapValue = useAppSelector(selectEffectiveSnapValue);
-  const lanes = useAppSelector(selectAllLanes);
-  const clips = useAppSelector(selectAllClips);
-  const selectedClipIds = useAppSelector(selectSelectedClipIds);
-  const currentLaneId = useAppSelector(selectCurrentLaneId);
-  const editingLaneId = useAppSelector(selectEditingLaneId);
-  const movingLaneId = useAppSelector(selectMovingLaneId);
+  const lanes = useAppSelector(selectAllTracks);
+  const clips = useAppSelector(selectAllPatterns);
+  const selectedClipIds = useAppSelector(selectSelectedPatternIds);
+  const currentLaneId = useAppSelector(selectCurrentTrackId);
+  const editingLaneId = useAppSelector(selectEditingTrackId);
+  const movingLaneId = useAppSelector(selectMovingTrackId);
   const verticalZoom = useAppSelector((state) => state.timeline.verticalZoom);
 
   // Use viewport hook for pan/zoom interactions
@@ -56,8 +56,8 @@ const Timeline = () => {
   });
 
   // Use custom hooks for operations
-  const clipOperations = useClipOperations(lanes);
-  const laneOperations = useLaneOperations(effectiveSnapValue);
+  const clipOperations = usePatternOperations(lanes);
+  const laneOperations = useTrackOperations(effectiveSnapValue);
   const { selectionRect, handleMouseDown: handleRectangleSelectionMouseDown } = useRectangleSelection({
     timelineRef,
     viewport,
@@ -87,9 +87,9 @@ const Timeline = () => {
   const handleClipSelect = useCallback(
     (clipId: ID, isMultiSelect: boolean) => {
       if (isMultiSelect) {
-        dispatch(toggleClipSelection(clipId));
+        dispatch(togglePatternSelection(clipId));
       } else {
-        dispatch(selectClip(clipId));
+        dispatch(selectPattern(clipId));
       }
     },
     [dispatch]

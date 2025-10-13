@@ -5,7 +5,7 @@
  */
 
 import { useAppSelector } from '@/store/hooks';
-import { selectClipCount, selectLaneCount, selectSelectionCount } from '@/store/selectors';
+import { selectPatternCount, selectTrackCount, selectSelectionCount } from '@/store/selectors';
 import './HUD.css';
 
 // Snap value to musical notation mapping
@@ -41,8 +41,8 @@ const HUD = () => {
   const zoom = useAppSelector((state) => state.timeline.viewport.zoom);
   const snapValue = useAppSelector((state) => state.timeline.snapValue);
   const playheadPosition = useAppSelector((state) => state.timeline.playheadPosition);
-  const clipCount = useAppSelector(selectClipCount);
-  const laneCount = useAppSelector(selectLaneCount);
+  const clipCount = useAppSelector(selectPatternCount);
+  const laneCount = useAppSelector(selectTrackCount);
   const selectedCount = useAppSelector(selectSelectionCount);
   const crtEnabled = useAppSelector((state) => state.crtEffects.enabled);
 
