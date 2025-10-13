@@ -1,29 +1,5 @@
 /**
- * ClipHandle Molecule Styles
- * Extracted from Clip.css
+ * PatternHandle Molecule Styles
+ * Note: Main handle styles are defined in Pattern.css
+ * This file is kept for future extensions if needed
  */
-
-.clip-handle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  cursor: ew-resize;
-  z-index: 10;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.clip-handle--left {
-  left: 0;
-}
-
-.clip-handle--right {
-  right: 0;
-}
-
-/* Show handles on hover or when parent clip is selected */
-.clip:hover .clip-handle,
-.clip--selected .clip-handle {
-  opacity: 1;
-}

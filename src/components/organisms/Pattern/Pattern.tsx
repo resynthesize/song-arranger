@@ -24,6 +24,8 @@ interface PatternProps {
   label?: string;
   trackName?: string;
   color?: string;
+  muted?: boolean;
+  patternType?: 'P3' | 'CK';
   externalVerticalDragDeltaY?: number;
   onSelect: (patternId: ID, isMultiSelect: boolean) => void;
   onMove: (patternId: ID, newPosition: Position, delta: number) => void;
@@ -49,6 +51,8 @@ const Pattern = ({
   label,
   trackName,
   color,
+  muted = false,
+  patternType = 'P3',
   externalVerticalDragDeltaY,
   onSelect,
   onMove,
@@ -301,6 +305,9 @@ const Pattern = ({
     }
   }, [effectiveVerticalDragDeltaY, isDragging, id]);
 
+  // Show type badge if pattern is wide enough (> 20px)
+  const showTypeBadge = widthPx > 20;
+
   return (
     <div
       ref={patternRef}
@@ -309,7 +316,9 @@ const Pattern = ({
         isSelected ? 'pattern--selected' : ''
       } ${isDragging ? 'pattern--dragging' : ''} ${
         isResizing ? 'pattern--resizing' : ''
-      } ${isCopying ? 'pattern--copying' : ''}`}
+      } ${isCopying ? 'pattern--copying' : ''} ${
+        muted ? 'pattern--muted' : ''
+      }`}
       style={{
         left: `${leftPx.toString()}px`,
         width: `${widthPx.toString()}px`,
@@ -330,6 +339,11 @@ const Pattern = ({
           <span className="pattern__corner pattern__corner--tl">┌</span>
           <span className="pattern__corner pattern__corner--tr">┐</span>
         </div>
+        {showTypeBadge && (
+          <div className="pattern__type-badge" data-testid={`pattern-${id}-type-badge`}>
+            {patternType}
+          </div>
+        )}
         {isEditing ? (
           <input
             ref={inputRef}

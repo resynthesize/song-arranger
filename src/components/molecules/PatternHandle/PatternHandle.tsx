@@ -20,8 +20,8 @@ export const PatternHandle: React.FC<PatternHandleProps> = ({
 }) => {
   return (
     <div
-      className={`clip-handle clip-handle--${edge}`}
-      data-testid={`clip-${patternId}-handle-${edge}`}
+      className={`pattern__handle pattern__handle--${edge}`}
+      data-testid={`pattern-${patternId}-handle-${edge}`}
       onMouseDown={onResizeStart(edge)}
     />
   );
