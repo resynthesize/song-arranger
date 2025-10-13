@@ -1,7 +1,7 @@
 /**
  * Song Arranger - Command Footer Component
  * Context-sensitive keyboard shortcuts display
- * Voyetra-inspired command reference footer
+ * Shows only relevant shortcuts for current context
  */
 
 import { useMemo } from 'react';
@@ -16,133 +16,45 @@ interface CommandFooterProps {
 }
 
 const CommandFooter = ({ hasSelection, selectionCount, isEditing }: CommandFooterProps) => {
-  // Get available shortcuts for current context
-  const shortcuts = useMemo(() => {
+  // Get context-appropriate shortcuts, filtered to only implemented ones
+  const relevantShortcuts = useMemo(() => {
     const context: KeyboardContext = {
       hasSelection,
       selectionCount,
       isEditing,
     };
-    return getShortcutsForContext(context);
-  }, [hasSelection, selectionCount, isEditing]);
+    const contextShortcuts = getShortcutsForContext(context);
 
-  // Group shortcuts into categories for better display
-  const clipShortcuts = shortcuts.filter(
-    s => s.action === 'delete' || s.action === 'duplicate' || s.action === 'edit' || s.action === 'changeColor'
-  );
-  const zoomShortcuts = shortcuts.filter(
-    s => s.action === 'zoomIn' || s.action === 'zoomOut'
-  );
-  const navShortcuts = shortcuts.filter(
-    s => s.action === 'navigateUp' || s.action === 'navigateDown'
-  );
-  const playbackShortcuts = shortcuts.filter(
-    s => s.action === 'togglePlay'
-  );
-  const editShortcuts = shortcuts.filter(
-    s => s.action === 'undo' || s.action === 'redo'
-  );
-  const helpShortcuts = shortcuts.filter(
-    s => s.action === 'help'
-  );
+    // Filter out shortcuts that are not yet implemented
+    const unimplementedActions = ['undo', 'redo', 'edit', 'changeColor', 'join'];
+
+    // Prioritize clip-specific shortcuts when clips are selected
+    // Show most useful shortcuts first, hide less common global shortcuts to save space
+    let filtered = contextShortcuts.filter(s => !unimplementedActions.includes(s.action));
+
+    if (hasSelection) {
+      // When clips are selected, prioritize clip operations
+      const clipActions = ['delete', 'duplicate', 'duplicateOffset', 'split', 'setDuration1',
+        'setDuration2', 'setDuration3', 'setDuration4', 'trimStart', 'trimEnd', 'frameSelection'];
+      const essentialGlobal = ['zoomIn', 'zoomOut', 'togglePlay', 'selectAll', 'deselectAll'];
+
+      filtered = filtered.filter(s =>
+        clipActions.includes(s.action) || essentialGlobal.includes(s.action)
+      );
+    }
+
+    return filtered;
+  }, [hasSelection, selectionCount, isEditing]);
 
   return (
     <div className="command-footer" data-testid="command-footer">
-      <div className="command-footer__border command-footer__border--top">
-        ├────────────────────────────────────────────────────────────────────────────────────────┤
-      </div>
-
       <div className="command-footer__content">
-        {/* Playback */}
-        {playbackShortcuts.length > 0 && (
-          <div className="command-footer__group">
-            {playbackShortcuts.map((shortcut, index) => (
-              <div key={`${shortcut.action}-${index}`} className="command-footer__shortcut">
-                <span className="command-footer__key">{formatShortcut(shortcut)}</span>
-                <span className="command-footer__description">{shortcut.description}</span>
-              </div>
-            ))}
+        {relevantShortcuts.map((shortcut, index) => (
+          <div key={`${shortcut.action}-${index.toString()}`} className="command-footer__shortcut">
+            <span className="command-footer__key">{formatShortcut(shortcut)}</span>
+            <span className="command-footer__description">{shortcut.description}</span>
           </div>
-        )}
-
-        {/* Clip Operations */}
-        {clipShortcuts.length > 0 && (
-          <>
-            <div className="command-footer__separator">│</div>
-            <div className="command-footer__group">
-              {clipShortcuts.map((shortcut, index) => (
-                <div key={`${shortcut.action}-${index}`} className="command-footer__shortcut">
-                  <span className="command-footer__key">{formatShortcut(shortcut)}</span>
-                  <span className="command-footer__description">{shortcut.description}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Zoom */}
-        {zoomShortcuts.length > 0 && (
-          <>
-            <div className="command-footer__separator">│</div>
-            <div className="command-footer__group">
-              {zoomShortcuts.map((shortcut, index) => (
-                <div key={`${shortcut.action}-${index}`} className="command-footer__shortcut">
-                  <span className="command-footer__key">{formatShortcut(shortcut)}</span>
-                  <span className="command-footer__description">{shortcut.description}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Navigation */}
-        {navShortcuts.length > 0 && (
-          <>
-            <div className="command-footer__separator">│</div>
-            <div className="command-footer__group">
-              {navShortcuts.map((shortcut, index) => (
-                <div key={`${shortcut.action}-${index}`} className="command-footer__shortcut">
-                  <span className="command-footer__key">{formatShortcut(shortcut)}</span>
-                  <span className="command-footer__description">{shortcut.description}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Edit (Undo/Redo) */}
-        {editShortcuts.length > 0 && (
-          <>
-            <div className="command-footer__separator">│</div>
-            <div className="command-footer__group">
-              {editShortcuts.map((shortcut, index) => (
-                <div key={`${shortcut.action}-${index}`} className="command-footer__shortcut">
-                  <span className="command-footer__key">{formatShortcut(shortcut)}</span>
-                  <span className="command-footer__description">{shortcut.description}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Help */}
-        {helpShortcuts.length > 0 && (
-          <>
-            <div className="command-footer__separator">│</div>
-            <div className="command-footer__group">
-              {helpShortcuts.map((shortcut, index) => (
-                <div key={`${shortcut.action}-${index}`} className="command-footer__shortcut">
-                  <span className="command-footer__key">{formatShortcut(shortcut)}</span>
-                  <span className="command-footer__description">{shortcut.description}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="command-footer__border command-footer__border--bottom">
-        └────────────────────────────────────────────────────────────────────────────────────────┘
+        ))}
       </div>
     </div>
   );

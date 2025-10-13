@@ -24,7 +24,9 @@ import {
   selectClip,
   toggleClipSelection,
   clearSelection,
+  setCurrentLane,
 } from '@/store/slices/selectionSlice';
+import { findNearestNeighbor } from '@/utils/navigation';
 import {
   renameLane,
   setEditingLane,
@@ -139,6 +141,15 @@ const Timeline = () => {
     [dispatch, clips]
   );
 
+  // Handle lane selection
+  const handleLaneSelect = useCallback(
+    (laneId: ID) => {
+      dispatch(setCurrentLane(laneId));
+      dispatch(clearSelection()); // Clear clip selection when selecting a lane
+    },
+    [dispatch]
+  );
+
   // Handle clip selection
   const handleClipSelect = useCallback(
     (clipId: ID, isMultiSelect: boolean) => {
@@ -235,19 +246,31 @@ const Timeline = () => {
     [dispatch, selectedClipIds]
   );
 
-  // Handle double-click to create clip
+  // Handle double-click to create clip (also handles drag-to-create with duration)
   const handleLaneDoubleClick = useCallback(
-    (laneId: ID, position: Position) => {
-      // Snap to left edge of grid cell (floor) - if you click in a grid cell,
-      // the clip starts at the left edge of that cell
-      const snappedPosition = snapToGridFloor(position, effectiveSnapValue);
-      dispatch(
-        addClip({
-          laneId,
-          position: snappedPosition,
-          duration: 4, // Default 4 beats (1 bar)
-        })
-      );
+    (laneId: ID, position: Position, duration?: Duration) => {
+      // If duration is provided (from drag-to-create), use it directly
+      // Otherwise, snap position and use default duration
+      if (duration !== undefined) {
+        // Drag-to-create - position and duration already snapped in Lane component
+        dispatch(
+          addClip({
+            laneId,
+            position,
+            duration,
+          })
+        );
+      } else {
+        // Traditional double-click - snap to left edge of grid cell (floor)
+        const snappedPosition = snapToGridFloor(position, effectiveSnapValue);
+        dispatch(
+          addClip({
+            laneId,
+            position: snappedPosition,
+            duration: 4, // Default 4 beats (1 bar)
+          })
+        );
+      }
     },
     [dispatch, effectiveSnapValue]
   );
@@ -277,16 +300,63 @@ const Timeline = () => {
   // Handle clip deletion (via context menu)
   const handleClipDelete = useCallback(
     (clipId: ID) => {
+      console.log('[handleClipDelete] Starting deletion', { clipId, selectedClipIds, totalClips: clips.length });
+
       if (selectedClipIds.includes(clipId) && selectedClipIds.length > 1) {
-        // Delete all selected clips
+        // Delete all selected clips - find nearest neighbor to the first deleted clip
+        const firstDeletedClip = clips.find((c) => c.id === selectedClipIds[0]);
+        const remainingClips = clips.filter((c) => !selectedClipIds.includes(c.id));
+
+        console.log('[handleClipDelete] Multi-delete:', {
+          deletingCount: selectedClipIds.length,
+          firstDeletedClip,
+          remainingCount: remainingClips.length
+        });
+
         dispatch(removeClips(selectedClipIds));
-        dispatch(clearSelection());
+
+        // Try to select nearest neighbor if one exists
+        if (firstDeletedClip) {
+          const nearestClip = findNearestNeighbor(firstDeletedClip, remainingClips);
+          console.log('[handleClipDelete] Nearest neighbor found:', nearestClip);
+          if (nearestClip) {
+            console.log('[handleClipDelete] Selecting nearest clip:', nearestClip.id);
+            dispatch(selectClip(nearestClip.id));
+          } else {
+            console.log('[handleClipDelete] No nearest clip, clearing selection');
+            dispatch(clearSelection());
+          }
+        } else {
+          console.log('[handleClipDelete] First deleted clip not found, clearing selection');
+          dispatch(clearSelection());
+        }
       } else {
-        // Delete single clip
+        // Delete single clip - find nearest neighbor
+        const deletedClip = clips.find((c) => c.id === clipId);
+        const remainingClips = clips.filter((c) => c.id !== clipId);
+
+        console.log('[handleClipDelete] Single delete:', {
+          deletedClip,
+          remainingCount: remainingClips.length
+        });
+
         dispatch(removeClips([clipId]));
+
+        // Try to select nearest neighbor if one exists
+        if (deletedClip) {
+          const nearestClip = findNearestNeighbor(deletedClip, remainingClips);
+          console.log('[handleClipDelete] Nearest neighbor found:', nearestClip);
+          if (nearestClip) {
+            console.log('[handleClipDelete] Selecting nearest clip:', nearestClip.id);
+            dispatch(selectClip(nearestClip.id));
+          } else {
+            console.log('[handleClipDelete] No nearest clip, clearing selection');
+            dispatch(clearSelection());
+          }
+        }
       }
     },
-    [dispatch, selectedClipIds]
+    [dispatch, selectedClipIds, clips]
   );
 
   // Handle vertical clip drag updates (called during drag for visual feedback)
@@ -481,24 +551,10 @@ const Timeline = () => {
     };
   }, [selectionRect, viewport, clips, lanes, dispatch]);
 
-  // Handle keyboard shortcuts
+  // NOTE: Keyboard shortcuts are now handled by useKeyboardShortcuts hook
+  // This effect only handles zoom shortcuts that use the viewport hook
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Delete selected clips
-      if (
-        (e.key === 'Delete' || e.key === 'Backspace') &&
-        selectedClipIds.length > 0
-      ) {
-        e.preventDefault();
-        dispatch(removeClips(selectedClipIds));
-        dispatch(clearSelection());
-      }
-
-      // Escape to clear selection
-      if (e.key === 'Escape') {
-        dispatch(clearSelection());
-      }
-
       // Zoom shortcuts - use viewport hook handlers
       if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
         e.preventDefault();
@@ -515,7 +571,7 @@ const Timeline = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [dispatch, selectedClipIds, handleZoomIn, handleZoomOut]);
+  }, [handleZoomIn, handleZoomOut]);
 
   return (
     <div
@@ -551,6 +607,7 @@ const Timeline = () => {
                 isCurrent={lane.id === currentLaneId}
                 isEditing={editingLaneId === lane.id}
                 isMoving={movingLaneId === lane.id}
+                onLaneSelect={handleLaneSelect}
                 onNameChange={handleNameChange}
                 onColorChange={handleColorChange}
                 onStartEditing={handleStartEditing}

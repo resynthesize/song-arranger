@@ -46,6 +46,7 @@ import {
   findNearestClipWest,
   findNearestClipNorth,
   findNearestClipSouth,
+  findNearestNeighbor,
 } from '@/utils/navigation';
 
 /**
@@ -91,8 +92,37 @@ export const useKeyboardShortcuts = () => {
         // Clip operations
         case 'delete':
           if (selectedClipIds.length > 0) {
+            console.log('[useKeyboardShortcuts] Delete key pressed', {
+              selectedClipIds,
+              totalClips: clips.length
+            });
+
+            // Find nearest neighbor to the first deleted clip
+            const firstDeletedClip = clips.find((c) => c.id === selectedClipIds[0]);
+            const remainingClips = clips.filter((c) => !selectedClipIds.includes(c.id));
+
+            console.log('[useKeyboardShortcuts] Delete data:', {
+              firstDeletedClip,
+              remainingCount: remainingClips.length
+            });
+
             dispatch(removeClips(selectedClipIds));
-            dispatch(clearSelection());
+
+            // Try to select nearest neighbor if one exists
+            if (firstDeletedClip) {
+              const nearestClip = findNearestNeighbor(firstDeletedClip, remainingClips);
+              console.log('[useKeyboardShortcuts] Nearest neighbor found:', nearestClip);
+              if (nearestClip) {
+                console.log('[useKeyboardShortcuts] Selecting nearest clip:', nearestClip.id);
+                dispatch(selectClip(nearestClip.id));
+              } else {
+                console.log('[useKeyboardShortcuts] No nearest clip, clearing selection');
+                dispatch(clearSelection());
+              }
+            } else {
+              console.log('[useKeyboardShortcuts] First deleted clip not found, clearing selection');
+              dispatch(clearSelection());
+            }
           }
           break;
 

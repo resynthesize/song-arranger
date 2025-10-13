@@ -167,3 +167,63 @@ export const findNearestClipSouth = (
     return clipDistance < nearestDistance ? clip : nearest;
   });
 };
+
+/**
+ * Find the nearest neighboring clip after deleting the current clip
+ * Priority: 1) Right in same lane, 2) Left in same lane, 3) Closest in any other lane
+ * @param deletedClip - The clip being deleted
+ * @param allClips - All clips in the timeline (excluding the deleted one)
+ * @returns The nearest neighbor clip, or null if no clips exist
+ */
+export const findNearestNeighbor = (
+  deletedClip: Clip,
+  allClips: Clip[]
+): Clip | null => {
+  console.log('[findNearestNeighbor] Starting search', {
+    deletedClip: { id: deletedClip.id, laneId: deletedClip.laneId, position: deletedClip.position },
+    totalClips: allClips.length
+  });
+
+  // Filter out the deleted clip from consideration
+  const otherClips = allClips.filter((clip) => clip.id !== deletedClip.id);
+
+  console.log('[findNearestNeighbor] After filtering deleted clip:', {
+    remainingClips: otherClips.length
+  });
+
+  if (otherClips.length === 0) {
+    console.log('[findNearestNeighbor] No other clips remaining');
+    return null;
+  }
+
+  // Priority 1: Try to find clip to the right in same lane
+  const clipToRight = findNearestClipEast(deletedClip, otherClips);
+  if (clipToRight) {
+    console.log('[findNearestNeighbor] Found clip to the right (Priority 1):', clipToRight.id);
+    return clipToRight;
+  }
+
+  // Priority 2: Try to find clip to the left in same lane
+  const clipToLeft = findNearestClipWest(deletedClip, otherClips);
+  if (clipToLeft) {
+    console.log('[findNearestNeighbor] Found clip to the left (Priority 2):', clipToLeft.id);
+    return clipToLeft;
+  }
+
+  // Priority 3: Find closest clip in any lane
+  // Calculate distance based on clip center positions
+  const deletedCenter = getClipCenter(deletedClip);
+
+  const closestClip = otherClips.reduce((nearest, clip) => {
+    const clipCenter = getClipCenter(clip);
+    const nearestCenter = getClipCenter(nearest);
+
+    const clipDistance = Math.abs(clipCenter - deletedCenter);
+    const nearestDistance = Math.abs(nearestCenter - deletedCenter);
+
+    return clipDistance < nearestDistance ? clip : nearest;
+  });
+
+  console.log('[findNearestNeighbor] Found closest clip in any lane (Priority 3):', closestClip.id);
+  return closestClip;
+};

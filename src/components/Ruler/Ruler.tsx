@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useAppSelector } from '@/store/hooks';
 import type { ViewportState } from '@/types';
 import { beatsToViewportPx, viewportPxToBeats } from '@/utils/viewport';
 import './Ruler.css';
@@ -16,7 +17,16 @@ interface RulerProps {
 
 const BEATS_PER_BAR = 4; // 4/4 time signature
 
+// Convert beats to time string (M:SS format)
+const beatsToTimeString = (beats: number, tempo: number): string => {
+  const totalSeconds = (beats / tempo) * 60;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
 const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps) => {
+  const tempo = useAppSelector((state) => state.timeline.tempo);
   // Calculate visible bars and adaptive grid lines
   const { bars, gridLines } = useMemo(() => {
     // Handle zero width gracefully
@@ -48,7 +58,7 @@ const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps)
     }
     // else: show every bar
 
-    const barsArray: Array<{ barNumber: number; position: number }> = [];
+    const barsArray: Array<{ barNumber: number; position: number; beats: number }> = [];
     const gridLinesArray: Array<{ position: number }> = [];
 
     // Calculate grid interval: always 4 divisions between consecutive bar numbers
@@ -63,7 +73,7 @@ const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps)
       const barBeat = bar * BEATS_PER_BAR;
 
       const x = beatsToViewportPx(barBeat, viewport); // Position relative to viewport
-      barsArray.push({ barNumber, position: x });
+      barsArray.push({ barNumber, position: x, beats: barBeat });
 
       // Generate 3 grid lines between this bar and the next numbered bar
       // (the 4th division is the next bar number itself)
@@ -96,16 +106,27 @@ const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps)
 
       {/* Content area with bar numbers and grid markers */}
       <div className="ruler__content">
-        {/* Bar numbers */}
-        {bars.map(({ barNumber, position }) => (
+        {/* Bar numbers and time markers */}
+        {bars.map(({ barNumber, position, beats }) => (
           <div
             key={`bar-${barNumber.toString()}`}
-            className="ruler__bar-number"
-            data-testid={`ruler-bar-${barNumber.toString()}`}
+            className="ruler__bar-container"
             style={{ left: `${position.toString()}px` }}
-            onClick={() => { handleClick(position); }}
           >
-            {barNumber}
+            <div
+              className="ruler__bar-number"
+              data-testid={`ruler-bar-${barNumber.toString()}`}
+              onClick={() => { handleClick(position); }}
+            >
+              {barNumber}
+            </div>
+            <div
+              className="ruler__time-marker"
+              data-testid={`ruler-time-${barNumber.toString()}`}
+              onClick={() => { handleClick(position); }}
+            >
+              {beatsToTimeString(beats, tempo)}
+            </div>
           </div>
         ))}
 

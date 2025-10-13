@@ -8,6 +8,7 @@ import {
   findNearestClipWest,
   findNearestClipNorth,
   findNearestClipSouth,
+  findNearestNeighbor,
 } from './navigation';
 import type { Clip, Lane } from '@/types';
 
@@ -305,6 +306,79 @@ describe('Navigation Utilities', () => {
 
       const result = findNearestClipSouth(currentClip, clips, lanes);
       expect(result?.id).toBe('clip2'); // Should pick by center distance
+    });
+  });
+
+  describe('findNearestNeighbor', () => {
+    it('should prioritize clip to the right in same lane', () => {
+      const deletedClip = createClip('deleted', 'lane1', 8);
+      const allClips = [
+        createClip('left', 'lane1', 0),    // To the left
+        deletedClip,
+        createClip('right', 'lane1', 16),  // To the right - PRIORITY 1
+        createClip('other', 'lane2', 8),   // Other lane
+      ];
+
+      const result = findNearestNeighbor(deletedClip, allClips);
+      expect(result?.id).toBe('right');
+    });
+
+    it('should select clip to the left if no clip to the right', () => {
+      const deletedClip = createClip('deleted', 'lane1', 16);
+      const allClips = [
+        createClip('left', 'lane1', 8),    // To the left - PRIORITY 2
+        deletedClip,
+        createClip('other', 'lane2', 20),  // Other lane
+      ];
+
+      const result = findNearestNeighbor(deletedClip, allClips);
+      expect(result?.id).toBe('left');
+    });
+
+    it('should select closest clip in any lane if no clips in same lane', () => {
+      const deletedClip = createClip('deleted', 'lane2', 10, 4); // Center at 12
+      const allClips = [
+        createClip('far', 'lane1', 50, 4),    // Center at 52
+        deletedClip,
+        createClip('close', 'lane3', 10, 4),  // Center at 12 - CLOSEST
+      ];
+
+      const result = findNearestNeighbor(deletedClip, allClips);
+      expect(result?.id).toBe('close');
+    });
+
+    it('should return null if no other clips exist', () => {
+      const deletedClip = createClip('deleted', 'lane1', 8);
+      const allClips = [deletedClip];
+
+      const result = findNearestNeighbor(deletedClip, allClips);
+      expect(result).toBeNull();
+    });
+
+    it('should filter out the deleted clip from consideration', () => {
+      const deletedClip = createClip('deleted', 'lane1', 8);
+      const allClips = [
+        createClip('other', 'lane1', 16),
+        deletedClip,
+      ];
+
+      const result = findNearestNeighbor(deletedClip, allClips);
+      expect(result?.id).toBe('other');
+      expect(result?.id).not.toBe('deleted');
+    });
+
+    it('should handle multiple clips and select nearest by priority', () => {
+      const deletedClip = createClip('deleted', 'lane2', 10);
+      const allClips = [
+        createClip('lane1-clip', 'lane1', 10), // Same position, different lane
+        deletedClip,
+        createClip('right', 'lane2', 14),      // Right in same lane - SHOULD WIN
+        createClip('left', 'lane2', 6),        // Left in same lane
+        createClip('lane3-clip', 'lane3', 10), // Same position, different lane
+      ];
+
+      const result = findNearestNeighbor(deletedClip, allClips);
+      expect(result?.id).toBe('right'); // Priority to right in same lane
     });
   });
 });

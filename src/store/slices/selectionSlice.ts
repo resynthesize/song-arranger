@@ -16,6 +16,10 @@ const selectionSlice = createSlice({
   initialState,
   reducers: {
     selectClip: (state, action: PayloadAction<ID>) => {
+      console.log('[selectClip reducer] Selecting clip', {
+        clipId: action.payload,
+        previousSelection: state.selectedClipIds
+      });
       state.selectedClipIds = [action.payload];
       // Clear current lane when selecting a clip
       state.currentLaneId = null;
@@ -51,6 +55,9 @@ const selectionSlice = createSlice({
     },
 
     clearSelection: (state) => {
+      console.log('[clearSelection reducer] Clearing selection', {
+        previousSelection: state.selectedClipIds
+      });
       state.selectedClipIds = [];
     },
 

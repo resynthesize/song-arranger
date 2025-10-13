@@ -42,8 +42,15 @@ const clipsSlice = createSlice({
     },
 
     removeClips: (state, action: PayloadAction<ID[]>) => {
+      console.log('[removeClips reducer] Removing clips', {
+        clipIds: action.payload,
+        beforeCount: state.clips.length
+      });
       const idsToRemove = new Set(action.payload);
       state.clips = state.clips.filter((clip) => !idsToRemove.has(clip.id));
+      console.log('[removeClips reducer] After removal', {
+        afterCount: state.clips.length
+      });
     },
 
     moveClip: (

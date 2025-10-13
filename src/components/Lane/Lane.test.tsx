@@ -3,12 +3,21 @@
  * Tests for the Lane component
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Lane from './Lane';
 import type { Clip, ViewportState } from '@/types';
 
 describe('Lane', () => {
+  // Helper function to simulate a double-click (two mousedowns within 500ms)
+  const simulateDoubleClick = (element: HTMLElement, clientX: number, clientY: number) => {
+    // First click
+    fireEvent.mouseDown(element, { clientX, clientY, button: 0 });
+    fireEvent.mouseUp(element, { clientX, clientY, button: 0 });
+    // Second click (within 500ms) - starts drag-to-create
+    fireEvent.mouseDown(element, { clientX, clientY, button: 0 });
+  };
+
   const mockClips: Clip[] = [
     { id: 'clip-1', laneId: 'lane-1', position: 0, duration: 4, label: 'Intro' },
     {
@@ -204,5 +213,385 @@ describe('Lane', () => {
     const callArgs = onDoubleClick.mock.calls[0] as [string, number];
     expect(callArgs[0]).toBe('lane-1');
     expect(callArgs[1]).toBe(4); // Position should be 4 beats
+  });
+
+  describe('Click-and-drag clip creation', () => {
+    it('should create clip with dragged width when user drags on empty space', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Simulate double-click at x=200 (100px from left = 1 beat) to start drag-to-create
+      simulateDoubleClick(laneContent, 200, 40);
+
+      // Simulate mousemove to x=600 (500px from left = 5 beats, so 4 beats duration)
+      fireEvent.mouseMove(document, {
+        clientX: 600,
+        clientY: 40,
+      });
+
+      // Simulate mouseup to complete the drag
+      fireEvent.mouseUp(document, {
+        clientX: 600,
+        clientY: 40,
+      });
+
+      // Should call onDoubleClick with start position and duration
+      await waitFor(() => {
+        expect(onDoubleClick).toHaveBeenCalledWith('lane-1', 1, 4);
+      });
+    });
+
+    it('should show ghost clip preview while dragging', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Simulate double-click at x=200 to start drag-to-create
+      simulateDoubleClick(laneContent, 200, 40);
+
+      // Simulate mousemove to x=600
+      fireEvent.mouseMove(document, {
+        clientX: 600,
+        clientY: 40,
+      });
+
+      // Should show ghost clip element
+      await waitFor(() => {
+        const ghostClip = screen.getByTestId('ghost-clip');
+        expect(ghostClip).toBeInTheDocument();
+      });
+    });
+
+    it('should enforce minimum clip duration of snap value', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Simulate very short drag (less than minimum)
+      simulateDoubleClick(laneContent, 200, 40);
+
+      fireEvent.mouseMove(document, {
+        clientX: 220, // Only 20px = 0.2 beats
+        clientY: 40,
+      });
+
+      fireEvent.mouseUp(document, {
+        clientX: 220,
+        clientY: 40,
+      });
+
+      // Should enforce minimum of snap value (1 beat)
+      await waitFor(() => {
+        expect(onDoubleClick).toHaveBeenCalledWith('lane-1', 1, 1);
+      });
+    });
+
+    it('should create default 4-beat clip on quick double-click without drag', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Simulate double-click
+      simulateDoubleClick(laneContent, 200, 40);
+
+      // Simulate mouseup immediately at same position
+      fireEvent.mouseUp(document, {
+        clientX: 200,
+        clientY: 40,
+      });
+
+      // Should create default 4-beat clip
+      await waitFor(() => {
+        expect(onDoubleClick).toHaveBeenCalledWith('lane-1', 1, 4);
+      });
+    });
+
+    it('should snap start position to grid when snap is enabled', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Simulate double-click at x=250 (150px = 1.5 beats, should snap to 1)
+      simulateDoubleClick(laneContent, 250, 40);
+
+      // Drag to x=650 (550px = 5.5 beats, duration should snap)
+      fireEvent.mouseMove(document, {
+        clientX: 650,
+        clientY: 40,
+      });
+
+      fireEvent.mouseUp(document, {
+        clientX: 650,
+        clientY: 40,
+      });
+
+      // Start position should snap to 1 beat, duration should be 5 beats (to reach 6 total)
+      await waitFor(() => {
+        expect(onDoubleClick).toHaveBeenCalledWith('lane-1', 1, 5);
+      });
+    });
+
+    it('should not trigger on existing clip', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+
+      // Get the first clip element
+      const clip = screen.getByTestId('clip-clip-1');
+
+      // Simulate double-click on the clip (not the empty lane)
+      fireEvent.dblClick(clip, {
+        clientX: 200,
+        clientY: 40,
+        button: 0,
+      });
+
+      fireEvent.mouseUp(document, {
+        clientX: 200,
+        clientY: 40,
+      });
+
+      // Wait a bit to ensure no delayed calls
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Should not create new clip when double-clicking on existing clip
+      expect(onDoubleClick).not.toHaveBeenCalled();
+    });
+
+    it('should cancel creation if dragging outside lane boundaries', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Simulate double-click
+      simulateDoubleClick(laneContent, 200, 40);
+
+      // Drag outside lane vertically
+      fireEvent.mouseMove(document, {
+        clientX: 600,
+        clientY: 200, // Far outside lane
+      });
+
+      fireEvent.mouseUp(document, {
+        clientX: 600,
+        clientY: 200,
+      });
+
+      // Wait a bit to ensure no delayed calls
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Should not create clip when drag ends outside lane
+      expect(onDoubleClick).not.toHaveBeenCalled();
+    });
+
+    it('should create clip backwards when dragging left (backward in time)', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Simulate double-click at x=600 (500px from left = 5 beats)
+      simulateDoubleClick(laneContent, 600, 40);
+
+      // Simulate mousemove backwards to x=200 (100px from left = 1 beat, so 4 beats duration)
+      fireEvent.mouseMove(document, {
+        clientX: 200,
+        clientY: 40,
+      });
+
+      // Simulate mouseup to complete the drag
+      fireEvent.mouseUp(document, {
+        clientX: 200,
+        clientY: 40,
+      });
+
+      // Should call onDoubleClick with the ending position (1 beat) and duration (4 beats)
+      // The clip should be created from beats 1-5
+      await waitFor(() => {
+        expect(onDoubleClick).toHaveBeenCalledWith('lane-1', 1, 4);
+      });
+    });
+
+    it('should show correct ghost clip preview when dragging backwards', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Simulate double-click at x=600 (5 beats)
+      simulateDoubleClick(laneContent, 600, 40);
+
+      // Simulate mousemove backwards to x=200 (1 beat)
+      fireEvent.mouseMove(document, {
+        clientX: 200,
+        clientY: 40,
+      });
+
+      // Should show ghost clip element at the correct position (starting from left)
+      await waitFor(() => {
+        const ghostClip = screen.getByTestId('ghost-clip');
+        expect(ghostClip).toBeInTheDocument();
+        // Ghost should be at 100px (1 beat) with width 400px (4 beats)
+        expect(ghostClip).toHaveStyle({ left: '100px', width: '400px' });
+      });
+    });
+
+    it('should handle backward drag with snapping correctly', async () => {
+      const onDoubleClick = jest.fn();
+      render(<Lane {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+
+      const laneContent = screen.getByTestId('lane-lane-1-content');
+
+      // Mock getBoundingClientRect
+      const mockGetBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 0,
+        right: 900,
+        bottom: 80,
+        width: 800,
+        height: 80,
+        x: 100,
+        y: 0,
+        toJSON: () => {},
+      });
+      laneContent.getBoundingClientRect = mockGetBoundingClientRect;
+
+      // Start at x=650 (550px = 5.5 beats, should snap to 5)
+      simulateDoubleClick(laneContent, 650, 40);
+
+      // Drag back to x=250 (150px = 1.5 beats, should snap to 2)
+      fireEvent.mouseMove(document, {
+        clientX: 250,
+        clientY: 40,
+      });
+
+      fireEvent.mouseUp(document, {
+        clientX: 250,
+        clientY: 40,
+      });
+
+      // Ending position snaps to 2, start position is 5, so clip should be at position 2 with duration 3
+      await waitFor(() => {
+        expect(onDoubleClick).toHaveBeenCalledWith('lane-1', 2, 3);
+      });
+    });
   });
 });

@@ -13,13 +13,20 @@ interface MinimapProps {
   viewport: ViewportState;
   timelineLength: number; // Total timeline length in beats
   visible: boolean;
+  embedded?: boolean; // Whether embedded in menu bar
   onViewportChange: (offsetBeats: number) => void;
   onToggle: () => void;
 }
 
-const MINIMAP_WIDTH = 400;
-const MINIMAP_LANE_HEIGHT = 20;
-const MINIMAP_PADDING = 4;
+// Embedded mode: fits in menu bar (32px height)
+const EMBEDDED_HEIGHT = 32;
+const EMBEDDED_MIN_WIDTH = 300;
+const EMBEDDED_PADDING = 2;
+
+// Overlay mode: floating window
+const OVERLAY_WIDTH = 400;
+const OVERLAY_LANE_HEIGHT = 20;
+const OVERLAY_PADDING = 4;
 
 const Minimap = ({
   lanes,
@@ -27,6 +34,7 @@ const Minimap = ({
   viewport,
   timelineLength,
   visible,
+  embedded = false,
   onViewportChange,
   onToggle,
 }: MinimapProps) => {
@@ -35,10 +43,53 @@ const Minimap = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartOffset, setDragStartOffset] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(EMBEDDED_MIN_WIDTH);
 
-  // Calculate minimap dimensions
-  const minimapHeight = lanes.length * MINIMAP_LANE_HEIGHT + MINIMAP_PADDING * 2;
-  const scale = MINIMAP_WIDTH / timelineLength;
+  // Update container width on resize (for embedded mode)
+  useEffect(() => {
+    if (!embedded || !containerRef.current) return;
+
+    const updateWidth = () => {
+      if (containerRef.current) {
+        // Get the actual rendered width of the container
+        const rect = containerRef.current.getBoundingClientRect();
+        // Leave some margin for borders and padding
+        const availableWidth = Math.floor(rect.width - 4);
+        setContainerWidth(availableWidth);
+      }
+    };
+
+    // Initial measurement
+    updateWidth();
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateWidth();
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [embedded]);
+
+  // Calculate minimap dimensions based on mode
+  const minimapWidth = embedded
+    ? Math.max(EMBEDDED_MIN_WIDTH, containerWidth)
+    : OVERLAY_WIDTH;
+
+  const minimapHeight = embedded
+    ? EMBEDDED_HEIGHT
+    : lanes.length * OVERLAY_LANE_HEIGHT + OVERLAY_PADDING * 2;
+
+  const padding = embedded ? EMBEDDED_PADDING : OVERLAY_PADDING;
+
+  // Calculate lane height dynamically for embedded mode to fit all lanes
+  const laneHeight = embedded
+    ? Math.max(2, (EMBEDDED_HEIGHT - EMBEDDED_PADDING * 2) / Math.max(1, lanes.length))
+    : OVERLAY_LANE_HEIGHT;
+
+  const scale = minimapWidth / timelineLength;
 
   // Render the minimap canvas
   useEffect(() => {
@@ -49,7 +100,7 @@ const Minimap = ({
     if (!ctx) return;
 
     // Set canvas size
-    canvas.width = MINIMAP_WIDTH;
+    canvas.width = minimapWidth;
     canvas.height = minimapHeight;
 
     // Clear canvas
@@ -62,32 +113,36 @@ const Minimap = ({
       if (laneIndex === -1) return;
 
       const lane = lanes[laneIndex];
-      const x = MINIMAP_PADDING + clip.position * scale;
-      const y = MINIMAP_PADDING + laneIndex * MINIMAP_LANE_HEIGHT;
+      const x = padding + clip.position * scale;
+      const y = padding + laneIndex * laneHeight;
       const width = clip.duration * scale;
-      const height = MINIMAP_LANE_HEIGHT - 2;
+      const height = Math.max(1, laneHeight - 1);
 
       // Draw clip rectangle with lane color
       ctx.fillStyle = lane?.color ?? '#00ff00';
       ctx.fillRect(x, y, width, height);
 
-      // Add subtle border
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x, y, width, height);
+      // Add subtle border (only if height is large enough)
+      if (height > 3) {
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, width, height);
+      }
     });
 
-    // Draw lane dividers
-    ctx.strokeStyle = 'rgba(0, 136, 0, 0.2)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < lanes.length; i++) {
-      const y = MINIMAP_PADDING + i * MINIMAP_LANE_HEIGHT;
-      ctx.beginPath();
-      ctx.moveTo(MINIMAP_PADDING, y);
-      ctx.lineTo(MINIMAP_WIDTH - MINIMAP_PADDING, y);
-      ctx.stroke();
+    // Draw lane dividers (only if not in embedded mode or if lanes are tall enough)
+    if (!embedded || laneHeight > 3) {
+      ctx.strokeStyle = 'rgba(0, 136, 0, 0.2)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i < lanes.length; i++) {
+        const y = padding + i * laneHeight;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(minimapWidth - padding, y);
+        ctx.stroke();
+      }
     }
-  }, [visible, lanes, clips, timelineLength, minimapHeight, scale]);
+  }, [visible, lanes, clips, timelineLength, minimapHeight, minimapWidth, padding, laneHeight, scale, embedded]);
 
   // Handle canvas click to jump to position
   const handleCanvasClick = useCallback(
@@ -95,7 +150,7 @@ const Minimap = ({
       if (!containerRef.current) return;
 
       const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left - MINIMAP_PADDING;
+      const x = e.clientX - rect.left - padding;
 
       // Convert click position to beat position
       const clickedBeat = x / scale;
@@ -106,7 +161,7 @@ const Minimap = ({
 
       onViewportChange(newOffset);
     },
-    [scale, viewport, onViewportChange]
+    [scale, viewport, onViewportChange, padding]
   );
 
   // Handle viewport drag start
@@ -148,7 +203,7 @@ const Minimap = ({
 
   // Calculate viewport rectangle dimensions
   const viewportWidthBeats = viewport.widthPx / viewport.zoom;
-  const viewportLeft = MINIMAP_PADDING + viewport.offsetBeats * scale;
+  const viewportLeft = padding + viewport.offsetBeats * scale;
   const viewportWidth = viewportWidthBeats * scale;
 
   if (!visible) {
@@ -157,23 +212,25 @@ const Minimap = ({
 
   return (
     <div
-      className="minimap"
+      className={`minimap ${embedded ? 'minimap--embedded' : ''}`}
       data-testid="minimap"
       role="region"
       aria-label="Arrangement Overview"
       ref={containerRef}
     >
-      <div className="minimap__header">
-        <div className="minimap__title">ARRANGEMENT OVERVIEW</div>
-        <button
-          className="minimap__close"
-          data-testid="minimap-close"
-          onClick={onToggle}
-          aria-label="Close minimap"
-        >
-          [X]
-        </button>
-      </div>
+      {!embedded && (
+        <div className="minimap__header">
+          <div className="minimap__title">ARRANGEMENT OVERVIEW</div>
+          <button
+            className="minimap__close"
+            data-testid="minimap-close"
+            onClick={onToggle}
+            aria-label="Close minimap"
+          >
+            [X]
+          </button>
+        </div>
+      )}
       <div className="minimap__content">
         <div className="minimap__canvas-container">
           <canvas
@@ -188,7 +245,7 @@ const Minimap = ({
             style={{
               left: `${viewportLeft}px`,
               width: `${viewportWidth}px`,
-              height: `${minimapHeight - MINIMAP_PADDING * 2}px`,
+              height: `${minimapHeight - padding * 2}px`,
             }}
             onMouseDown={handleViewportMouseDown}
           />

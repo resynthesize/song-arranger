@@ -4,8 +4,43 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import timelineReducer from '@/store/slices/timelineSlice';
 import Ruler from './Ruler';
 import type { ViewportState } from '@/types';
+
+// Helper to create a test store
+const createTestStore = () => {
+  return configureStore({
+    reducer: {
+      timeline: timelineReducer,
+    },
+    preloadedState: {
+      timeline: {
+        viewport: {
+          offsetBeats: 0,
+          zoom: 100,
+          widthPx: 1600,
+          heightPx: 600,
+        },
+        playheadPosition: 0,
+        isPlaying: false,
+        tempo: 120,
+        snapValue: 1,
+        snapMode: 'grid' as const,
+        verticalZoom: 100,
+        minimapVisible: false,
+      },
+    },
+  });
+};
+
+// Helper to render with Redux Provider
+const renderWithProvider = (ui: React.ReactElement) => {
+  const store = createTestStore();
+  return render(<Provider store={store}>{ui}</Provider>);
+};
 
 describe('Ruler', () => {
   const defaultViewport: ViewportState = {
@@ -22,12 +57,12 @@ describe('Ruler', () => {
 
   describe('Rendering', () => {
     it('should render the ruler component', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       expect(screen.getByTestId('ruler')).toBeInTheDocument();
     });
 
     it('should render bar numbers', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       // With 1600px width and 100px per beat, we have 16 beats = 4 bars
       // Should show bars 1, 2, 3, 4
       expect(screen.getByText('1')).toBeInTheDocument();
@@ -37,7 +72,7 @@ describe('Ruler', () => {
     });
 
     it('should render grid markers between bars', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       // Grid markers show adaptive divisions between bar numbers
       const gridTicks = document.querySelectorAll('.ruler__grid-tick');
       // With 4 bars visible, we should have 3 grid lines between each bar number (12 total)
@@ -48,7 +83,7 @@ describe('Ruler', () => {
   describe('Zoom Scaling', () => {
     it('should scale bar positions with zoom level', () => {
       const viewport50: ViewportState = { ...defaultViewport, zoom: 50 };
-      const { rerender } = render(<Ruler {...defaultProps} viewport={viewport50} />);
+      const { rerender } = renderWithProvider(<Ruler {...defaultProps} viewport={viewport50} />);
       // At 50px per beat, bar 1 should be at 0px, bar 2 at 200px
       const bar1 = screen.getByTestId('ruler-bar-1');
       expect(bar1).toHaveStyle({ left: '0px' });
@@ -63,7 +98,7 @@ describe('Ruler', () => {
 
     it('should show more bars when zoomed in', () => {
       const viewport50: ViewportState = { ...defaultViewport, zoom: 50 };
-      const { rerender } = render(<Ruler {...defaultProps} viewport={viewport50} />);
+      const { rerender } = renderWithProvider(<Ruler {...defaultProps} viewport={viewport50} />);
       // At 50px per beat, with 1600px width: 1600/50 = 32 beats = 8 bars
       const barsZoomedOut = screen.getAllByTestId(/^ruler-bar-/);
       expect(barsZoomedOut.length).toBeGreaterThanOrEqual(8);
@@ -78,18 +113,18 @@ describe('Ruler', () => {
 
   describe('Bar Numbering', () => {
     it('should start bar numbering at 1', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       expect(screen.getByText('1')).toBeInTheDocument();
     });
 
     it('should not show bar 0', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       expect(screen.queryByText('0')).not.toBeInTheDocument();
     });
 
     it('should show sequential bar numbers', () => {
       const viewport2000: ViewportState = { ...defaultViewport, widthPx: 2000 };
-      render(<Ruler {...defaultProps} viewport={viewport2000} />);
+      renderWithProvider(<Ruler {...defaultProps} viewport={viewport2000} />);
       // With more width, should show more bars
       expect(screen.getByText('1')).toBeInTheDocument();
       expect(screen.getByText('2')).toBeInTheDocument();
@@ -102,7 +137,7 @@ describe('Ruler', () => {
   describe('Grid Markers', () => {
     it('should render grid ticks between bars', () => {
       const viewport800: ViewportState = { ...defaultViewport, widthPx: 800 };
-      render(<Ruler {...defaultProps} viewport={viewport800} />);
+      renderWithProvider(<Ruler {...defaultProps} viewport={viewport800} />);
       // 800px / 100px per beat = 8 beats = 2 bars
       // Should have 3 grid ticks between each bar number (6 total for 2 bars)
       const gridTicks = document.querySelectorAll('.ruler__grid-tick');
@@ -110,7 +145,7 @@ describe('Ruler', () => {
     });
 
     it('should position grid markers correctly', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       // First grid tick should be at 100px (1 beat from start with barInterval=1)
       const gridTicks = document.querySelectorAll('.ruler__grid-tick');
       expect(gridTicks[0]).toHaveStyle({ left: '100px' });
@@ -119,19 +154,19 @@ describe('Ruler', () => {
 
   describe('Styling', () => {
     it('should have terminal aesthetic styling', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       const ruler = screen.getByTestId('ruler');
       expect(ruler).toHaveClass('ruler');
     });
 
     it('should style bar numbers with primary color', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       const barNumber = screen.getByTestId('ruler-bar-1');
       expect(barNumber).toHaveClass('ruler__bar-number');
     });
 
     it('should style grid markers differently from bar numbers', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       const gridTicks = document.querySelectorAll('.ruler__grid-tick');
       expect(gridTicks[0]).toHaveClass('ruler__grid-tick');
     });
@@ -139,14 +174,14 @@ describe('Ruler', () => {
 
   describe('Accessibility', () => {
     it('should have appropriate ARIA labels', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       const ruler = screen.getByTestId('ruler');
       expect(ruler).toHaveAttribute('role', 'none'); // Purely visual element
     });
 
     it('should be keyboard accessible if interactive', () => {
       // If we add click functionality later, this test will be expanded
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       const ruler = screen.getByTestId('ruler');
       expect(ruler).toBeInTheDocument();
     });
@@ -155,21 +190,21 @@ describe('Ruler', () => {
   describe('Edge Cases', () => {
     it('should handle very small zoom levels', () => {
       const viewport10: ViewportState = { ...defaultViewport, zoom: 10 };
-      render(<Ruler {...defaultProps} viewport={viewport10} />);
+      renderWithProvider(<Ruler {...defaultProps} viewport={viewport10} />);
       // Should still render without crashing
       expect(screen.getByTestId('ruler')).toBeInTheDocument();
     });
 
     it('should handle very large zoom levels', () => {
       const viewport400: ViewportState = { ...defaultViewport, zoom: 400 };
-      render(<Ruler {...defaultProps} viewport={viewport400} />);
+      renderWithProvider(<Ruler {...defaultProps} viewport={viewport400} />);
       // Should still render without crashing
       expect(screen.getByTestId('ruler')).toBeInTheDocument();
     });
 
     it('should handle zero container width gracefully', () => {
       const viewport0: ViewportState = { ...defaultViewport, widthPx: 0 };
-      render(<Ruler {...defaultProps} viewport={viewport0} />);
+      renderWithProvider(<Ruler {...defaultProps} viewport={viewport0} />);
       // Should render but show no bars
       expect(screen.getByTestId('ruler')).toBeInTheDocument();
       expect(screen.queryByText('1')).not.toBeInTheDocument();
@@ -177,7 +212,7 @@ describe('Ruler', () => {
 
     it('should handle very wide containers', () => {
       const viewport10000: ViewportState = { ...defaultViewport, widthPx: 10000 };
-      render(<Ruler {...defaultProps} viewport={viewport10000} />);
+      renderWithProvider(<Ruler {...defaultProps} viewport={viewport10000} />);
       // Should render many bars
       const bars = screen.getAllByTestId(/^ruler-bar-/);
       expect(bars.length).toBeGreaterThan(10);
@@ -186,7 +221,7 @@ describe('Ruler', () => {
 
   describe('Visual Hierarchy', () => {
     it('should render bars (downbeats) with bar class', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       const barNumbers = document.querySelectorAll('.ruler__bar-number');
       expect(barNumbers.length).toBeGreaterThan(0);
       // Bar numbers should have the bar class
@@ -194,7 +229,7 @@ describe('Ruler', () => {
     });
 
     it('should render grid lines with adaptive spacing', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       const gridTicks = document.querySelectorAll('.ruler__grid-tick');
       // Should have grid lines between bar numbers (3 per bar interval)
       expect(gridTicks.length).toBeGreaterThan(0);
@@ -203,7 +238,7 @@ describe('Ruler', () => {
     it('should adapt grid density based on zoom level', () => {
       // At very low zoom (many bars visible), grid should be sparser
       const viewportLowZoom: ViewportState = { ...defaultViewport, zoom: 5, widthPx: 2000 };
-      const { rerender } = render(<Ruler {...defaultProps} viewport={viewportLowZoom} />);
+      const { rerender } = renderWithProvider(<Ruler {...defaultProps} viewport={viewportLowZoom} />);
       const gridTicksLowZoom = document.querySelectorAll('.ruler__grid-tick');
       const lowZoomCount = gridTicksLowZoom.length;
 
@@ -219,7 +254,7 @@ describe('Ruler', () => {
     });
 
     it('should position bar ticks at bar boundaries', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       // Bar 1 should be at 0px (start of timeline)
       const bar1 = screen.getByTestId('ruler-bar-1');
       expect(bar1).toHaveStyle({ left: '0px' });
@@ -230,7 +265,7 @@ describe('Ruler', () => {
     });
 
     it('should position grid ticks between bars', () => {
-      render(<Ruler {...defaultProps} />);
+      renderWithProvider(<Ruler {...defaultProps} />);
       const gridTicks = document.querySelectorAll('.ruler__grid-tick');
       // First grid tick should be at 100px (1 beat with barInterval=1)
       expect(gridTicks[0]).toHaveStyle({ left: '100px' });

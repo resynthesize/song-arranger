@@ -84,7 +84,7 @@ describe('DurationDisplay', () => {
           <DurationDisplay />
         </Provider>
       );
-      expect(screen.getByText('GLOBAL')).toBeInTheDocument();
+      expect(screen.getByText('TOTAL')).toBeInTheDocument();
     });
 
     it('should display 00:00 when no clips exist', () => {
@@ -269,12 +269,11 @@ describe('DurationDisplay', () => {
   });
 
   describe('Integration', () => {
-    it('should display both global and selected durations when clips are selected', () => {
+    it('should display selected duration when clips are selected', () => {
       const clips: Clip[] = [
         { id: '1', laneId: 'lane1', position: 0, duration: 4 },
         { id: '2', laneId: 'lane2', position: 8, duration: 4 },
       ];
-      // Global: 12 beats at 120 BPM = 6 seconds
       // Selected: 4 beats at 120 BPM = 2 seconds
       const store = createTestStore({ tempo: 120, clips, selectedClipIds: ['1'] });
       render(
@@ -282,7 +281,7 @@ describe('DurationDisplay', () => {
           <DurationDisplay />
         </Provider>
       );
-      expect(screen.getByTestId('duration-global')).toHaveTextContent('00:06');
+      expect(screen.queryByTestId('duration-global')).not.toBeInTheDocument(); // Global hidden when selection exists
       expect(screen.getByTestId('duration-selected')).toHaveTextContent('00:02');
     });
 

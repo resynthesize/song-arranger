@@ -89,16 +89,25 @@ const Clip = ({
   const handleMouseDown = (e: MouseEvent) => {
     if (e.button !== 0) return; // Only left click
 
-    // Prevent text selection during drag
+    // Prevent text selection during drag and stop event from bubbling to Timeline
     e.preventDefault();
+    e.stopPropagation();
 
-    const isMultiSelect = e.altKey;
-    onSelect(id, isMultiSelect);
+    // Selection is handled in handleDragStart (on content area) or here (on handles)
+    // Only select here if clicking on handles, not content
+    if ((e.target as HTMLElement).classList.contains('clip__handle')) {
+      const isMultiSelect = e.altKey;
+      onSelect(id, isMultiSelect);
+    }
   };
 
   const handleDragStart = (e: MouseEvent) => {
     if (e.button !== 0) return;
     e.stopPropagation();
+
+    // Always select on mousedown (before starting potential drag)
+    const isMultiSelect = e.altKey;
+    onSelect(id, isMultiSelect);
 
     // Check if Alt key is held (for copying)
     if (e.altKey && onCopy) {

@@ -42,35 +42,79 @@
   box-shadow: var(--phosphor-glow-md);
 }
 
-/* Selected state with phosphor persistence fade-in */
+/* Selected state with phosphor persistence fade-in and pulsing */
 .clip--selected {
   border-color: var(--color-highlight);
-  box-shadow: var(--box-glow-lg);
+  border-width: 2px;
+  box-shadow:
+    0 0 4px rgba(0, 255, 0, 1),
+    0 0 8px rgba(0, 255, 0, 0.8),
+    0 0 16px rgba(0, 255, 0, 0.6),
+    inset 0 0 8px rgba(0, 255, 0, 0.4);
   z-index: var(--z-controls);
+  background: #002200;
   /* Phosphor persistence: fade-in glow effect on selection (200-300ms) */
   transition:
     box-shadow 250ms ease-out,
     border-color 250ms ease-out,
-    background-color 250ms ease-out;
-  animation: clip-select-glow 300ms ease-out;
+    background-color 250ms ease-out,
+    border-width 250ms ease-out;
+  animation: clip-select-glow 300ms ease-out, clip-pulse 2s ease-in-out infinite;
+  animation-delay: 0s, 300ms; /* Start pulse after initial glow completes */
 }
 
 /* Phosphor persistence fade-in animation for selection */
 @keyframes clip-select-glow {
   0% {
-    box-shadow: var(--phosphor-glow-sm);
+    box-shadow: 0 0 2px rgba(0, 255, 0, 0.5);
     border-color: var(--color-secondary);
+    border-width: 1px;
+    background: var(--color-bg-elevated);
   }
   100% {
-    box-shadow: var(--box-glow-lg);
+    box-shadow:
+      0 0 4px rgba(0, 255, 0, 1),
+      0 0 8px rgba(0, 255, 0, 0.8),
+      0 0 16px rgba(0, 255, 0, 0.6),
+      inset 0 0 8px rgba(0, 255, 0, 0.4);
     border-color: var(--color-highlight);
+    border-width: 2px;
+    background: #002200;
+  }
+}
+
+/* Stronger pulse animation for selected clips */
+@keyframes clip-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 4px rgba(0, 255, 0, 1),
+      0 0 8px rgba(0, 255, 0, 0.8),
+      0 0 16px rgba(0, 255, 0, 0.6),
+      inset 0 0 8px rgba(0, 255, 0, 0.4);
+    border-color: var(--color-highlight);
+    background: #002200;
+  }
+  50% {
+    box-shadow:
+      0 0 6px rgba(102, 255, 102, 1),
+      0 0 12px rgba(102, 255, 102, 0.9),
+      0 0 24px rgba(102, 255, 102, 0.7),
+      inset 0 0 12px rgba(102, 255, 102, 0.5);
+    border-color: #ccffcc;
+    background: #003300;
+    filter: brightness(1.2);
   }
 }
 
 /* Hover on selected clips - enhance glow further */
 .clip--selected:hover {
-  box-shadow: var(--box-glow-xl);
-  background: #002200;
+  box-shadow:
+    0 0 6px rgba(102, 255, 102, 1),
+    0 0 14px rgba(102, 255, 102, 0.95),
+    0 0 28px rgba(102, 255, 102, 0.8),
+    inset 0 0 16px rgba(102, 255, 102, 0.6);
+  background: #003300;
+  border-color: #ffffff;
 }
 
 .clip--selected .clip__corner {
@@ -190,7 +234,8 @@
 
 /* Resize Handles */
 .clip__handle {
-  width: 8px;
+  /* Dynamic width: larger clips get wider handles, small clips get minimal handles */
+  width: min(16px, max(4px, 20%));
   cursor: ew-resize;
   background: transparent;
   position: relative;
@@ -198,6 +243,27 @@
   transition:
     background-color var(--transition-fast),
     opacity var(--transition-fast);
+}
+
+/* Extended hit area using pseudo-element for better grab at all sizes */
+.clip__handle::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  /* Extend hit area outward by 8px for easier grabbing */
+  width: calc(100% + 16px);
+  cursor: inherit;
+}
+
+.clip__handle--left::before {
+  left: -8px;
+  right: 0;
+}
+
+.clip__handle--right::before {
+  left: 0;
+  right: -8px;
 }
 
 .clip__handle:hover {
@@ -252,6 +318,12 @@
   .clip--new {
     animation: none;
     opacity: 1;
+  }
+
+  .clip--selected {
+    /* Keep selection visible but remove animations */
+    animation: none;
+    box-shadow: var(--box-glow-xl);
   }
 
   @keyframes clip-select-glow {

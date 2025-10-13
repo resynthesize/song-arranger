@@ -30,25 +30,49 @@
   overflow: hidden;
 }
 
-/* Bar Numbers - Brightest, most prominent */
-.ruler__bar-number {
+/* Bar container - holds bar number and time marker vertically */
+.ruler__bar-container {
   position: absolute;
   top: 0;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: auto;
+}
+
+/* Bar Numbers - Reduced size to fit time markers */
+.ruler__bar-number {
+  padding: 2px 4px;
   font-family: var(--font-primary);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base); /* Reduced from lg */
   font-weight: bold;
   color: #00ff00; /* Brightest green */
   cursor: pointer;
   transition: color var(--transition-fast);
   line-height: 1;
-  pointer-events: auto;
   text-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
 }
 
 .ruler__bar-number:hover {
   color: var(--color-highlight);
   text-shadow: var(--phosphor-glow-sm);
+}
+
+/* Time Markers - Small text below bar numbers */
+.ruler__time-marker {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xs); /* Very small */
+  color: #008800; /* Medium green */
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.ruler__time-marker:hover {
+  color: var(--color-secondary);
+  opacity: 1;
 }
 
 /* Beat Tick Markers - Medium brightness */

@@ -9,6 +9,7 @@ import ContextMenu, { type MenuItem } from '../ContextMenu';
 import ColorPicker from '../ColorPicker';
 import type { ID, Clip as ClipType, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx, isRangeVisible } from '@/utils/viewport';
+import { snapToGridFloor, snapToGrid } from '@/utils/snap';
 import './Lane.css';
 
 interface LaneProps {
@@ -24,6 +25,7 @@ interface LaneProps {
   isCurrent: boolean; // Is this the current lane for navigation
   isEditing: boolean;
   isMoving: boolean; // Is this lane currently animating from a move
+  onLaneSelect?: (laneId: ID) => void; // Select this lane (sets currentLaneId)
   onNameChange: (laneId: ID, newName: string) => void;
   onColorChange?: (laneId: ID, color: string) => void;
   onStartEditing: (laneId: ID) => void;
@@ -37,7 +39,7 @@ interface LaneProps {
   onClipDelete?: (clipId: ID) => void;
   onClipVerticalDrag?: (clipId: ID, startingLaneId: ID, deltaY: number) => void;
   onClipVerticalDragUpdate?: (clipId: ID, deltaY: number) => void;
-  onDoubleClick: (laneId: ID, position: Position) => void;
+  onDoubleClick: (laneId: ID, position: Position, duration?: Duration) => void;
 }
 
 const Lane = ({
@@ -53,6 +55,7 @@ const Lane = ({
   isCurrent,
   isEditing,
   isMoving,
+  onLaneSelect,
   onNameChange,
   onColorChange,
   onStartEditing,
@@ -90,6 +93,18 @@ const Lane = ({
   const gridCanvasRef = useRef<HTMLCanvasElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; position: number } | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
+
+  // State for drag-to-create clip functionality
+  const [dragCreateState, setDragCreateState] = useState<{
+    startX: number;
+    startY: number;
+    startPositionBeats: Position;
+    currentPositionBeats: Position;
+  } | null>(null);
+
+  // Track click timing for double-click detection
+  const lastClickTimeRef = useRef<number>(0);
+  const lastClickPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Filter clips to only show those in this lane
   const laneClips = clips.filter((clip) => clip.laneId === id);
@@ -239,6 +254,89 @@ const Lane = ({
     };
   }, []);
 
+  // Handle drag-to-create mousemove and mouseup
+  useEffect(() => {
+    if (!dragCreateState) return;
+
+    const handleMouseMove = (e: globalThis.MouseEvent) => {
+      if (!contentRef.current || !dragCreateState) return;
+
+      const rect = contentRef.current.getBoundingClientRect();
+      const currentX = e.clientX - rect.left;
+      const currentPositionBeats = viewport.offsetBeats + currentX / viewport.zoom;
+
+      setDragCreateState((prev) => {
+        if (!prev) return null;
+        return { ...prev, currentPositionBeats };
+      });
+    };
+
+    const handleMouseUp = (e: globalThis.MouseEvent) => {
+      if (!contentRef.current || !dragCreateState) {
+        setDragCreateState(null);
+        return;
+      }
+
+      const rect = contentRef.current.getBoundingClientRect();
+
+      // Check if mouse is still within lane boundaries vertically
+      const mouseY = e.clientY;
+      const laneTop = rect.top;
+      const laneBottom = rect.bottom;
+      const isInsideLane = mouseY >= laneTop && mouseY <= laneBottom;
+
+      if (!isInsideLane) {
+        // Cancel creation if dragged outside lane
+        setDragCreateState(null);
+        return;
+      }
+
+      // Calculate final position and duration
+      const startPos = dragCreateState.startPositionBeats;
+      const endPos = dragCreateState.currentPositionBeats;
+
+      // Calculate raw duration to detect direction
+      const rawDuration = endPos - startPos;
+
+      // Snap duration to grid and enforce minimum
+      const minDuration = Math.max(snapValue, 0.25); // Minimum is snap value or 0.25 beats
+      let clipPosition: Position;
+      let duration: Duration;
+
+      if (Math.abs(rawDuration) < 0.01) {
+        // Quick click without drag - create default 4-beat clip at start position
+        clipPosition = snapToGridFloor(startPos, snapValue);
+        duration = 4;
+      } else if (rawDuration >= 0) {
+        // Dragging forward (left to right)
+        clipPosition = snapToGridFloor(startPos, snapValue);
+        const snappedEnd = snapToGrid(endPos, snapValue);
+        duration = Math.max(minDuration, snappedEnd - clipPosition);
+      } else {
+        // Dragging backward (right to left)
+        // For backward drag, floor the end position and use the ceiling of start to include the full grid cell
+        const snappedEnd = snapToGridFloor(endPos, snapValue);
+        const snappedStart = snapToGrid(startPos, snapValue);
+        clipPosition = snappedEnd;
+        duration = Math.max(minDuration, snappedStart - snappedEnd);
+      }
+
+      // Create the clip
+      onDoubleClick(id, clipPosition, duration);
+
+      // Clear drag state
+      setDragCreateState(null);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragCreateState, viewport, snapValue, id, onDoubleClick]);
+
   const handleNameDoubleClick = () => {
     onStartEditing(id);
   };
@@ -261,19 +359,48 @@ const Lane = ({
     onStopEditing();
   };
 
-  const handleContentDoubleClick = (e: MouseEvent<HTMLDivElement>) => {
+  const handleContentMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    // Only handle left mouse button
+    if (e.button !== 0) return;
+
     // Don't trigger if clicking on a clip
     if ((e.target as HTMLElement).closest('.clip')) {
       return;
     }
 
-    if (contentRef.current) {
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    const distanceFromLastClick = Math.hypot(
+      e.clientX - lastClickPosRef.current.x,
+      e.clientY - lastClickPosRef.current.y
+    );
+
+    // Double-click threshold: within 500ms and within 5px of last click
+    const isDoubleClick = timeSinceLastClick < 500 && distanceFromLastClick < 5;
+
+    if (isDoubleClick && contentRef.current) {
+      // This is the second click - start drag-to-create
       const rect = contentRef.current.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const positionInBeats = viewport.offsetBeats + clickX / viewport.zoom;
-      onDoubleClick(id, positionInBeats);
+
+      setDragCreateState({
+        startX: e.clientX,
+        startY: e.clientY,
+        startPositionBeats: positionInBeats,
+        currentPositionBeats: positionInBeats,
+      });
+
+      // Prevent default and stop propagation to avoid text selection and drag selection
+      e.preventDefault();
+      e.stopPropagation();
+    } else {
+      // This is a single click - just track it for next potential double-click
+      lastClickTimeRef.current = now;
+      lastClickPosRef.current = { x: e.clientX, y: e.clientY };
     }
   };
+
 
   const handleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
     // Don't show menu if clicking on a clip
@@ -315,11 +442,19 @@ const Lane = ({
       data-testid={`lane-${id}`}
       style={{ height: `${laneHeight}px` }}
     >
-      <div className="lane__header" style={{ padding: `${headerPadding}px` }}>
+      <div
+        className="lane__header"
+        style={{ padding: `${headerPadding}px` }}
+        onClick={() => onLaneSelect?.(id)}
+        data-testid={`lane-${id}-header`}
+      >
         {isCurrent && <span className="lane__current-indicator">&gt;</span>}
         <button
           className="lane__color-swatch"
-          onClick={() => setShowColorPicker(true)}
+          onClick={(e) => {
+            e.stopPropagation(); // Don't trigger lane selection
+            setShowColorPicker(true);
+          }}
           title="Change lane color"
           data-testid={`lane-${id}-color-swatch`}
           style={{ color: color || '#00ff00' }}
@@ -333,6 +468,7 @@ const Lane = ({
             defaultValue={name}
             onKeyDown={handleInputKeyDown}
             onBlur={handleInputBlur}
+            onClick={(e) => e.stopPropagation()} // Don't trigger lane selection while editing
           />
         ) : (
           <div className="lane__name" onDoubleClick={handleNameDoubleClick}>
@@ -344,7 +480,7 @@ const Lane = ({
         ref={contentRef}
         className="lane__content"
         data-testid={`lane-${id}-content`}
-        onDoubleClick={handleContentDoubleClick}
+        onMouseDown={handleContentMouseDown}
         onContextMenu={handleContextMenu}
       >
         <canvas
@@ -384,6 +520,51 @@ const Lane = ({
             />
           );
         })}
+        {dragCreateState && (() => {
+          // Render ghost clip preview
+          const startPos = dragCreateState.startPositionBeats;
+          const endPos = dragCreateState.currentPositionBeats;
+
+          // Calculate direction and duration
+          const rawDuration = endPos - startPos;
+          const minDuration = Math.max(snapValue, 0.25);
+
+          let clipPosition: Position;
+          let duration: Duration;
+
+          if (rawDuration >= 0) {
+            // Dragging forward (left to right)
+            clipPosition = snapToGridFloor(startPos, snapValue);
+            const snappedEnd = snapToGrid(endPos, snapValue);
+            duration = Math.max(minDuration, snappedEnd - clipPosition);
+          } else {
+            // Dragging backward (right to left)
+            // For backward drag, floor the end position and use the ceiling of start to include the full grid cell
+            const snappedEnd = snapToGridFloor(endPos, snapValue);
+            const snappedStart = snapToGrid(startPos, snapValue);
+            clipPosition = snappedEnd;
+            duration = Math.max(minDuration, snappedStart - snappedEnd);
+          }
+
+          // Calculate pixel position and width
+          const leftPx = beatsToViewportPx(clipPosition, viewport);
+          const widthPx = duration * viewport.zoom;
+
+          return (
+            <div
+              className="lane__ghost-clip"
+              data-testid="ghost-clip"
+              style={{
+                left: `${leftPx}px`,
+                width: `${widthPx}px`,
+                height: '100%',
+                position: 'absolute',
+                top: 0,
+                pointerEvents: 'none',
+              }}
+            />
+          );
+        })()}
       </div>
       {contextMenu && (
         <ContextMenu

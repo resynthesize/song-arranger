@@ -16,10 +16,8 @@ describe('CommandFooter', () => {
     render(<CommandFooter hasSelection={false} selectionCount={0} isEditing={false} />);
 
     // Should show global shortcuts
-    expect(screen.getByText(/SPACE/)).toBeInTheDocument();
-    expect(screen.getByText(/Play/)).toBeInTheDocument();
-    expect(screen.getByText(/\[/)).toBeInTheDocument();
-    expect(screen.getByText(/]/)).toBeInTheDocument();
+    expect(screen.getByText('SPACE')).toBeInTheDocument();
+    expect(screen.getByText('Play/Pause')).toBeInTheDocument();
     expect(screen.getAllByText(/Zoom/).length).toBeGreaterThan(0);
 
     // Should not show clip-specific shortcuts
@@ -30,16 +28,26 @@ describe('CommandFooter', () => {
   it('should display clip shortcuts when clips are selected', () => {
     render(<CommandFooter hasSelection={true} selectionCount={2} isEditing={false} />);
 
-    // Should show clip-specific shortcuts
+    // Should show clip-specific shortcuts (only implemented ones)
     expect(screen.getByText('DEL')).toBeInTheDocument();
     expect(screen.getByText('BKSP')).toBeInTheDocument();
     expect(screen.getAllByText('Delete selected clips').length).toBe(2); // Delete and Backspace
     expect(screen.getByText('D')).toBeInTheDocument();
     expect(screen.getByText('Duplicate selected clips')).toBeInTheDocument();
-    expect(screen.getByText('E')).toBeInTheDocument();
-    expect(screen.getByText('Edit clip label')).toBeInTheDocument();
-    expect(screen.getByText('C')).toBeInTheDocument();
-    expect(screen.getByText('Change clip color')).toBeInTheDocument();
+
+    // Should NOT show unimplemented shortcuts
+    expect(screen.queryByText('Edit clip label')).not.toBeInTheDocument();
+    expect(screen.queryByText('Change clip color')).not.toBeInTheDocument();
+    expect(screen.queryByText('Join adjacent selected clips')).not.toBeInTheDocument();
+
+    // Should show duration shortcuts
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('Set clip duration to 1 bar')).toBeInTheDocument();
+
+    // Should show essential global shortcuts
+    expect(screen.getByText('[')).toBeInTheDocument();
+    expect(screen.getByText(']')).toBeInTheDocument();
+    expect(screen.getByText('SPACE')).toBeInTheDocument();
   });
 
   it('should hide conflicting shortcuts when editing', () => {
@@ -50,40 +58,31 @@ describe('CommandFooter', () => {
     expect(screen.queryByText('Edit clip label')).not.toBeInTheDocument();
     expect(screen.queryByText('Change clip color')).not.toBeInTheDocument();
 
-    // Should still show global shortcuts (play, zoom, navigation, undo/redo)
+    // Should still show some global shortcuts (play, zoom)
     expect(screen.getByText('SPACE')).toBeInTheDocument();
-    expect(screen.getByText('Ctrl+Z')).toBeInTheDocument();
-    expect(screen.getByText('↑')).toBeInTheDocument();
-    expect(screen.getByText('↓')).toBeInTheDocument();
+    expect(screen.getByText('[')).toBeInTheDocument();
+    expect(screen.getByText(']')).toBeInTheDocument();
 
-    // Note: Delete shortcuts are not available when editing to prevent accidental deletion
+    // Note: Delete shortcuts and alphanumeric shortcuts are not available when editing
   });
 
-  it('should show navigation shortcuts in all contexts', () => {
-    const contexts = [
-      { hasSelection: false, selectionCount: 0, isEditing: false },
-      { hasSelection: true, selectionCount: 1, isEditing: false },
-      { hasSelection: true, selectionCount: 1, isEditing: true },
-    ];
-
-    contexts.forEach((context) => {
-      const { unmount } = render(<CommandFooter {...context} />);
-
-      // Should show arrow navigation
-      expect(screen.getByText(/↑/)).toBeInTheDocument();
-      expect(screen.getByText(/↓/)).toBeInTheDocument();
-
-      unmount();
-    });
-  });
-
-  it('should show undo/redo shortcuts in all contexts', () => {
+  it('should show global shortcuts when no selection', () => {
     render(<CommandFooter hasSelection={false} selectionCount={0} isEditing={false} />);
 
-    expect(screen.getByText('Ctrl+Z')).toBeInTheDocument();
-    expect(screen.getByText('Ctrl+Shift+Z')).toBeInTheDocument();
-    expect(screen.getByText('Undo')).toBeInTheDocument();
-    expect(screen.getByText('Redo')).toBeInTheDocument();
+    // Should show navigation shortcuts when no selection
+    expect(screen.getAllByText(/↑/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/↓/).length).toBeGreaterThan(0);
+
+    // Should show add lane shortcut
+    expect(screen.getByText('Add new lane')).toBeInTheDocument();
+  });
+
+  it('should not show unimplemented shortcuts like undo/redo', () => {
+    render(<CommandFooter hasSelection={false} selectionCount={0} isEditing={false} />);
+
+    // Undo/redo are not yet implemented, should not be shown
+    expect(screen.queryByText('Undo')).not.toBeInTheDocument();
+    expect(screen.queryByText('Redo')).not.toBeInTheDocument();
   });
 
   it('should display help shortcut', () => {

@@ -66,8 +66,10 @@ describe('Clip', () => {
     const onSelect = jest.fn();
     render(<Clip {...defaultProps} onSelect={onSelect} />);
 
-    const clip = screen.getByTestId('clip-clip-1');
-    await userEvent.click(clip);
+    const content = screen.getByTestId('clip-clip-1').querySelector('.clip__content');
+    if (content) {
+      await userEvent.click(content);
+    }
 
     expect(onSelect).toHaveBeenCalledWith('clip-1', false); // false = not multi-select
   });
@@ -76,14 +78,14 @@ describe('Clip', () => {
     const onSelect = jest.fn();
     render(<Clip {...defaultProps} onSelect={onSelect} />);
 
-    const clip = screen.getByTestId('clip-clip-1');
+    const content = screen.getByTestId('clip-clip-1').querySelector('.clip__content');
     // Simulate Alt+click with fireEvent for better control
     const clickEvent = new MouseEvent('mousedown', {
       bubbles: true,
       altKey: true,
       button: 0,
     });
-    clip.dispatchEvent(clickEvent);
+    content?.dispatchEvent(clickEvent);
 
     expect(onSelect).toHaveBeenCalledWith('clip-1', true); // true = multi-select
   });
@@ -198,4 +200,5 @@ describe('Clip', () => {
       expect(rightHandle).toHaveClass('clip__handle--right');
     });
   });
+
 });
