@@ -8,6 +8,7 @@ import ContextMenu, { type MenuItem } from '../ContextMenu';
 import type { ID, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx } from '@/utils/viewport';
 import { snapToGrid } from '@/utils/snap';
+import { logger } from '@/utils/debug';
 import './Clip.css';
 
 interface ClipProps {
@@ -285,7 +286,7 @@ const Clip = ({
       const laneContent = clipEl.parentElement;
       const lane = laneContent?.parentElement;
 
-      console.log('Clip vertical drag debug:', {
+      logger.log('Clip vertical drag debug:', {
         clipId: id,
         isDragging,
         effectiveVerticalDragDeltaY,

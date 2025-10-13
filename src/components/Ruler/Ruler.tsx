@@ -7,6 +7,8 @@ import { useMemo } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import type { ViewportState } from '@/types';
 import { beatsToViewportPx, viewportPxToBeats } from '@/utils/viewport';
+import { calculateGridMetrics } from '@/utils/grid';
+import { BEATS_PER_BAR } from '@/constants';
 import './Ruler.css';
 
 interface RulerProps {
@@ -14,8 +16,6 @@ interface RulerProps {
   snapValue: number; // Snap interval in beats (currently unused but kept for future features)
   onPositionClick?: (position: number) => void; // Optional click handler
 }
-
-const BEATS_PER_BAR = 4; // 4/4 time signature
 
 // Convert beats to time string (M:SS format)
 const beatsToTimeString = (beats: number, tempo: number): string => {
@@ -42,28 +42,12 @@ const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps)
     // Calculate visible bars
     const startBar = Math.floor(startBeat / BEATS_PER_BAR);
     const endBar = Math.ceil(endBeat / BEATS_PER_BAR);
-    const barsVisible = endBar - startBar;
 
-    // Determine bar number interval based on visible bars
-    // Show fewer bar numbers when zoomed out, more when zoomed in
-    let barInterval = 1;
-    if (barsVisible > 128) {
-      barInterval = 16; // Very zoomed out: every 16 bars
-    } else if (barsVisible > 64) {
-      barInterval = 8; // Every 8 bars
-    } else if (barsVisible > 32) {
-      barInterval = 4; // Every 4 bars
-    } else if (barsVisible > 16) {
-      barInterval = 2; // Every 2 bars
-    }
-    // else: show every bar
+    // Calculate adaptive grid metrics using shared utility
+    const { barInterval, gridIntervalBeats } = calculateGridMetrics(viewport, BEATS_PER_BAR);
 
     const barsArray: Array<{ barNumber: number; position: number; beats: number }> = [];
     const gridLinesArray: Array<{ position: number }> = [];
-
-    // Calculate grid interval: always 4 divisions between consecutive bar numbers
-    // This is the beat distance between each grid line
-    const gridIntervalBeats = (barInterval * BEATS_PER_BAR) / 4;
 
     // Generate bar numbers and their associated grid lines
     // Start from the first bar that matches the interval and increment by barInterval

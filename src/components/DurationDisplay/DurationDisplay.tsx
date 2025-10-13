@@ -5,13 +5,15 @@
 
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { useAppSelector } from '@/store/hooks';
+import { selectAllClips, selectSelectedClipIds, selectHasSelection } from '@/store/selectors';
 import { formatDuration, calculateGlobalDuration, calculateSelectedDuration } from '@/utils/duration';
 import './DurationDisplay.css';
 
 export const DurationDisplay = () => {
   const tempo = useAppSelector((state) => state.timeline.tempo);
-  const clips = useAppSelector((state) => state.clips.clips);
-  const selectedClipIds = useAppSelector((state) => state.selection.selectedClipIds);
+  const clips = useAppSelector(selectAllClips);
+  const selectedClipIds = useAppSelector(selectSelectedClipIds);
+  const hasSelection = useAppSelector(selectHasSelection);
   const contentRef = useRef<HTMLDivElement>(null);
   const [borderWidth, setBorderWidth] = useState(12);
 
@@ -34,8 +36,6 @@ export const DurationDisplay = () => {
     () => formatDuration(selectedDurationSeconds),
     [selectedDurationSeconds]
   );
-
-  const hasSelection = selectedClipIds.length > 0;
 
   // Measure content width and calculate border width
   useEffect(() => {

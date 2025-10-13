@@ -14,6 +14,8 @@ import {
   selectViewport,
 } from '@/store/slices/timelineSlice';
 import { calculateZoomOffset } from '@/utils/viewport';
+import { ZOOM_LEVELS } from '@/constants';
+import { last } from '@/utils/array';
 
 interface UseViewportOptions {
   containerRef: RefObject<HTMLElement>;
@@ -186,9 +188,6 @@ export function useViewport({
   };
 }
 
-// Discrete zoom levels - must match timelineSlice.ts
-const ZOOM_LEVELS = [0.25, 0.5, 1, 2, 5, 10, 25, 50, 100, 200, 400, 800] as const;
-
 /**
  * Get the next zoom level (zoom in)
  */
@@ -199,7 +198,8 @@ function getNextZoomLevel(currentZoom: number): number {
       return level;
     }
   }
-  return ZOOM_LEVELS[ZOOM_LEVELS.length - 1] ?? 800;
+  const lastLevel = last(ZOOM_LEVELS);
+  return lastLevel ?? 800;
 }
 
 /**
@@ -212,5 +212,6 @@ function getPreviousZoomLevel(currentZoom: number): number {
       return level;
     }
   }
-  return ZOOM_LEVELS[0] ?? 0.25;
+  const firstLevel = ZOOM_LEVELS[0];
+  return firstLevel ?? 0.25;
 }

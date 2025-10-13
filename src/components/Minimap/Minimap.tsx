@@ -5,6 +5,14 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { ViewportState, Lane, Clip } from '@/types';
+import {
+  MINIMAP_EMBEDDED_HEIGHT,
+  MINIMAP_EMBEDDED_MIN_WIDTH,
+  MINIMAP_EMBEDDED_PADDING,
+  MINIMAP_OVERLAY_WIDTH,
+  MINIMAP_LANE_HEIGHT,
+  MINIMAP_PADDING,
+} from '@/constants';
 import './Minimap.css';
 
 interface MinimapProps {
@@ -17,16 +25,6 @@ interface MinimapProps {
   onViewportChange: (offsetBeats: number) => void;
   onToggle: () => void;
 }
-
-// Embedded mode: fits in menu bar (32px height)
-const EMBEDDED_HEIGHT = 32;
-const EMBEDDED_MIN_WIDTH = 300;
-const EMBEDDED_PADDING = 2;
-
-// Overlay mode: floating window
-const OVERLAY_WIDTH = 400;
-const OVERLAY_LANE_HEIGHT = 20;
-const OVERLAY_PADDING = 4;
 
 const Minimap = ({
   lanes,
@@ -43,7 +41,7 @@ const Minimap = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartOffset, setDragStartOffset] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(EMBEDDED_MIN_WIDTH);
+  const [containerWidth, setContainerWidth] = useState(MINIMAP_EMBEDDED_MIN_WIDTH);
 
   // Update container width on resize (for embedded mode)
   useEffect(() => {
@@ -75,19 +73,19 @@ const Minimap = ({
 
   // Calculate minimap dimensions based on mode
   const minimapWidth = embedded
-    ? Math.max(EMBEDDED_MIN_WIDTH, containerWidth)
-    : OVERLAY_WIDTH;
+    ? Math.max(MINIMAP_EMBEDDED_MIN_WIDTH, containerWidth)
+    : MINIMAP_OVERLAY_WIDTH;
 
   const minimapHeight = embedded
-    ? EMBEDDED_HEIGHT
-    : lanes.length * OVERLAY_LANE_HEIGHT + OVERLAY_PADDING * 2;
+    ? MINIMAP_EMBEDDED_HEIGHT
+    : lanes.length * MINIMAP_LANE_HEIGHT + MINIMAP_PADDING * 2;
 
-  const padding = embedded ? EMBEDDED_PADDING : OVERLAY_PADDING;
+  const padding = embedded ? MINIMAP_EMBEDDED_PADDING : MINIMAP_PADDING;
 
   // Calculate lane height dynamically for embedded mode to fit all lanes
   const laneHeight = embedded
-    ? Math.max(2, (EMBEDDED_HEIGHT - EMBEDDED_PADDING * 2) / Math.max(1, lanes.length))
-    : OVERLAY_LANE_HEIGHT;
+    ? Math.max(2, (MINIMAP_EMBEDDED_HEIGHT - MINIMAP_EMBEDDED_PADDING * 2) / Math.max(1, lanes.length))
+    : MINIMAP_LANE_HEIGHT;
 
   const scale = minimapWidth / timelineLength;
 

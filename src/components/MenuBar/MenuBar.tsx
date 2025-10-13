@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { zoomIn, zoomOut, setViewportOffset } from '@/store/slices/timelineSlice';
 import { addLane } from '@/store/slices/lanesSlice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
+import { selectAllClips, selectAllLanes, selectTimelineEndPosition } from '@/store/selectors';
 import { TerminalButton } from '../TerminalButton';
 import { FileMenu } from '../FileMenu';
 import Minimap from '../Minimap';
@@ -16,14 +17,12 @@ import './MenuBar.css';
 const MenuBar = () => {
   const dispatch = useAppDispatch();
   const viewport = useAppSelector((state) => state.timeline.viewport);
-  const lanes = useAppSelector((state) => state.lanes.lanes);
-  const clips = useAppSelector((state) => state.clips.clips);
+  const lanes = useAppSelector(selectAllLanes);
+  const clips = useAppSelector(selectAllClips);
 
-  // Calculate total timeline length
-  const timelineLength = clips.reduce((max, clip) => {
-    const clipEnd = clip.position + clip.duration;
-    return Math.max(max, clipEnd);
-  }, 64); // Minimum 64 beats
+  // Calculate total timeline length using memoized selector
+  const timelineEndPosition = useAppSelector(selectTimelineEndPosition);
+  const timelineLength = Math.max(64, timelineEndPosition); // Minimum 64 beats
 
   const handleAddLane = useCallback(() => {
     dispatch(addLane({}));

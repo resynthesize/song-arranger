@@ -4,6 +4,7 @@
  */
 
 import type { Clip, Lane, TimelineState } from '@/types';
+import { logger } from './debug';
 
 // Current data version for future migration support
 const DATA_VERSION = '1.0.0';
@@ -130,7 +131,7 @@ export const loadProject = (projectId: string): ProjectFile | null => {
     const projectFile = JSON.parse(stored) as ProjectFile;
     return projectFile;
   } catch (error) {
-    console.error(`Failed to load project ${projectId}:`, error);
+    logger.error(`Failed to load project ${projectId}:`, error);
     return null;
   }
 };
@@ -161,7 +162,7 @@ export const listProjects = (): ProjectFile[] => {
           projects.push(projectFile);
         }
       } catch (error) {
-        console.error(`Failed to parse project from key ${key}:`, error);
+        logger.error(`Failed to parse project from key ${key}:`, error);
         // Skip corrupted entries
       }
     }

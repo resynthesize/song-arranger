@@ -8,6 +8,7 @@ import { useAppSelector, useAppDispatch } from './store/hooks';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { loadProjectById } from './store/slices/projectSlice';
 import { getTemplateProject } from './utils/storage';
+import { logger } from './utils/debug';
 import BootSequence from './components/BootSequence';
 import MenuBar from './components/MenuBar';
 import Timeline from './components/Timeline';
@@ -73,7 +74,7 @@ function App() {
           currentValue={0}
           onSubmit={(value) => {
             // TODO: Handle quick input submission
-            console.log(`QuickInput submit: ${quickInputCommand} = ${value}`);
+            logger.log(`QuickInput submit: ${quickInputCommand} = ${value}`);
             setShowQuickInput(false);
           }}
           onCancel={() => setShowQuickInput(false)}

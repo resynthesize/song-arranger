@@ -6,17 +6,18 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { TimelineState, Position, SnapMode } from '@/types';
 import { calculateGridSnap } from '@/utils/snap';
-
-// Discrete zoom levels for better UX
-// From 0.25px/beat (ultra zoomed out, ~1024 bars visible) to 800px/beat (very zoomed in, 1/16th notes)
-const ZOOM_LEVELS = [0.25, 0.5, 1, 2, 5, 10, 25, 50, 100, 200, 400, 800] as const; // pixels per beat
-const MIN_ZOOM = ZOOM_LEVELS[0] ?? 0.25;
-const MAX_ZOOM = ZOOM_LEVELS[ZOOM_LEVELS.length - 1] ?? 800;
-
-// Vertical zoom constants
-const MIN_VERTICAL_ZOOM = 10; // 10% - 8px lane height (~75 tracks in 600px viewport)
-const MAX_VERTICAL_ZOOM = 150; // 150% - 120px lane height (~5 tracks in 600px viewport)
-const VERTICAL_ZOOM_STEP = 10; // Zoom in/out by 10% at a time for faster control
+import {
+  ZOOM_LEVELS,
+  MIN_ZOOM,
+  MAX_ZOOM,
+  MIN_VERTICAL_ZOOM,
+  MAX_VERTICAL_ZOOM,
+  VERTICAL_ZOOM_STEP,
+  BEATS_PER_BAR,
+  MIN_TEMPO,
+  MAX_TEMPO,
+  DEFAULT_TEMPO,
+} from '@/constants';
 
 const initialState: TimelineState = {
   viewport: {
@@ -28,7 +29,7 @@ const initialState: TimelineState = {
   verticalZoom: 100, // Default 100% vertical zoom
   playheadPosition: 0,
   isPlaying: false,
-  tempo: 120, // Default BPM
+  tempo: DEFAULT_TEMPO,
   snapValue: 1, // Default to quarter note (1 beat)
   snapMode: 'grid', // Default to grid snap mode
   minimapVisible: false, // Minimap hidden by default
@@ -156,7 +157,7 @@ const timelineSlice = createSlice({
     },
 
     setTempo: (state, action: PayloadAction<number>) => {
-      state.tempo = Math.max(20, Math.min(300, action.payload));
+      state.tempo = Math.max(MIN_TEMPO, Math.min(MAX_TEMPO, action.payload));
     },
 
     setSnapValue: (state, action: PayloadAction<number>) => {
@@ -188,9 +189,8 @@ const timelineSlice = createSlice({
     },
 
     movePlayheadByBars: (state, action: PayloadAction<number>) => {
-      // Move playhead by N bars (4 beats per bar)
-      const beatsPerBar = 4;
-      state.playheadPosition = Math.max(0, state.playheadPosition + (action.payload * beatsPerBar));
+      // Move playhead by N bars
+      state.playheadPosition = Math.max(0, state.playheadPosition + (action.payload * BEATS_PER_BAR));
     },
 
     movePlayheadToPosition: (state, action: PayloadAction<Position>) => {
@@ -199,7 +199,7 @@ const timelineSlice = createSlice({
 
     adjustTempo: (state, action: PayloadAction<number>) => {
       // Adjust tempo by delta
-      state.tempo = Math.max(20, Math.min(300, state.tempo + action.payload));
+      state.tempo = Math.max(MIN_TEMPO, Math.min(MAX_TEMPO, state.tempo + action.payload));
     },
 
     frameViewport: (state, action: PayloadAction<{ startBeats: number; endBeats: number }>) => {
@@ -211,8 +211,6 @@ const timelineSlice = createSlice({
         const targetZoom = (state.viewport.widthPx * 0.9) / durationBeats;
 
         // Clamp to valid zoom range
-        const MIN_ZOOM = 0.25;
-        const MAX_ZOOM = 800;
         state.viewport.zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, targetZoom));
 
         // Center the content with 5% left padding

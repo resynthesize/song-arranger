@@ -13,6 +13,7 @@ import {
   deleteProjectById,
   setCurrentProjectName,
 } from '@/store/slices/projectSlice';
+import { selectAllClips, selectAllLanes } from '@/store/selectors';
 import {
   saveProject,
   loadProject,
@@ -25,6 +26,7 @@ import {
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
 import ProjectSelector from '../ProjectSelector';
 import SaveAsDialog from '../SaveAsDialog';
+import { first } from '@/utils/array';
 import './FileMenu.css';
 
 export interface FileMenuProps {
@@ -37,9 +39,9 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
   const currentProjectName = useAppSelector((state) => state.project.currentProjectName);
   const isDirty = useAppSelector((state) => state.project.isDirty);
 
-  // Get all current state for saving
-  const clips = useAppSelector((state) => state.clips.clips);
-  const lanes = useAppSelector((state) => state.lanes.lanes);
+  // Get all current state for saving using selectors
+  const clips = useAppSelector(selectAllClips);
+  const lanes = useAppSelector(selectAllLanes);
   const timeline = useAppSelector((state) => state.timeline);
 
   // Dialog states
@@ -245,7 +247,10 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     input.accept = '.json,application/json';
 
     input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
+      const files = (e.target as HTMLInputElement).files;
+      if (!files) return;
+
+      const file = first(Array.from(files));
       if (!file) return;
 
       const reader = new FileReader();

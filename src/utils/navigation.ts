@@ -4,6 +4,7 @@
  */
 
 import type { Clip, Lane } from '@/types';
+import { logger } from './debug';
 
 /**
  * Calculate the center position of a clip
@@ -179,7 +180,7 @@ export const findNearestNeighbor = (
   deletedClip: Clip,
   allClips: Clip[]
 ): Clip | null => {
-  console.log('[findNearestNeighbor] Starting search', {
+  logger.log('[findNearestNeighbor] Starting search', {
     deletedClip: { id: deletedClip.id, laneId: deletedClip.laneId, position: deletedClip.position },
     totalClips: allClips.length
   });
@@ -187,26 +188,26 @@ export const findNearestNeighbor = (
   // Filter out the deleted clip from consideration
   const otherClips = allClips.filter((clip) => clip.id !== deletedClip.id);
 
-  console.log('[findNearestNeighbor] After filtering deleted clip:', {
+  logger.log('[findNearestNeighbor] After filtering deleted clip:', {
     remainingClips: otherClips.length
   });
 
   if (otherClips.length === 0) {
-    console.log('[findNearestNeighbor] No other clips remaining');
+    logger.log('[findNearestNeighbor] No other clips remaining');
     return null;
   }
 
   // Priority 1: Try to find clip to the right in same lane
   const clipToRight = findNearestClipEast(deletedClip, otherClips);
   if (clipToRight) {
-    console.log('[findNearestNeighbor] Found clip to the right (Priority 1):', clipToRight.id);
+    logger.log('[findNearestNeighbor] Found clip to the right (Priority 1):', clipToRight.id);
     return clipToRight;
   }
 
   // Priority 2: Try to find clip to the left in same lane
   const clipToLeft = findNearestClipWest(deletedClip, otherClips);
   if (clipToLeft) {
-    console.log('[findNearestNeighbor] Found clip to the left (Priority 2):', clipToLeft.id);
+    logger.log('[findNearestNeighbor] Found clip to the left (Priority 2):', clipToLeft.id);
     return clipToLeft;
   }
 
@@ -224,6 +225,6 @@ export const findNearestNeighbor = (
     return clipDistance < nearestDistance ? clip : nearest;
   });
 
-  console.log('[findNearestNeighbor] Found closest clip in any lane (Priority 3):', closestClip.id);
+  logger.log('[findNearestNeighbor] Found closest clip in any lane (Priority 3):', closestClip.id);
   return closestClip;
 };

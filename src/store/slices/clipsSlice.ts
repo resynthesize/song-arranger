@@ -5,6 +5,7 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { ClipsState, Clip, ID, Position, Duration } from '@/types';
+import { logger } from '@/utils/debug';
 
 const initialState: ClipsState = {
   clips: [],
@@ -42,13 +43,13 @@ const clipsSlice = createSlice({
     },
 
     removeClips: (state, action: PayloadAction<ID[]>) => {
-      console.log('[removeClips reducer] Removing clips', {
+      logger.log('[removeClips reducer] Removing clips', {
         clipIds: action.payload,
         beforeCount: state.clips.length
       });
       const idsToRemove = new Set(action.payload);
       state.clips = state.clips.filter((clip) => !idsToRemove.has(clip.id));
-      console.log('[removeClips reducer] After removal', {
+      logger.log('[removeClips reducer] After removal', {
         afterCount: state.clips.length
       });
     },

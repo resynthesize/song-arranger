@@ -7,9 +7,12 @@ import { useRef, useEffect, useMemo, useState, KeyboardEvent, MouseEvent, memo }
 import Clip from '../Clip';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
 import ColorPicker from '../ColorPicker';
+import GridCanvas from './GridCanvas';
 import type { ID, Clip as ClipType, Position, Duration, ViewportState } from '@/types';
-import { beatsToViewportPx, isRangeVisible } from '@/utils/viewport';
-import { snapToGridFloor, snapToGrid } from '@/utils/snap';
+import { isRangeVisible } from '@/utils/viewport';
+import { useDragToCreateClip } from '@/hooks/useDragToCreateClip';
+import { LANE_HEIGHT, DEFAULT_LANE_COLOR } from '@/constants';
+import { logger } from '@/utils/debug';
 import './Lane.css';
 
 interface LaneProps {
@@ -71,18 +74,18 @@ const Lane = ({
   onClipVerticalDragUpdate,
   onDoubleClick,
 }: LaneProps) => {
-  // Calculate lane height from vertical zoom (base height is 80px)
-  const laneHeight = (80 * verticalZoom) / 100;
+  // Calculate lane height from vertical zoom
+  const laneHeight = (LANE_HEIGHT * verticalZoom) / 100;
 
   // Debug: log when isMoving changes
   useEffect(() => {
-    console.log(`Lane ${id} (${name}): isMoving = ${isMoving}, timestamp = ${Date.now()}`);
+    logger.log(`Lane ${id} (${name}): isMoving = ${isMoving}, timestamp = ${Date.now()}`);
   }, [isMoving, id, name]);
 
   // Debug: log className when it changes
   const laneClassName = `lane ${isCurrent ? 'lane--current' : ''} ${isMoving ? 'lane--moving' : ''}`;
   useEffect(() => {
-    console.log(`Lane ${id}: className = "${laneClassName}", timestamp = ${Date.now()}`);
+    logger.log(`Lane ${id}: className = "${laneClassName}", timestamp = ${Date.now()}`);
   }, [id, laneClassName]);
 
   // Scale padding for lane header based on zoom (base padding is 16px)
@@ -90,21 +93,16 @@ const Lane = ({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const gridCanvasRef = useRef<HTMLCanvasElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; position: number } | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
-  // State for drag-to-create clip functionality
-  const [dragCreateState, setDragCreateState] = useState<{
-    startX: number;
-    startY: number;
-    startPositionBeats: Position;
-    currentPositionBeats: Position;
-  } | null>(null);
-
-  // Track click timing for double-click detection
-  const lastClickTimeRef = useRef<number>(0);
-  const lastClickPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  // Use drag-to-create clip hook
+  const { handleMouseDown: handleDragToCreate, ghostClip } = useDragToCreateClip({
+    viewport,
+    snapValue,
+    onCreateClip: (position, duration) => onDoubleClick(id, position, duration),
+    containerRef: contentRef,
+  });
 
   // Filter clips to only show those in this lane
   const laneClips = clips.filter((clip) => clip.laneId === id);
@@ -134,14 +132,14 @@ const Lane = ({
       const element = contentRef.current;
       element.style.overflow = 'visible';
 
-      console.log('Lane.tsx: Setting overflow to visible on mount');
-      console.log('Lane.tsx: Initial computed overflow:', getComputedStyle(element).overflow);
+      logger.log('Lane.tsx: Setting overflow to visible on mount');
+      logger.log('Lane.tsx: Initial computed overflow:', getComputedStyle(element).overflow);
 
       // Watch for changes
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-            console.log('Lane.tsx: Style attribute changed!', {
+            logger.log('Lane.tsx: Style attribute changed!', {
               overflow: getComputedStyle(element).overflow,
               overflowY: getComputedStyle(element).overflowY,
             });
@@ -154,188 +152,6 @@ const Lane = ({
       return () => observer.disconnect();
     }
   }, []);
-
-  // Draw adaptive grid lines on canvas - matches ruler's 4-division grid system
-  useEffect(() => {
-    const canvas = gridCanvasRef.current;
-    const container = contentRef.current;
-    if (!canvas || !container) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size to match container
-    const rect = container.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const BEATS_PER_BAR = 4;
-
-    // Calculate visible range in beats using viewport
-    const startBeat = viewport.offsetBeats;
-    const beatsVisible = viewport.widthPx / viewport.zoom;
-    const endBeat = startBeat + beatsVisible;
-
-    // Calculate visible bars
-    const startBar = Math.floor(startBeat / BEATS_PER_BAR);
-    const endBar = Math.ceil(endBeat / BEATS_PER_BAR);
-    const barsVisible = endBar - startBar;
-
-    // Determine bar line interval (same logic as ruler)
-    let barInterval = 1;
-    if (barsVisible > 128) {
-      barInterval = 16; // Very zoomed out: every 16 bars
-    } else if (barsVisible > 64) {
-      barInterval = 8; // Every 8 bars
-    } else if (barsVisible > 32) {
-      barInterval = 4; // Every 4 bars
-    } else if (barsVisible > 16) {
-      barInterval = 2; // Every 2 bars
-    }
-
-    // Calculate grid interval: always 4 divisions between consecutive bar numbers
-    const gridIntervalBeats = (barInterval * BEATS_PER_BAR) / 4;
-
-    // Draw bar lines and grid lines (same logic as Ruler)
-    // Start from the first bar that matches the interval and increment by barInterval
-    const firstIntervalBar = Math.floor(startBar / barInterval) * barInterval;
-    for (let bar = firstIntervalBar; bar <= endBar + barInterval; bar += barInterval) {
-      const barBeat = bar * BEATS_PER_BAR;
-      const x = beatsToViewportPx(barBeat, viewport); // Position relative to viewport
-
-      // Draw bar line (numbered bars in ruler) - brighter and thicker
-      if (x >= -5 && x <= canvas.width + 5) {
-        ctx.strokeStyle = '#00ff00';
-        ctx.globalAlpha = 0.5;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      // Generate 3 grid lines between this bar and the next numbered bar
-      ctx.strokeStyle = '#004400';
-      ctx.globalAlpha = 0.4;
-      ctx.lineWidth = 1;
-      for (let i = 1; i < 4; i++) {
-        const gridBeat = barBeat + (i * gridIntervalBeats);
-        const gridX = beatsToViewportPx(gridBeat, viewport);
-
-        // Only draw if within visible range (with 5px margin for edges)
-        if (gridBeat >= startBeat && gridBeat <= endBeat && gridX >= -5 && gridX <= canvas.width + 5) {
-          ctx.beginPath();
-          ctx.moveTo(gridX, 0);
-          ctx.lineTo(gridX, canvas.height);
-          ctx.stroke();
-        }
-      }
-    }
-  }, [viewport, snapValue]);
-
-  // Re-draw grid when window resizes
-  useEffect(() => {
-    const handleResize = () => {
-      const canvas = gridCanvasRef.current;
-      const container = contentRef.current;
-      if (!canvas || !container) return;
-
-      const rect = container.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // Handle drag-to-create mousemove and mouseup
-  useEffect(() => {
-    if (!dragCreateState) return;
-
-    const handleMouseMove = (e: globalThis.MouseEvent) => {
-      if (!contentRef.current || !dragCreateState) return;
-
-      const rect = contentRef.current.getBoundingClientRect();
-      const currentX = e.clientX - rect.left;
-      const currentPositionBeats = viewport.offsetBeats + currentX / viewport.zoom;
-
-      setDragCreateState((prev) => {
-        if (!prev) return null;
-        return { ...prev, currentPositionBeats };
-      });
-    };
-
-    const handleMouseUp = (e: globalThis.MouseEvent) => {
-      if (!contentRef.current || !dragCreateState) {
-        setDragCreateState(null);
-        return;
-      }
-
-      const rect = contentRef.current.getBoundingClientRect();
-
-      // Check if mouse is still within lane boundaries vertically
-      const mouseY = e.clientY;
-      const laneTop = rect.top;
-      const laneBottom = rect.bottom;
-      const isInsideLane = mouseY >= laneTop && mouseY <= laneBottom;
-
-      if (!isInsideLane) {
-        // Cancel creation if dragged outside lane
-        setDragCreateState(null);
-        return;
-      }
-
-      // Calculate final position and duration
-      const startPos = dragCreateState.startPositionBeats;
-      const endPos = dragCreateState.currentPositionBeats;
-
-      // Calculate raw duration to detect direction
-      const rawDuration = endPos - startPos;
-
-      // Snap duration to grid and enforce minimum
-      const minDuration = Math.max(snapValue, 0.25); // Minimum is snap value or 0.25 beats
-      let clipPosition: Position;
-      let duration: Duration;
-
-      if (Math.abs(rawDuration) < 0.01) {
-        // Quick click without drag - create default 4-beat clip at start position
-        clipPosition = snapToGridFloor(startPos, snapValue);
-        duration = 4;
-      } else if (rawDuration >= 0) {
-        // Dragging forward (left to right)
-        clipPosition = snapToGridFloor(startPos, snapValue);
-        const snappedEnd = snapToGrid(endPos, snapValue);
-        duration = Math.max(minDuration, snappedEnd - clipPosition);
-      } else {
-        // Dragging backward (right to left)
-        // For backward drag, floor the end position and use the ceiling of start to include the full grid cell
-        const snappedEnd = snapToGridFloor(endPos, snapValue);
-        const snappedStart = snapToGrid(startPos, snapValue);
-        clipPosition = snappedEnd;
-        duration = Math.max(minDuration, snappedStart - snappedEnd);
-      }
-
-      // Create the clip
-      onDoubleClick(id, clipPosition, duration);
-
-      // Clear drag state
-      setDragCreateState(null);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [dragCreateState, viewport, snapValue, id, onDoubleClick]);
 
   const handleNameDoubleClick = () => {
     onStartEditing(id);
@@ -358,49 +174,6 @@ const Lane = ({
     }
     onStopEditing();
   };
-
-  const handleContentMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    // Only handle left mouse button
-    if (e.button !== 0) return;
-
-    // Don't trigger if clicking on a clip
-    if ((e.target as HTMLElement).closest('.clip')) {
-      return;
-    }
-
-    const now = Date.now();
-    const timeSinceLastClick = now - lastClickTimeRef.current;
-    const distanceFromLastClick = Math.hypot(
-      e.clientX - lastClickPosRef.current.x,
-      e.clientY - lastClickPosRef.current.y
-    );
-
-    // Double-click threshold: within 500ms and within 5px of last click
-    const isDoubleClick = timeSinceLastClick < 500 && distanceFromLastClick < 5;
-
-    if (isDoubleClick && contentRef.current) {
-      // This is the second click - start drag-to-create
-      const rect = contentRef.current.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const positionInBeats = viewport.offsetBeats + clickX / viewport.zoom;
-
-      setDragCreateState({
-        startX: e.clientX,
-        startY: e.clientY,
-        startPositionBeats: positionInBeats,
-        currentPositionBeats: positionInBeats,
-      });
-
-      // Prevent default and stop propagation to avoid text selection and drag selection
-      e.preventDefault();
-      e.stopPropagation();
-    } else {
-      // This is a single click - just track it for next potential double-click
-      lastClickTimeRef.current = now;
-      lastClickPosRef.current = { x: e.clientX, y: e.clientY };
-    }
-  };
-
 
   const handleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
     // Don't show menu if clicking on a clip
@@ -457,7 +230,7 @@ const Lane = ({
           }}
           title="Change lane color"
           data-testid={`lane-${id}-color-swatch`}
-          style={{ color: color || '#00ff00' }}
+          style={{ color: color || DEFAULT_LANE_COLOR }}
         >
           █
         </button>
@@ -480,14 +253,10 @@ const Lane = ({
         ref={contentRef}
         className="lane__content"
         data-testid={`lane-${id}-content`}
-        onMouseDown={handleContentMouseDown}
+        onMouseDown={handleDragToCreate}
         onContextMenu={handleContextMenu}
       >
-        <canvas
-          ref={gridCanvasRef}
-          className="lane__grid"
-          data-testid={`lane-${id}-grid`}
-        />
+        <GridCanvas viewport={viewport} snapValue={snapValue} />
         {visibleClips.map((clip) => {
           // Calculate deltaY for this clip if it's selected during vertical drag
           let externalVerticalDragDeltaY: number | undefined;
@@ -520,51 +289,20 @@ const Lane = ({
             />
           );
         })}
-        {dragCreateState && (() => {
-          // Render ghost clip preview
-          const startPos = dragCreateState.startPositionBeats;
-          const endPos = dragCreateState.currentPositionBeats;
-
-          // Calculate direction and duration
-          const rawDuration = endPos - startPos;
-          const minDuration = Math.max(snapValue, 0.25);
-
-          let clipPosition: Position;
-          let duration: Duration;
-
-          if (rawDuration >= 0) {
-            // Dragging forward (left to right)
-            clipPosition = snapToGridFloor(startPos, snapValue);
-            const snappedEnd = snapToGrid(endPos, snapValue);
-            duration = Math.max(minDuration, snappedEnd - clipPosition);
-          } else {
-            // Dragging backward (right to left)
-            // For backward drag, floor the end position and use the ceiling of start to include the full grid cell
-            const snappedEnd = snapToGridFloor(endPos, snapValue);
-            const snappedStart = snapToGrid(startPos, snapValue);
-            clipPosition = snappedEnd;
-            duration = Math.max(minDuration, snappedStart - snappedEnd);
-          }
-
-          // Calculate pixel position and width
-          const leftPx = beatsToViewportPx(clipPosition, viewport);
-          const widthPx = duration * viewport.zoom;
-
-          return (
-            <div
-              className="lane__ghost-clip"
-              data-testid="ghost-clip"
-              style={{
-                left: `${leftPx}px`,
-                width: `${widthPx}px`,
-                height: '100%',
-                position: 'absolute',
-                top: 0,
-                pointerEvents: 'none',
-              }}
-            />
-          );
-        })()}
+        {ghostClip && (
+          <div
+            className="lane__ghost-clip"
+            data-testid="ghost-clip"
+            style={{
+              left: `${ghostClip.leftPx}px`,
+              width: `${ghostClip.widthPx}px`,
+              height: '100%',
+              position: 'absolute',
+              top: 0,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </div>
       {contextMenu && (
         <ContextMenu
@@ -576,7 +314,7 @@ const Lane = ({
       )}
       {showColorPicker && onColorChange && (
         <ColorPicker
-          selectedColor={color || '#00ff00'}
+          selectedColor={color || DEFAULT_LANE_COLOR}
           onSelectColor={(newColor) => {
             onColorChange(id, newColor);
           }}

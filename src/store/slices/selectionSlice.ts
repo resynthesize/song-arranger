@@ -5,6 +5,8 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { SelectionState, ID } from '@/types';
+import { first, last } from '@/utils/array';
+import { logger } from '@/utils/debug';
 
 const initialState: SelectionState = {
   selectedClipIds: [],
@@ -16,7 +18,7 @@ const selectionSlice = createSlice({
   initialState,
   reducers: {
     selectClip: (state, action: PayloadAction<ID>) => {
-      console.log('[selectClip reducer] Selecting clip', {
+      logger.log('[selectClip reducer] Selecting clip', {
         clipId: action.payload,
         previousSelection: state.selectedClipIds
       });
@@ -55,7 +57,7 @@ const selectionSlice = createSlice({
     },
 
     clearSelection: (state) => {
-      console.log('[clearSelection reducer] Clearing selection', {
+      logger.log('[clearSelection reducer] Clearing selection', {
         previousSelection: state.selectedClipIds
       });
       state.selectedClipIds = [];
@@ -71,7 +73,7 @@ const selectionSlice = createSlice({
 
       // If nothing selected, select first/last
       if (state.selectedClipIds.length === 0) {
-        const firstOrLast = direction === 'forward' ? clipIds[0] : clipIds[clipIds.length - 1];
+        const firstOrLast = direction === 'forward' ? first(clipIds) : last(clipIds);
         if (firstOrLast) {
           state.selectedClipIds = [firstOrLast];
         }
@@ -79,14 +81,14 @@ const selectionSlice = createSlice({
       }
 
       // Find current selection index
-      const currentId = state.selectedClipIds[0];
+      const currentId = first(state.selectedClipIds);
       if (!currentId) return;
 
       const currentIndex = clipIds.indexOf(currentId);
 
       if (currentIndex === -1) {
         // Current selection not in list, select first/last
-        const firstOrLast = direction === 'forward' ? clipIds[0] : clipIds[clipIds.length - 1];
+        const firstOrLast = direction === 'forward' ? first(clipIds) : last(clipIds);
         if (firstOrLast) {
           state.selectedClipIds = [firstOrLast];
         }
@@ -124,14 +126,16 @@ const selectionSlice = createSlice({
 
       if (state.currentLaneId === null) {
         // No current lane, select last lane
-        state.currentLaneId = laneIds[laneIds.length - 1] || null;
+        const lastLane = last(laneIds);
+        state.currentLaneId = lastLane || null;
       } else {
         // Find current lane index
         const currentIndex = laneIds.indexOf(state.currentLaneId);
 
         if (currentIndex > 0) {
           // Move to previous lane
-          state.currentLaneId = laneIds[currentIndex - 1] || null;
+          const prevLane = laneIds[currentIndex - 1];
+          state.currentLaneId = prevLane || null;
         }
         // If at first lane or not found, stay at current lane
       }
@@ -146,14 +150,16 @@ const selectionSlice = createSlice({
 
       if (state.currentLaneId === null) {
         // No current lane, select first lane
-        state.currentLaneId = laneIds[0] || null;
+        const firstLane = first(laneIds);
+        state.currentLaneId = firstLane || null;
       } else {
         // Find current lane index
         const currentIndex = laneIds.indexOf(state.currentLaneId);
 
         if (currentIndex !== -1 && currentIndex < laneIds.length - 1) {
           // Move to next lane
-          state.currentLaneId = laneIds[currentIndex + 1] || null;
+          const nextLane = laneIds[currentIndex + 1];
+          state.currentLaneId = nextLane || null;
         }
         // If at last lane or not found, stay at current lane
       }

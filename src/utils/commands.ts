@@ -24,6 +24,8 @@ import {
 } from '@/store/slices/selectionSlice';
 import { addLane } from '@/store/slices/lanesSlice';
 import { openQuickInput } from '@/store/slices/quickInputSlice';
+import { first } from '@/utils/array';
+import { logger } from './debug';
 
 export type CommandCategory = 'Edit' | 'Navigate' | 'View' | 'Arrange' | 'Playback';
 
@@ -137,7 +139,7 @@ export const commands: Command[] = [
     keywords: ['split', 'cut', 'divide'],
     condition: (state) => state.selection.selectedClipIds.length > 0,
     action: (dispatch, state) => {
-      const clipId = state.selection.selectedClipIds[0];
+      const clipId = first(state.selection.selectedClipIds);
       if (clipId) {
         dispatch(splitClip({ clipId, position: state.timeline.playheadPosition }));
       }
@@ -301,7 +303,7 @@ export const getRecentCommands = (maxCount: number = 5): string[] => {
       return JSON.parse(recent).slice(0, maxCount);
     }
   } catch (e) {
-    console.warn('Failed to load recent commands:', e);
+    logger.warn('Failed to load recent commands:', e);
   }
   return [];
 };
@@ -319,7 +321,7 @@ export const addToRecentCommands = (commandId: string): void => {
     // Save
     localStorage.setItem('recentCommands', JSON.stringify(filtered));
   } catch (e) {
-    console.warn('Failed to save recent command:', e);
+    logger.warn('Failed to save recent command:', e);
   }
 };
 
