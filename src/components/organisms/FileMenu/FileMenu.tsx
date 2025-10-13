@@ -26,9 +26,11 @@ import {
   type ProjectFile,
 } from '@/utils/storage';
 import { parseCKSFile, importFromCirklon } from '@/utils/cirklon/import';
+import { exportToCirklon, type ExportOptions } from '@/utils/cirklon/export';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
 import ProjectSelector from '../ProjectSelector';
 import SaveAsDialog from '../SaveAsDialog';
+import CirklonExportDialog from '../CirklonExportDialog/CirklonExportDialog';
 import { first } from '@/utils/array';
 import './FileMenu.css';
 
@@ -51,6 +53,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showSaveAsDialog, setShowSaveAsDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showExportCirklonDialog, setShowExportCirklonDialog] = useState(false);
 
   const handleNew = useCallback(() => {
     if (isDirty) {
@@ -361,6 +364,39 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     input.click();
   }, [dispatch, isDirty]);
 
+  const handleExportCirklon = useCallback(() => {
+    setShowExportCirklonDialog(true);
+  }, []);
+
+  const handleExportCirklonConfirm = useCallback((options: ExportOptions) => {
+    try {
+      // Export to Cirklon format
+      const cirklonData = exportToCirklon(tracks, patterns, options);
+
+      // Create JSON blob
+      const jsonString = JSON.stringify(cirklonData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      // Create download link
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${options.songName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.CKS`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setShowExportCirklonDialog(false);
+
+      alert(`Successfully exported "${options.songName}" to Cirklon format`);
+    } catch (error) {
+      alert(`Failed to export Cirklon file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }, [tracks, patterns]);
+
   const menuItems: TerminalMenuItem[] = [
     { id: 'new', label: 'New' },
     { id: 'open', label: 'Open...' },
@@ -370,6 +406,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     { id: 'import', label: 'Import JSON...' },
     { id: 'import-cirklon', label: 'Import Cirklon (.CKS)...' },
     { id: 'export', label: 'Export JSON...' },
+    { id: 'export-cirklon', label: 'Export Cirklon (.CKS)...' },
     { id: 'separator-2', separator: true },
     { id: 'template', label: 'Set as Template' },
     { id: 'separator-3', separator: true },
@@ -400,6 +437,9 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
         case 'export':
           handleExport();
           break;
+        case 'export-cirklon':
+          handleExportCirklon();
+          break;
         case 'template':
           handleSetAsTemplate();
           break;
@@ -408,7 +448,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           break;
       }
     },
-    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleImportCirklon, handleExport, handleSetAsTemplate, handleDelete]
+    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleImportCirklon, handleExport, handleExportCirklon, handleSetAsTemplate, handleDelete]
   );
 
   return (
@@ -446,6 +486,14 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           mode="delete"
           onSelect={handleDeleteConfirm}
           onClose={() => setShowDeleteDialog(false)}
+        />
+      )}
+
+      {showExportCirklonDialog && (
+        <CirklonExportDialog
+          isOpen={showExportCirklonDialog}
+          onClose={() => setShowExportCirklonDialog(false)}
+          onExport={handleExportCirklonConfirm}
         />
       )}
     </>
