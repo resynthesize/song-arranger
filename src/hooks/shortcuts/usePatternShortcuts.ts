@@ -14,6 +14,8 @@ import {
   trimPatternStart,
   trimPatternEnd,
   addPattern,
+  setPatternMuted,
+  setPatternType,
 } from '@/store/slices/patternsSlice';
 import { selectPattern, clearSelection, selectAllPatterns } from '@/store/slices/selectionSlice';
 import { selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
@@ -44,6 +46,8 @@ export interface ClipShortcutHandlers {
   addPattern: () => void;
   edit: () => void;
   changeColor: () => void;
+  toggleMute: () => void;
+  togglePatternType: () => void;
 }
 
 /**
@@ -181,6 +185,35 @@ export const usePatternShortcuts = (): ClipShortcutHandlers => {
     logger.log('Change color (not yet implemented)');
   }, []);
 
+  const handleToggleMute = useCallback(() => {
+    if (selectedPatternIds.length > 0) {
+      // Toggle mute state for all selected patterns
+      selectedPatternIds.forEach((patternId) => {
+        const pattern = patterns.find((p) => p.id === patternId);
+        if (pattern) {
+          // Toggle: if currently muted, unmute; if unmuted (or undefined), mute
+          const newMutedState = !pattern.muted;
+          dispatch(setPatternMuted({ patternId, muted: newMutedState }));
+        }
+      });
+    }
+  }, [dispatch, selectedPatternIds, patterns]);
+
+  const handleTogglePatternType = useCallback(() => {
+    if (selectedPatternIds.length > 0) {
+      // Toggle pattern type for all selected patterns
+      selectedPatternIds.forEach((patternId) => {
+        const pattern = patterns.find((p) => p.id === patternId);
+        if (pattern) {
+          // Toggle: P3 -> CK, CK -> P3, undefined -> P3
+          const currentType = pattern.patternType || 'P3';
+          const newType = currentType === 'P3' ? 'CK' : 'P3';
+          dispatch(setPatternType({ patternId, patternType: newType }));
+        }
+      });
+    }
+  }, [dispatch, selectedPatternIds, patterns]);
+
   return {
     delete: handleDelete,
     duplicate: handleDuplicate,
@@ -203,5 +236,7 @@ export const usePatternShortcuts = (): ClipShortcutHandlers => {
     addPattern: handleAddPattern,
     edit: handleEdit,
     changeColor: handleChangeColor,
+    toggleMute: handleToggleMute,
+    togglePatternType: handleTogglePatternType,
   };
 };

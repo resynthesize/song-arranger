@@ -16,6 +16,8 @@ export type KeyboardAction =
   | 'split'
   | 'join'
   | 'addClip'
+  | 'toggleMute'
+  | 'togglePatternType'
   // Lane operations
   | 'addLane'
   | 'deleteLane'
@@ -124,6 +126,16 @@ const ALL_SHORTCUTS: KeyboardShortcut[] = [
     key: 'c',
     action: 'changeColor',
     description: 'Change clip color'
+  },
+  {
+    key: 'm',
+    action: 'toggleMute',
+    description: 'Toggle mute on selected patterns'
+  },
+  {
+    key: 't',
+    action: 'togglePatternType',
+    description: 'Toggle pattern type (P3 ↔ CK)'
   },
   {
     key: 's',
@@ -488,7 +500,8 @@ export const getShortcutsForContext = (
       'split', 'join', 'cycleForward', 'cycleBackward',
       'setDuration1', 'setDuration2', 'setDuration3', 'setDuration4',
       'setDuration5', 'setDuration6', 'setDuration7', 'setDuration8',
-      'setDuration9', 'trimStart', 'trimEnd', 'frameSelection'
+      'setDuration9', 'trimStart', 'trimEnd', 'frameSelection',
+      'toggleMute', 'togglePatternType'
     ];
     shortcuts.push(...ALL_SHORTCUTS.filter(s => clipActions.includes(s.action)));
   }
