@@ -1,15 +1,15 @@
 /**
- * Song Arranger - Clip Component Styles
- * Terminal-styled clip with drag and resize functionality
+ * Song Arranger - Pattern Component Styles
+ * Terminal-styled pattern with drag and resize functionality
  */
 
-.clip {
+.pattern {
   position: absolute;
-  /* Stretch to fill lane height with minimal margin (works even at small zoom) */
+  /* Stretch to fill track height with minimal margin (works even at small zoom) */
   top: 2px;
   bottom: 2px;
   background: var(--color-bg-elevated);
-  border: var(--border-width-base) solid var(--clip-color, var(--color-secondary));
+  border: var(--border-width-base) solid var(--pattern-color, var(--color-secondary));
   cursor: pointer;
   user-select: none;
   /* Smooth transitions for all state changes */
@@ -22,28 +22,28 @@
   align-items: stretch;
 }
 
-/* Background tint using the lane color */
-.clip[style*="--clip-color"]::before {
+/* Background tint using the track color */
+.pattern[style*="--pattern-color"]::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--clip-color);
+  background: var(--pattern-color);
   opacity: 0.1;
   pointer-events: none;
 }
 
 /* Hover state - brighten slightly with glow increase */
-.clip:hover {
-  border-color: var(--clip-color, var(--color-primary));
+.pattern:hover {
+  border-color: var(--pattern-color, var(--color-primary));
   background: #001a00; /* Slightly brighter than bg-elevated */
   box-shadow: var(--phosphor-glow-md);
 }
 
 /* Selected state with phosphor persistence fade-in and pulsing */
-.clip--selected {
+.pattern--selected {
   border-color: var(--color-highlight);
   border-width: 2px;
   box-shadow:
@@ -59,12 +59,12 @@
     border-color 250ms ease-out,
     background-color 250ms ease-out,
     border-width 250ms ease-out;
-  animation: clip-select-glow 300ms ease-out, clip-pulse 2s ease-in-out infinite;
+  animation: pattern-select-glow 300ms ease-out, pattern-pulse 2s ease-in-out infinite;
   animation-delay: 0s, 300ms; /* Start pulse after initial glow completes */
 }
 
 /* Phosphor persistence fade-in animation for selection */
-@keyframes clip-select-glow {
+@keyframes pattern-select-glow {
   0% {
     box-shadow: 0 0 2px rgba(0, 255, 0, 0.5);
     border-color: var(--color-secondary);
@@ -83,8 +83,8 @@
   }
 }
 
-/* Stronger pulse animation for selected clips */
-@keyframes clip-pulse {
+/* Stronger pulse animation for selected patterns */
+@keyframes pattern-pulse {
   0%, 100% {
     box-shadow:
       0 0 4px rgba(0, 255, 0, 1),
@@ -106,8 +106,8 @@
   }
 }
 
-/* Hover on selected clips - enhance glow further */
-.clip--selected:hover {
+/* Hover on selected patterns - enhance glow further */
+.pattern--selected:hover {
   box-shadow:
     0 0 6px rgba(102, 255, 102, 1),
     0 0 14px rgba(102, 255, 102, 0.95),
@@ -117,24 +117,24 @@
   border-color: #ffffff;
 }
 
-.clip--selected .clip__corner {
+.pattern--selected .pattern__corner {
   color: var(--color-highlight);
   text-shadow: var(--phosphor-glow-lg);
 }
 
-.clip--dragging,
-.clip--resizing {
+.pattern--dragging,
+.pattern--resizing {
   opacity: 0.8;
   cursor: grabbing;
-  z-index: var(--z-tooltip); /* Ensure dragging clips are above everything */
+  z-index: var(--z-tooltip); /* Ensure dragging patterns are above everything */
 }
 
-.clip--copying {
+.pattern--copying {
   box-shadow: var(--phosphor-glow-lg);
-  animation: clip-copying-pulse 400ms ease-in-out infinite;
+  animation: pattern-copying-pulse 400ms ease-in-out infinite;
 }
 
-@keyframes clip-copying-pulse {
+@keyframes pattern-copying-pulse {
   0%, 100% {
     border-color: var(--color-highlight);
   }
@@ -143,8 +143,8 @@
   }
 }
 
-/* Clip Content */
-.clip__content {
+/* Pattern Content */
+.pattern__content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -155,12 +155,12 @@
   overflow: hidden;
 }
 
-.clip--dragging .clip__content {
+.pattern--dragging .pattern__content {
   cursor: grabbing;
 }
 
 /* ASCII Corner Characters */
-.clip__corners {
+.pattern__corners {
   display: flex;
   justify-content: space-between;
   font-family: var(--font-primary);
@@ -169,15 +169,15 @@
   line-height: 1;
 }
 
-.clip--selected .clip__corners {
+.pattern--selected .pattern__corners {
   color: var(--color-highlight);
 }
 
-.clip__corners--bottom {
+.pattern__corners--bottom {
   margin-top: auto;
 }
 
-.clip__corner {
+.pattern__corner {
   display: inline-block;
   pointer-events: none;
   transition:
@@ -185,8 +185,8 @@
     text-shadow var(--transition-base);
 }
 
-/* Clip Label */
-.clip__label {
+/* Pattern Label */
+.pattern__label {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -204,13 +204,13 @@
     text-shadow var(--transition-base);
 }
 
-.clip--selected .clip__label {
+.pattern--selected .pattern__label {
   color: var(--color-highlight);
   text-shadow: var(--phosphor-glow-sm);
 }
 
-/* Clip Label Input */
-.clip__label-input {
+/* Pattern Label Input */
+.pattern__label-input {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -226,15 +226,15 @@
   z-index: 10;
 }
 
-.clip__label-input:focus {
+.pattern__label-input:focus {
   outline: none;
   border-color: var(--color-highlight);
   box-shadow: var(--phosphor-glow-sm);
 }
 
 /* Resize Handles */
-.clip__handle {
-  /* Dynamic width: larger clips get wider handles, small clips get minimal handles */
+.pattern__handle {
+  /* Dynamic width: larger patterns get wider handles, small patterns get minimal handles */
   width: min(16px, max(4px, 20%));
   cursor: ew-resize;
   background: transparent;
@@ -246,7 +246,7 @@
 }
 
 /* Extended hit area using pseudo-element for better grab at all sizes */
-.clip__handle::before {
+.pattern__handle::before {
   content: '';
   position: absolute;
   top: -4px;
@@ -256,33 +256,33 @@
   cursor: inherit;
 }
 
-.clip__handle--left::before {
+.pattern__handle--left::before {
   left: -8px;
   right: 0;
 }
 
-.clip__handle--right::before {
+.pattern__handle--right::before {
   left: 0;
   right: -8px;
 }
 
-.clip__handle:hover {
+.pattern__handle:hover {
   background: var(--color-primary);
   opacity: 0.5;
 }
 
-.clip__handle--left {
+.pattern__handle--left {
   left: 0;
   cursor: w-resize;
 }
 
-.clip__handle--right {
+.pattern__handle--right {
   right: 0;
   cursor: e-resize;
 }
 
-/* Phosphor burn-in animation for newly created clips */
-@keyframes clip-burn-in {
+/* Phosphor burn-in animation for newly created patterns */
+@keyframes pattern-burn-in {
   0% {
     opacity: 0;
     box-shadow: var(--phosphor-glow-xl);
@@ -302,31 +302,31 @@
   }
 }
 
-.clip--new {
-  animation: clip-burn-in 400ms ease-out;
+.pattern--new {
+  animation: pattern-burn-in 400ms ease-out;
 }
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  .clip,
-  .clip--selected,
-  .clip__handle {
+  .pattern,
+  .pattern--selected,
+  .pattern__handle {
     transition: none;
     animation: none;
   }
 
-  .clip--new {
+  .pattern--new {
     animation: none;
     opacity: 1;
   }
 
-  .clip--selected {
+  .pattern--selected {
     /* Keep selection visible but remove animations */
     animation: none;
     box-shadow: var(--box-glow-xl);
   }
 
-  @keyframes clip-select-glow {
+  @keyframes pattern-select-glow {
     0%, 100% {
       box-shadow: var(--box-glow-lg);
       border-color: var(--color-highlight);

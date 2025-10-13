@@ -3,11 +3,11 @@
 export { TerminalPanel } from './TerminalPanel';
 export type { TerminalPanelProps } from './TerminalPanel';
 
-export { LaneHeader } from './LaneHeader';
-export type { LaneHeaderProps } from './LaneHeader';
+export { TrackHeader } from './TrackHeader';
+export type { TrackHeaderProps } from './TrackHeader';
 
-export { ClipHandle } from './ClipHandle';
-export type { ClipHandleProps } from './ClipHandle';
+export { PatternHandle } from './PatternHandle';
+export type { PatternHandleProps } from './PatternHandle';
 
 export { RulerTick } from './RulerTick';
 export type { RulerTickProps } from './RulerTick';

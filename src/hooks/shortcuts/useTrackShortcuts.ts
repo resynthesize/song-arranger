@@ -1,11 +1,11 @@
 /**
- * Song Arranger - Lane Shortcuts Hook
- * Handles keyboard shortcuts for lane manipulation
+ * Song Arranger - Track Shortcuts Hook
+ * Handles keyboard shortcuts for track manipulation
  */
 
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { addLane, removeLane, moveLaneUp, moveLaneDown, setMovingLane, clearMovingLane } from '@/store/slices/lanesSlice';
+import { addLane, removeLane, moveLaneUp, moveLaneDown, setMovingLane, clearMovingTrack } from '@/store/slices/tracksSlice';
 import { logger } from '@/utils/debug';
 
 export interface LaneShortcutHandlers {
@@ -16,17 +16,17 @@ export interface LaneShortcutHandlers {
 }
 
 /**
- * Hook for lane manipulation keyboard shortcuts
+ * Hook for track manipulation keyboard shortcuts
  */
-export const useLaneShortcuts = (): LaneShortcutHandlers => {
+export const useTrackShortcuts = (): LaneShortcutHandlers => {
   const dispatch = useAppDispatch();
   const currentLaneId = useAppSelector((state) => state.selection.currentLaneId);
 
-  const handleAddLane = useCallback(() => {
+  const handleAddTrack = useCallback(() => {
     dispatch(addLane({}));
   }, [dispatch]);
 
-  const handleDeleteLane = useCallback(() => {
+  const handleDeleteTrack = useCallback(() => {
     if (currentLaneId) {
       dispatch(removeLane(currentLaneId));
     }
@@ -42,7 +42,7 @@ export const useLaneShortcuts = (): LaneShortcutHandlers => {
         dispatch(clearMovingLane());
       }, 400);
     } else {
-      logger.log('moveLaneUp: No current lane ID');
+      logger.log('moveLaneUp: No current track ID');
     }
   }, [dispatch, currentLaneId]);
 
@@ -56,7 +56,7 @@ export const useLaneShortcuts = (): LaneShortcutHandlers => {
         dispatch(clearMovingLane());
       }, 400);
     } else {
-      logger.log('moveLaneDown: No current lane ID');
+      logger.log('moveLaneDown: No current track ID');
     }
   }, [dispatch, currentLaneId]);
 

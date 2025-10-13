@@ -1,6 +1,6 @@
 /**
- * Song Arranger - useDragToCreateClip Hook
- * Custom hook for drag-to-create clip functionality
+ * Song Arranger - useDragToCreatePattern Hook
+ * Custom hook for drag-to-create pattern functionality
  */
 
 import { useState, useEffect, useRef, MouseEvent as ReactMouseEvent } from 'react';
@@ -23,28 +23,28 @@ interface GhostClipData {
   widthPx: number;
 }
 
-interface UseDragToCreateClipOptions {
+interface UseDragToCreatePatternOptions {
   viewport: ViewportState;
   snapValue: number;
-  onCreateClip: (position: Position, duration?: Duration) => void;
+  onCreatePattern: (position: Position, duration?: Duration) => void;
   containerRef: React.RefObject<HTMLDivElement>;
 }
 
-interface UseDragToCreateClipResult {
+interface UseDragToCreatePatternResult {
   handleMouseDown: (e: ReactMouseEvent<HTMLDivElement>) => void;
-  ghostClip: GhostClipData | null;
+  ghostPattern: GhostClipData | null;
 }
 
 /**
- * Custom hook for drag-to-create clip functionality
- * Handles double-click detection, drag state, and ghost clip preview
+ * Custom hook for drag-to-create pattern functionality
+ * Handles double-click detection, drag state, and ghost pattern preview
  */
-export function useDragToCreateClip({
+export function useDragToCreatePattern({
   viewport,
   snapValue,
-  onCreateClip,
+  onCreatePattern,
   containerRef,
-}: UseDragToCreateClipOptions): UseDragToCreateClipResult {
+}: UseDragToCreatePatternOptions): UseDragToCreatePatternResult {
   const [dragCreateState, setDragCreateState] = useState<DragCreateState | null>(null);
 
   // Track click timing for double-click detection
@@ -76,11 +76,11 @@ export function useDragToCreateClip({
 
       const rect = containerRef.current.getBoundingClientRect();
 
-      // Check if mouse is still within lane boundaries vertically
+      // Check if mouse is still within track boundaries vertically
       const mouseY = e.clientY;
       const laneTop = rect.top;
       const laneBottom = rect.bottom;
-      const isInsideLane = mouseY >= laneTop && mouseY <= laneBottom;
+      const isInsideTrack = mouseY >= laneTop && mouseY <= laneBottom;
 
       if (!isInsideLane) {
         // Cancel creation if dragged outside lane
@@ -101,7 +101,7 @@ export function useDragToCreateClip({
       let duration: Duration;
 
       if (Math.abs(rawDuration) < 0.01) {
-        // Quick click without drag - create default clip at start position
+        // Quick click without drag - create default pattern at start position
         clipPosition = snapToGridFloor(startPos, snapValue);
         duration = DEFAULT_CLIP_DURATION;
       } else if (rawDuration >= 0) {
@@ -119,7 +119,7 @@ export function useDragToCreateClip({
       }
 
       // Create the clip
-      onCreateClip(clipPosition, duration);
+      onCreatePattern(clipPosition, duration);
 
       // Clear drag state
       setDragCreateState(null);
@@ -132,7 +132,7 @@ export function useDragToCreateClip({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [dragCreateState, viewport, snapValue, onCreateClip, containerRef]);
+  }, [dragCreateState, viewport, snapValue, onCreatePattern, containerRef]);
 
   const handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
     // Only handle left mouse button
@@ -176,8 +176,8 @@ export function useDragToCreateClip({
     }
   };
 
-  // Calculate ghost clip data if dragging
-  const ghostClip: GhostClipData | null = dragCreateState ? (() => {
+  // Calculate ghost pattern data if dragging
+  const ghostPattern: GhostClipData | null = dragCreateState ? (() => {
     const startPos = dragCreateState.startPositionBeats;
     const endPos = dragCreateState.currentPositionBeats;
 
@@ -216,6 +216,6 @@ export function useDragToCreateClip({
 
   return {
     handleMouseDown,
-    ghostClip,
+    ghostPattern,
   };
 }

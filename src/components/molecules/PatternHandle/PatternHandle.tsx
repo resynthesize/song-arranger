@@ -1,27 +1,27 @@
 /**
- * ClipHandle Molecule
+ * PatternHandle Molecule
  * Resize handle for clip edges (left/right)
  */
 
 import { MouseEvent } from 'react';
 import type { ID } from '@/types';
-import './ClipHandle.css';
+import './PatternHandle.css';
 
-export interface ClipHandleProps {
-  clipId: ID;
+export interface PatternHandleProps {
+  patternId: ID;
   edge: 'left' | 'right';
   onResizeStart: (edge: 'left' | 'right') => (e: MouseEvent) => void;
 }
 
-export const ClipHandle: React.FC<ClipHandleProps> = ({
-  clipId,
+export const PatternHandle: React.FC<PatternHandleProps> = ({
+  patternId,
   edge,
   onResizeStart,
 }) => {
   return (
     <div
       className={`clip-handle clip-handle--${edge}`}
-      data-testid={`clip-${clipId}-handle-${edge}`}
+      data-testid={`clip-${patternId}-handle-${edge}`}
       onMouseDown={onResizeStart(edge)}
     />
   );

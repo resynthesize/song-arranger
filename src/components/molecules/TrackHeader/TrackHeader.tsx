@@ -1,35 +1,35 @@
 /**
- * LaneHeader Molecule
+ * TrackHeader Molecule
  * Lane header component with current indicator, color swatch, and name editing
  */
 
 import { useRef, useEffect, KeyboardEvent } from 'react';
 import { ColorSwatch } from '../ColorSwatch';
 import type { ID } from '@/types';
-import './LaneHeader.css';
+import './TrackHeader.css';
 
-export interface LaneHeaderProps {
+export interface TrackHeaderProps {
   id: ID;
   name: string;
   color: string;
   isCurrent: boolean;
   isEditing: boolean;
   headerPadding: number;
-  onLaneSelect?: (laneId: ID) => void;
-  onNameChange: (laneId: ID, newName: string) => void;
-  onStartEditing: (laneId: ID) => void;
+  onTrackSelect?: (trackId: ID) => void;
+  onNameChange: (trackId: ID, newName: string) => void;
+  onStartEditing: (trackId: ID) => void;
   onStopEditing: () => void;
   onColorSwatchClick: (e: React.MouseEvent) => void;
 }
 
-export const LaneHeader: React.FC<LaneHeaderProps> = ({
+export const TrackHeader: React.FC<TrackHeaderProps> = ({
   id,
   name,
   color,
   isCurrent,
   isEditing,
   headerPadding,
-  onLaneSelect,
+  onTrackSelect,
   onNameChange,
   onStartEditing,
   onStopEditing,
@@ -71,7 +71,7 @@ export const LaneHeader: React.FC<LaneHeaderProps> = ({
     <div
       className="lane-header"
       style={{ padding: `${headerPadding}px` }}
-      onClick={() => onLaneSelect?.(id)}
+      onClick={() => onTrackSelect?.(id)}
       data-testid={`lane-${id}-header`}
     >
       {isCurrent && <span className="lane-header__current-indicator">&gt;</span>}

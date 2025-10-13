@@ -3,9 +3,9 @@
 // Timeline organisms
 export { default as Timeline } from './Timeline/Timeline';
 
-export { default as Lane } from './Lane/Lane';
+export { Track } from './Track';
 
-export { default as Clip } from './Clip/Clip';
+export { Pattern } from './Pattern';
 
 export { default as Ruler } from './Ruler/Ruler';
 
