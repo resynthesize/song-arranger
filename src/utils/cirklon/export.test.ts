@@ -6,7 +6,6 @@
 import { describe, it, expect } from '@jest/globals';
 import { exportToCirklon, type ExportOptions } from './export';
 import type { Track, Pattern } from '@/types';
-import type { CirklonSongData } from './types';
 
 describe('Cirklon Export', () => {
   const defaultOptions: ExportOptions = {
@@ -24,9 +23,11 @@ describe('Cirklon Export', () => {
       const result = exportToCirklon(tracks, patterns, defaultOptions);
 
       expect(result.song_data).toBeDefined();
-      expect(result.song_data['Test Song']).toBeDefined();
-      expect(result.song_data['Test Song'].patterns).toEqual({});
-      expect(result.song_data['Test Song'].scenes).toEqual({});
+      const song = result.song_data['Test Song'];
+      expect(song).toBeDefined();
+      if (!song) return;
+      expect(song.patterns).toEqual({});
+      expect(song.scenes).toEqual({});
     });
 
     it('should export single track with single pattern', () => {
@@ -56,12 +57,13 @@ describe('Cirklon Export', () => {
       expect(Object.keys(song.patterns)).toHaveLength(1);
       const patternName = Object.keys(song.patterns)[0];
       expect(patternName).toBeDefined();
-      if (patternName) {
-        expect(song.patterns[patternName].type).toBe('P3');
-        expect(song.patterns[patternName].bar_count).toBe(8);
-        expect(song.patterns[patternName].creator_track).toBe(1);
-        expect(song.patterns[patternName].saved).toBe(false);
-      }
+      if (!patternName) return;
+      const pattern = song.patterns[patternName];
+      if (!pattern) return;
+      expect(pattern.type).toBe('P3');
+      expect(pattern.bar_count).toBe(8);
+      expect(pattern.creator_track).toBe(1);
+      expect(pattern.saved).toBe(false);
 
       // Check scenes
       expect(Object.keys(song.scenes)).toHaveLength(1);
@@ -428,9 +430,10 @@ describe('Cirklon Export', () => {
 
       const patternName = Object.keys(song.patterns)[0];
       expect(patternName).toBeDefined();
-      if (patternName) {
-        expect(song.patterns[patternName].type).toBe('P3');
-      }
+      if (!patternName) return;
+      const pattern = song.patterns[patternName];
+      if (!pattern) return;
+      expect(pattern.type).toBe('P3');
     });
 
     it('should use track ID to determine track number', () => {

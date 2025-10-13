@@ -5,7 +5,7 @@
 
 .minimap {
   position: fixed;
-  bottom: var(--spacing-lg);
+  bottom: calc(var(--footer-height) + 36px + var(--spacing-md)); /* footer + status line + gap */
   right: var(--spacing-lg);
   background: var(--color-bg);
   border: var(--border-width-base) solid var(--color-secondary);

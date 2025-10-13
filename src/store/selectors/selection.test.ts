@@ -38,6 +38,7 @@ const createMockState = (selectedIds: string[] = [], currentTrackId: string | nu
     },
     quickInput: { isOpen: false, command: null },
     commandPalette: { isOpen: false },
+    status: { currentMessage: null },
   } as RootState;
 };
 

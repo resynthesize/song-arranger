@@ -3,7 +3,7 @@
  * Provides an overview of the entire arrangement with navigation
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import type { ViewportState, Track, Pattern } from '@/types';
 import {
   MINIMAP_EMBEDDED_HEIGHT,
@@ -43,6 +43,17 @@ const Minimap = ({
   const [dragStartOffset, setDragStartOffset] = useState(0);
   const [containerWidth, setContainerWidth] = useState(MINIMAP_EMBEDDED_MIN_WIDTH);
 
+  // Track clip and lane IDs to detect real data changes (not just array reference changes)
+  const clipsSignature = useMemo(() =>
+    clips.map(c => `${c.id}-${c.position}-${c.duration}`).join('|'),
+    [clips]
+  );
+
+  const lanesSignature = useMemo(() =>
+    lanes.map(l => `${l.id}-${l.color}`).join('|'),
+    [lanes]
+  );
+
   // Update container width on resize (for embedded mode)
   useEffect(() => {
     if (!embedded || !containerRef.current) return;
@@ -71,31 +82,54 @@ const Minimap = ({
     };
   }, [embedded]);
 
-  // Calculate minimap dimensions based on mode
-  const minimapWidth = embedded
-    ? Math.max(MINIMAP_EMBEDDED_MIN_WIDTH, containerWidth)
-    : MINIMAP_OVERLAY_WIDTH;
+  // Memoize computed dimensions to prevent unnecessary redraws
+  const minimapWidth = useMemo(() =>
+    embedded
+      ? Math.max(MINIMAP_EMBEDDED_MIN_WIDTH, containerWidth)
+      : MINIMAP_OVERLAY_WIDTH,
+    [embedded, containerWidth]
+  );
 
-  const minimapHeight = embedded
-    ? MINIMAP_EMBEDDED_HEIGHT
-    : lanes.length * MINIMAP_LANE_HEIGHT + MINIMAP_PADDING * 2;
+  const minimapHeight = useMemo(() =>
+    embedded
+      ? MINIMAP_EMBEDDED_HEIGHT
+      : lanes.length * MINIMAP_LANE_HEIGHT + MINIMAP_PADDING * 2,
+    [embedded, lanes.length]
+  );
 
-  const padding = embedded ? MINIMAP_EMBEDDED_PADDING : MINIMAP_PADDING;
+  const padding = useMemo(() =>
+    embedded ? MINIMAP_EMBEDDED_PADDING : MINIMAP_PADDING,
+    [embedded]
+  );
 
-  // Calculate lane height dynamically for embedded mode to fit all lanes
-  const laneHeight = embedded
-    ? Math.max(2, (MINIMAP_EMBEDDED_HEIGHT - MINIMAP_EMBEDDED_PADDING * 2) / Math.max(1, lanes.length))
-    : MINIMAP_LANE_HEIGHT;
+  const laneHeight = useMemo(() =>
+    embedded
+      ? Math.max(2, (MINIMAP_EMBEDDED_HEIGHT - MINIMAP_EMBEDDED_PADDING * 2) / Math.max(1, lanes.length))
+      : MINIMAP_LANE_HEIGHT,
+    [embedded, lanes.length]
+  );
 
-  const scale = minimapWidth / timelineLength;
+  const scale = useMemo(() =>
+    minimapWidth / timelineLength,
+    [minimapWidth, timelineLength]
+  );
 
   // Render the minimap canvas
+  // NOTE: viewport is intentionally NOT in dependencies - the viewport overlay
+  // is positioned via CSS and doesn't require redrawing the canvas
+  // Uses data signatures instead of array references to avoid unnecessary redraws
   useEffect(() => {
     if (!visible || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Create lane lookup map locally to avoid reference-based dependency issues
+    const laneIndexMap = new Map<string, number>();
+    lanes.forEach((lane, index) => {
+      laneIndexMap.set(lane.id, index);
+    });
 
     // Set canvas size
     canvas.width = minimapWidth;
@@ -107,8 +141,8 @@ const Minimap = ({
 
     // Draw clips
     clips.forEach((clip) => {
-      const laneIndex = lanes.findIndex((lane) => lane.id === clip.trackId);
-      if (laneIndex === -1) return;
+      const laneIndex = laneIndexMap.get(clip.trackId);
+      if (laneIndex === undefined) return;
 
       const lane = lanes[laneIndex];
       const x = padding + clip.position * scale;
@@ -140,7 +174,11 @@ const Minimap = ({
         ctx.stroke();
       }
     }
-  }, [visible, lanes, clips, timelineLength, minimapHeight, minimapWidth, padding, laneHeight, scale, embedded]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, clipsSignature, lanesSignature, timelineLength, minimapHeight, minimapWidth, padding, laneHeight, scale, embedded]);
+  // Note: lanes and clips are intentionally omitted from deps but used in the effect body
+  // We rely on clipsSignature and lanesSignature to detect data changes without triggering
+  // on array reference changes. This prevents unnecessary redraws during scrolling.
 
   // Handle canvas click to jump to position
   const handleCanvasClick = useCallback(
@@ -174,19 +212,33 @@ const Minimap = ({
     [viewport.offsetBeats]
   );
 
-  // Handle viewport drag
+  // Handle viewport drag with requestAnimationFrame throttling for better performance
   useEffect(() => {
     if (!isDragging) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - dragStartX;
-      const deltaBeats = deltaX / scale;
-      const newOffset = Math.max(0, dragStartOffset + deltaBeats);
+    let rafId: number | null = null;
+    let lastClientX = dragStartX;
 
-      onViewportChange(newOffset);
+    const handleMouseMove = (e: MouseEvent) => {
+      lastClientX = e.clientX;
+
+      // Only schedule a new frame if one isn't already scheduled
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          const deltaX = lastClientX - dragStartX;
+          const deltaBeats = deltaX / scale;
+          const newOffset = Math.max(0, dragStartOffset + deltaBeats);
+
+          onViewportChange(newOffset);
+          rafId = null;
+        });
+      }
     };
 
     const handleMouseUp = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
       setIsDragging(false);
     };
 
@@ -194,6 +246,9 @@ const Minimap = ({
     document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -204,7 +259,28 @@ const Minimap = ({
   const viewportLeft = padding + viewport.offsetBeats * scale;
   const viewportWidth = viewportWidthBeats * scale;
 
+  // Debug logging for minimap positioning
+  useEffect(() => {
+    if (visible && containerRef.current && !embedded) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(containerRef.current);
+      console.log('[Minimap] Positioning info:', {
+        bottom: computedStyle.bottom,
+        right: computedStyle.right,
+        position: computedStyle.position,
+        rect: {
+          top: rect.top,
+          bottom: rect.bottom,
+          height: rect.height,
+          width: rect.width
+        },
+        windowHeight: window.innerHeight
+      });
+    }
+  }, [visible, embedded, minimapHeight, minimapWidth]);
+
   if (!visible) {
+    console.log('[Minimap] Not rendering - not visible');
     return null;
   }
 

@@ -149,7 +149,7 @@ describe('Minimap', () => {
   });
 
   describe('Drag Viewport', () => {
-    it('should allow dragging viewport rectangle', () => {
+    it('should allow dragging viewport rectangle', (done) => {
       const onViewportChange = jest.fn();
       render(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
 
@@ -161,13 +161,17 @@ describe('Minimap', () => {
       // Move mouse
       fireEvent.mouseMove(document, { clientX: 150, clientY: 50 });
 
-      // End drag
-      fireEvent.mouseUp(document);
+      // Wait for requestAnimationFrame to execute
+      requestAnimationFrame(() => {
+        // End drag
+        fireEvent.mouseUp(document);
 
-      expect(onViewportChange).toHaveBeenCalled();
+        expect(onViewportChange).toHaveBeenCalled();
+        done();
+      });
     });
 
-    it('should update viewport position during drag', () => {
+    it('should update viewport position during drag', (done) => {
       const onViewportChange = jest.fn();
       render(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
 
@@ -176,10 +180,15 @@ describe('Minimap', () => {
       // Drag to the right
       fireEvent.mouseDown(viewportRect, { clientX: 100, clientY: 50 });
       fireEvent.mouseMove(document, { clientX: 200, clientY: 50 });
-      fireEvent.mouseUp(document);
 
-      // Should have been called multiple times or at least once with a new position
-      expect(onViewportChange).toHaveBeenCalled();
+      // Wait for requestAnimationFrame to execute
+      requestAnimationFrame(() => {
+        fireEvent.mouseUp(document);
+
+        // Should have been called at least once with a new position
+        expect(onViewportChange).toHaveBeenCalled();
+        done();
+      });
     });
   });
 
