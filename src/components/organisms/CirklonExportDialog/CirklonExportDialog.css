@@ -1,0 +1,141 @@
+/**
+ * Song Arranger - CirklonExportDialog Styles
+ * Terminal-styled Cirklon export dialog
+ */
+
+.cirklon-export-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 10000;
+  backdrop-filter: blur(2px);
+}
+
+.cirklon-export-dialog__content {
+  min-width: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.cirklon-export-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.cirklon-export-dialog__label {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.cirklon-export-dialog__input,
+.cirklon-export-dialog__select {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-elevated);
+  border: var(--border-width-base) solid var(--color-secondary);
+  color: var(--color-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cirklon-export-dialog__input:focus,
+.cirklon-export-dialog__select:focus {
+  border-color: var(--color-highlight);
+  box-shadow: var(--phosphor-glow-sm);
+}
+
+.cirklon-export-dialog__input::placeholder {
+  color: var(--color-grid);
+}
+
+.cirklon-export-dialog__select {
+  cursor: pointer;
+}
+
+.cirklon-export-dialog__select option {
+  background: var(--color-bg);
+  color: var(--color-primary);
+}
+
+.cirklon-export-dialog__actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}
+
+.cirklon-export-dialog__button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: transparent;
+  border: var(--border-width-base) solid var(--color-secondary);
+  color: var(--color-primary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.cirklon-export-dialog__button:hover:not(:disabled) {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: var(--color-highlight);
+  color: var(--color-highlight);
+  box-shadow: var(--phosphor-glow-sm);
+}
+
+.cirklon-export-dialog__button:active:not(:disabled) {
+  background: rgba(0, 255, 0, 0.2);
+  transform: translateY(1px);
+}
+
+.cirklon-export-dialog__button--primary {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.cirklon-export-dialog__button--secondary {
+  color: var(--color-secondary);
+}
+
+.cirklon-export-dialog__button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: var(--color-grid);
+  color: var(--color-grid);
+}
+
+/* Number input styling */
+.cirklon-export-dialog__input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.cirklon-export-dialog__input[type='number']::-webkit-outer-spin-button,
+.cirklon-export-dialog__input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .cirklon-export-dialog__input,
+  .cirklon-export-dialog__select,
+  .cirklon-export-dialog__button {
+    transition: none;
+  }
+}
