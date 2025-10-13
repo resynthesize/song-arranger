@@ -51,12 +51,12 @@ export function useRectangleSelection({
    * Handle mouse down to start rectangle selection
    */
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    // Only start rectangle selection if clicking on the timeline background (not on clips/lanes)
+    // Only start rectangle selection if clicking on the timeline background (not on patterns/tracks)
     const target = e.target as HTMLElement;
     if (
       !target.classList.contains('timeline__lanes') &&
-      !target.classList.contains('lane__content') &&
-      !target.classList.contains('lane__grid')
+      !target.classList.contains('track__content') &&
+      !target.classList.contains('track__grid')
     ) {
       return;
     }
@@ -111,8 +111,8 @@ export function useRectangleSelection({
       // Do comparison in pixel space to avoid precision loss at low zoom levels
       const selectedIds: ID[] = [];
       clips.forEach((clip) => {
-        // Convert clip beat positions to viewport pixels, then add lane header offset
-        // Clips are positioned inside lane__content, which starts after the lane header
+        // Convert clip beat positions to viewport pixels, then add track header offset
+        // Patterns are positioned inside track__content, which starts after the track header
         const clipStartPx = LANE_HEADER_WIDTH + (clip.position - viewport.offsetBeats) * viewport.zoom;
         const clipEndPx = LANE_HEADER_WIDTH + (clip.position + clip.duration - viewport.offsetBeats) * viewport.zoom;
 

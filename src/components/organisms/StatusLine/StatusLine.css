@@ -1,0 +1,85 @@
+/**
+ * Song Arranger - StatusLine Component Styles
+ * Terminal-styled status line for displaying messages
+ */
+
+.status-line {
+  position: fixed;
+  bottom: var(--footer-height);
+  left: 0;
+  right: 0;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-md);
+  background: var(--color-bg-elevated);
+  border-top: var(--border-width-base) solid var(--color-secondary);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  z-index: var(--z-hud);
+  animation: status-line-slide-up 200ms ease-out;
+}
+
+@keyframes status-line-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.status-line__message {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-line__close {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 var(--spacing-xs);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.status-line__close:hover {
+  color: var(--color-highlight);
+}
+
+/* Status types */
+.status-line--info {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.status-line--success {
+  color: var(--color-highlight);
+  border-color: var(--color-highlight);
+  box-shadow: 0 -1px 4px rgba(0, 255, 0, 0.3);
+}
+
+.status-line--warning {
+  color: #ffff00;
+  border-color: #ffff00;
+  box-shadow: 0 -1px 4px rgba(255, 255, 0, 0.3);
+}
+
+.status-line--error {
+  color: #ff0000;
+  border-color: #ff0000;
+  box-shadow: 0 -1px 4px rgba(255, 0, 0, 0.3);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .status-line {
+    animation: none;
+  }
+}

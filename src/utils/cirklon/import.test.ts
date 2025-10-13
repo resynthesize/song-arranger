@@ -413,5 +413,107 @@ describe('Cirklon Import', () => {
       expect(result.tracks[1]?.name).toBe('Track 7');
       expect(result.tracks[2]?.name).toBe('Track 15');
     });
+
+    it('should exclude workscene from import', () => {
+      const cksData: CirklonSongData = {
+        song_data: {
+          'test song': {
+            patterns: {
+              'Trk1 P1': { type: 'P3', creator_track: 1, saved: true, bar_count: 4 },
+              'Trk2 P1': { type: 'P3', creator_track: 2, saved: true, bar_count: 4 },
+            },
+            scenes: {
+              'workscene': {
+                gbar: 0,
+                length: 8,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P1',
+                  track_2: 'Trk2 P1',
+                },
+              },
+              'scene 1': {
+                gbar: 0,
+                length: 8,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P1',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = importFromCirklon(cksData);
+
+      // Should only have 1 track (from scene 1), not 2 tracks (from workscene)
+      expect(result.tracks).toHaveLength(1);
+      expect(result.tracks[0]?.name).toBe('Track 1');
+
+      // Should only have 1 pattern (from scene 1), not patterns from workscene
+      expect(result.patterns).toHaveLength(1);
+      expect(result.patterns[0]?.label).toBe('Trk1 P1');
+      expect(result.patterns[0]?.position).toBe(0);
+    });
+
+    it('should preserve scene order from file, not sort by gbar', () => {
+      const cksData: CirklonSongData = {
+        song_data: {
+          'order test': {
+            patterns: {
+              'Trk1 P1': { type: 'P3', creator_track: 1, saved: true, bar_count: 4 },
+              'Trk1 P2': { type: 'P3', creator_track: 1, saved: true, bar_count: 4 },
+              'Trk1 P3': { type: 'P3', creator_track: 1, saved: true, bar_count: 4 },
+            },
+            scenes: {
+              // Note: scenes are in file order but gbar values are intentionally out of order
+              'scene 2': {
+                gbar: 16,
+                length: 4,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P2',
+                },
+              },
+              'scene 1': {
+                gbar: 0,
+                length: 4,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P1',
+                },
+              },
+              'scene 3': {
+                gbar: 8,
+                length: 4,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P3',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = importFromCirklon(cksData);
+
+      // Scenes should be processed in file order (scene 2, scene 1, scene 3)
+      // not sorted by gbar (scene 1, scene 3, scene 2)
+      expect(result.patterns).toHaveLength(3);
+
+      // First pattern should be from scene 2 (first in file)
+      expect(result.patterns[0]?.label).toBe('Trk1 P2');
+      expect(result.patterns[0]?.position).toBe(0);
+
+      // Second pattern should be from scene 1 (second in file)
+      expect(result.patterns[1]?.label).toBe('Trk1 P1');
+      expect(result.patterns[1]?.position).toBe(16); // After 4 bars = 16 beats
+
+      // Third pattern should be from scene 3 (third in file)
+      expect(result.patterns[2]?.label).toBe('Trk1 P3');
+      expect(result.patterns[2]?.position).toBe(32); // After 8 bars = 32 beats
+    });
   });
 });

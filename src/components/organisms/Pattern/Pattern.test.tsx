@@ -96,12 +96,6 @@ describe('Pattern', () => {
     expect(screen.getByTestId('pattern-pattern-1-handle-right')).toBeInTheDocument();
   });
 
-  it('should render ASCII corner characters', () => {
-    const { container } = render(<Pattern {...defaultProps} />);
-    const pattern = container.querySelector('.pattern');
-    expect(pattern?.textContent).toMatch(/[┌┐└┘]/);
-  });
-
   it('should scale width based on zoom level', () => {
     const viewport50: ViewportState = { ...defaultViewport, zoom: 50 };
     const { rerender } = render(<Pattern {...defaultProps} viewport={viewport50} />);

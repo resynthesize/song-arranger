@@ -69,29 +69,29 @@ export const TrackHeader: React.FC<TrackHeaderProps> = ({
 
   return (
     <div
-      className="lane-header"
+      className="track-header"
       style={{ padding: `${headerPadding}px` }}
       onClick={() => onTrackSelect?.(id)}
-      data-testid={`lane-${id}-header`}
+      data-testid={`track-${id}-header`}
     >
-      {isCurrent && <span className="lane-header__current-indicator">&gt;</span>}
+      {isCurrent && <span className="track-header__current-indicator">&gt;</span>}
       <ColorSwatch
         color={color}
         onClick={onColorSwatchClick}
-        title="Change lane color"
-        testId={`lane-${id}-color-swatch`}
+        title="Change track color"
+        testId={`track-${id}-color-swatch`}
       />
       {isEditing ? (
         <input
           ref={inputRef}
-          className="lane-header__name-input terminal-input"
+          className="track-header__name-input terminal-input"
           defaultValue={name}
           onKeyDown={handleInputKeyDown}
           onBlur={handleInputBlur}
-          onClick={(e) => e.stopPropagation()} // Don't trigger lane selection while editing
+          onClick={(e) => e.stopPropagation()} // Don't trigger track selection while editing
         />
       ) : (
-        <div className="lane-header__name" onDoubleClick={handleNameDoubleClick}>
+        <div className="track-header__name" onDoubleClick={handleNameDoubleClick}>
           {name}
         </div>
       )}

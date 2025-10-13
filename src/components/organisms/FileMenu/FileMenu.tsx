@@ -15,6 +15,7 @@ import {
 } from '@/store/slices/projectSlice';
 import { setPatterns } from '@/store/slices/patternsSlice';
 import { setTracks } from '@/store/slices/tracksSlice';
+import { setStatus } from '@/store/slices/statusSlice';
 import { selectAllPatterns, selectAllTracks } from '@/store/selectors';
 import {
   saveProject,
@@ -347,14 +348,16 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           // Set tempo
           dispatch({ type: 'timeline/setTempo', payload: importResult.tempo });
 
-          alert(
-            `Successfully imported "${importResult.songName}"\n\n` +
-            `Tracks: ${importResult.tracks.length}\n` +
-            `Patterns: ${importResult.patterns.length}\n` +
-            `Muted patterns: ${importResult.patterns.filter(p => p.muted).length}`
-          );
+          // Show success message in status line
+          dispatch(setStatus({
+            message: `Successfully imported "${importResult.songName}" (${importResult.tracks.length} tracks, ${importResult.patterns.length} patterns)`,
+            type: 'success',
+          }));
         } catch (error) {
-          alert(`Failed to import Cirklon file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          dispatch(setStatus({
+            message: `Failed to import Cirklon file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            type: 'error',
+          }));
         }
       };
 

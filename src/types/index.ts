@@ -29,6 +29,7 @@ export interface Pattern {
   label?: string;
   muted?: boolean;
   patternType?: 'P3' | 'CK';
+  sceneDuration?: Duration; // Duration of the scene this pattern belongs to (for loop visualization)
 }
 
 /**

@@ -55,13 +55,17 @@ function extractTrackNumber(trackKey: string): number | null {
 
 /**
  * Collect all unique track numbers from scenes
+ * Excludes 'workscene' which is a temporary scratch pad in Cirklon
  * @param song Cirklon song
  * @returns Sorted array of unique track numbers
  */
 function collectTrackNumbers(song: CirklonSong): number[] {
   const trackNumbers = new Set<number>();
 
-  Object.values(song.scenes).forEach((scene) => {
+  Object.entries(song.scenes).forEach(([sceneName, scene]) => {
+    if (sceneName === 'workscene') {
+      return; // Skip workscene
+    }
     if (scene.pattern_assignments) {
       Object.keys(scene.pattern_assignments).forEach((trackKey) => {
         const trackNum = extractTrackNumber(trackKey);
@@ -113,14 +117,15 @@ function getTrackColor(trackNum: number): string {
 }
 
 /**
- * Sort scenes by their gbar (global bar) position
+ * Get scenes in their original order from the CKS file
+ * Excludes 'workscene' which is a temporary scratch pad in Cirklon
+ * Note: Scene order is preserved from the file, not sorted by gbar or name
  * @param song Cirklon song
- * @returns Array of [sceneName, scene] tuples sorted by gbar
+ * @returns Array of [sceneName, scene] tuples in original order
  */
-function getSortedScenes(song: CirklonSong): Array<[string, CirklonScene]> {
-  return Object.entries(song.scenes).sort(
-    ([, sceneA], [, sceneB]) => sceneA.gbar - sceneB.gbar
-  );
+function getOrderedScenes(song: CirklonSong): Array<[string, CirklonScene]> {
+  return Object.entries(song.scenes)
+    .filter(([sceneName]) => sceneName !== 'workscene');
 }
 
 /**
@@ -162,11 +167,11 @@ export function importFromCirklon(
   const tracks = Array.from(trackMap.values());
   const patterns: Pattern[] = [];
 
-  // Process scenes in order
-  const sortedScenes = getSortedScenes(song);
+  // Process scenes in their original order from the file
+  const orderedScenes = getOrderedScenes(song);
   let currentPosition = 0;
 
-  sortedScenes.forEach(([, scene]) => {
+  orderedScenes.forEach(([, scene]) => {
     const sceneDuration = calculateSceneDuration(scene, beatsPerBar);
 
     // Process pattern assignments in this scene
@@ -201,6 +206,7 @@ export function importFromCirklon(
           duration: patternDuration,
           label: patternName,
           patternType: patternDef.type,
+          sceneDuration, // Add scene duration for loop visualization
         };
 
         // Only add muted property if true

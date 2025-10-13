@@ -4,7 +4,7 @@
  * Shows only relevant shortcuts for current context
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import type { KeyboardContext } from '@/utils/keyboard';
 import { getShortcutsForContext, formatShortcut } from '@/utils/keyboard';
 import './CommandFooter.css';
@@ -16,6 +16,8 @@ interface CommandFooterProps {
 }
 
 const CommandFooter = ({ hasSelection, selectionCount, isEditing }: CommandFooterProps) => {
+  const footerRef = useRef<HTMLDivElement>(null);
+
   // Get context-appropriate shortcuts, filtered to only implemented ones
   const relevantShortcuts = useMemo(() => {
     const context: KeyboardContext = {
@@ -46,8 +48,26 @@ const CommandFooter = ({ hasSelection, selectionCount, isEditing }: CommandFoote
     return filtered;
   }, [hasSelection, selectionCount, isEditing]);
 
+  // Debug logging for footer dimensions
+  useEffect(() => {
+    if (footerRef.current) {
+      const rect = footerRef.current.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(footerRef.current);
+      console.log('[CommandFooter] Dimensions:', {
+        rect: {
+          top: rect.top,
+          bottom: rect.bottom,
+          height: rect.height
+        },
+        position: computedStyle.position,
+        bottom: computedStyle.bottom,
+        windowHeight: window.innerHeight
+      });
+    }
+  }, [relevantShortcuts.length]);
+
   return (
-    <div className="command-footer" data-testid="command-footer">
+    <div ref={footerRef} className="command-footer" data-testid="command-footer">
       <div className="command-footer__content">
         {relevantShortcuts.map((shortcut, index) => (
           <div key={`${shortcut.action}-${index.toString()}`} className="command-footer__shortcut">

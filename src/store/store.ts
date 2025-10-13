@@ -12,6 +12,7 @@ import crtEffectsReducer from './slices/crtEffectsSlice';
 import projectReducer from './slices/projectSlice';
 import quickInputReducer from './slices/quickInputSlice';
 import commandPaletteReducer from './slices/commandPaletteSlice';
+import statusReducer from './slices/statusSlice';
 
 export const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ export const store = configureStore({
     project: projectReducer,
     quickInput: quickInputReducer,
     commandPalette: commandPaletteReducer,
+    status: statusReducer,
   },
 });
 

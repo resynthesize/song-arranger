@@ -78,6 +78,26 @@ const Timeline = () => {
     });
   }, [verticalZoom, viewport.heightPx, lanes.length]);
 
+  // Debug: log timeline container dimensions
+  useEffect(() => {
+    if (timelineRef.current) {
+      const rect = timelineRef.current.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(timelineRef.current);
+      console.log('[Timeline] Container dimensions:', {
+        rect: {
+          top: rect.top,
+          bottom: rect.bottom,
+          height: rect.height,
+          width: rect.width
+        },
+        position: computedStyle.position,
+        bottom: computedStyle.bottom,
+        windowHeight: window.innerHeight,
+        overflow: computedStyle.overflow
+      });
+    }
+  }, [lanes.length, viewport.heightPx]);
+
   // Debug: log movingLaneId changes
   useEffect(() => {
     logger.log('Timeline: movingLaneId changed to', movingLaneId);

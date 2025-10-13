@@ -17,7 +17,7 @@
 
 /* Ruler header space to align with lane headers */
 .ruler__header {
-  width: 150px;
+  width: 200px;
   flex-shrink: 0;
   background: var(--color-bg);
   border-right: var(--border-width-base) solid var(--color-secondary);

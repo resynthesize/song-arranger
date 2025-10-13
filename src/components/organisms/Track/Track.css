@@ -62,7 +62,7 @@
 
 /* Track Header (Name) */
 .track__header {
-  width: 150px;
+  width: 200px;
   padding: var(--spacing-md); /* Overridden by inline style for dynamic scaling */
   background: var(--color-bg);
   border-right: var(--border-width-base) solid var(--color-secondary);
@@ -149,6 +149,7 @@
   min-width: 0;
   cursor: crosshair;
   overflow: visible !important; /* Allow overflow for dragging patterns between tracks. CSS spec: can't have one axis hidden and other visible, browser converts to auto */
+  clip-path: inset(-9999px -9999px -9999px 0); /* Clip left edge to prevent overflow into track header, allow overflow on top/bottom/right for pattern dragging */
   transition: background-color var(--transition-fast);
 }
 

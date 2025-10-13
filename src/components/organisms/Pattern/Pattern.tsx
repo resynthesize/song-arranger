@@ -17,6 +17,7 @@ interface PatternProps {
   trackId: ID;
   position: Position;
   duration: Duration;
+  sceneDuration?: Duration; // Duration of the scene for loop visualization
   viewport: ViewportState;
   snapValue: number;
   isSelected: boolean;
@@ -44,6 +45,7 @@ const Pattern = ({
   trackId,
   position,
   duration,
+  sceneDuration,
   viewport,
   snapValue,
   isSelected,
@@ -90,7 +92,16 @@ const Pattern = ({
 
   // Convert beats to viewport-relative pixels
   const leftPx = beatsToViewportPx(position, viewport);
-  const widthPx = duration * viewport.zoom;
+
+  // Use sceneDuration for display width if available (for loop visualization)
+  // Otherwise use the actual pattern duration
+  const displayDuration = sceneDuration && sceneDuration > duration ? sceneDuration : duration;
+  const widthPx = displayDuration * viewport.zoom;
+  const originalWidthPx = duration * viewport.zoom;
+
+  // Calculate if pattern loops (sceneDuration > duration)
+  const hasLoopVisualization = sceneDuration !== undefined && sceneDuration > duration;
+  const originalWidthPercentage = hasLoopVisualization ? (duration / sceneDuration) * 100 : 100;
 
   const handleMouseDown = (e: MouseEvent) => {
     if (e.button !== 0) return; // Only left click
@@ -318,27 +329,33 @@ const Pattern = ({
         isResizing ? 'pattern--resizing' : ''
       } ${isCopying ? 'pattern--copying' : ''} ${
         muted ? 'pattern--muted' : ''
-      }`}
+      } ${hasLoopVisualization ? 'pattern--looping' : ''}`}
       style={{
         left: `${leftPx.toString()}px`,
         width: `${widthPx.toString()}px`,
         transform: effectiveVerticalDragDeltaY !== 0 ? `translateY(${effectiveVerticalDragDeltaY}px)` : undefined,
         zIndex: (isDragging || isResizing || effectiveVerticalDragDeltaY !== 0) ? 1000 : undefined,
         ...(color ? { '--pattern-color': color } as React.CSSProperties : {}),
+        ...(hasLoopVisualization ? { '--pattern-original-width-percent': `${originalWidthPercentage}%` } as React.CSSProperties : {}),
       }}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >
+      {hasLoopVisualization && (
+        <div
+          className="pattern__loop-fill"
+          style={{
+            left: `${originalWidthPx}px`,
+            width: `${widthPx - originalWidthPx}px`
+          }}
+        />
+      )}
       <PatternHandle patternId={id} edge="left" onResizeStart={handleResizeStart} />
       <div
         className="pattern__content"
         onMouseDown={handleDragStart}
         onDoubleClick={handleDoubleClick}
       >
-        <div className="pattern__corners">
-          <span className="pattern__corner pattern__corner--tl">┌</span>
-          <span className="pattern__corner pattern__corner--tr">┐</span>
-        </div>
         {showTypeBadge && (
           <div className="pattern__type-badge" data-testid={`pattern-${id}-type-badge`}>
             {patternType}
@@ -363,10 +380,6 @@ const Pattern = ({
             </div>
           )
         )}
-        <div className="pattern__corners pattern__corners--bottom">
-          <span className="pattern__corner pattern__corner--bl">└</span>
-          <span className="pattern__corner pattern__corner--br">┘</span>
-        </div>
       </div>
       <PatternHandle patternId={id} edge="right" onResizeStart={handleResizeStart} />
       {contextMenu && (

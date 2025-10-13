@@ -107,6 +107,7 @@
   /* Z-Index Layers */
   --z-base: 1;
   --z-controls: 10;
+  --z-hud: 15;
   --z-dropdown: 50;
   --z-modal: 100;
   --z-tooltip: 1000;
@@ -140,6 +141,7 @@
   --input-padding-x: var(--spacing-sm);
   --input-padding-y: var(--spacing-xs);
   --panel-padding: var(--spacing-md);
+  --footer-height: 50px;
 
   /* Cursor */
   --cursor-blink-duration: 1000ms;

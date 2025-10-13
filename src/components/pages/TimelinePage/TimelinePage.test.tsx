@@ -14,6 +14,7 @@ import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
 import projectReducer from '@/store/slices/projectSlice';
 import quickInputReducer from '@/store/slices/quickInputSlice';
 import commandPaletteReducer from '@/store/slices/commandPaletteSlice';
+import statusReducer from '@/store/slices/statusSlice';
 
 // Mock storage utility
 jest.mock('@/utils/storage', () => ({
@@ -32,6 +33,7 @@ const createTestStore = () => {
       project: projectReducer,
       quickInput: quickInputReducer,
       commandPalette: commandPaletteReducer,
+      status: statusReducer,
     },
   });
 };

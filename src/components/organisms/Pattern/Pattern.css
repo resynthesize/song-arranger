@@ -12,6 +12,8 @@
   border: var(--border-width-base) solid var(--pattern-color, var(--color-secondary));
   cursor: pointer;
   user-select: none;
+  /* Include borders in width calculation for precise alignment */
+  box-sizing: border-box;
   /* Smooth transitions for all state changes */
   transition:
     border-color var(--transition-base),
@@ -153,6 +155,7 @@
   cursor: grab;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .pattern--dragging .pattern__content {
@@ -199,6 +202,10 @@
   text-overflow: ellipsis;
   max-width: calc(100% - var(--spacing-md));
   pointer-events: none;
+  /* Add solid background for readability on striped patterns */
+  background: var(--color-bg-elevated);
+  padding: 2px 6px;
+  border-radius: 2px;
   transition:
     color var(--transition-base),
     text-shadow var(--transition-base);
@@ -338,6 +345,37 @@
 
 .pattern--new {
   animation: pattern-burn-in 400ms ease-out;
+}
+
+/* Pattern Loop Visualization - Shows the full scene duration with looped portion */
+.pattern__loop-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: var(--color-bg-elevated);
+  /* Diagonal stripes pattern for looped portion - uses track color */
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    color-mix(in srgb, var(--pattern-color, var(--color-secondary)) 15%, transparent) 3px,
+    color-mix(in srgb, var(--pattern-color, var(--color-secondary)) 15%, transparent) 6px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* When pattern is looping, ensure content sits on top */
+.pattern--looping .pattern__content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure handles are visible on looping patterns */
+.pattern--looping .pattern__handle {
+  position: relative;
+  z-index: 2;
 }
 
 /* Respect reduced motion preference */

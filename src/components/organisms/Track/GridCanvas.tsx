@@ -110,7 +110,7 @@ const GridCanvas = ({ viewport, snapValue }: GridCanvasProps) => {
     <div ref={containerRef} style={{ position: 'absolute', inset: 0 }}>
       <canvas
         ref={canvasRef}
-        className="lane__grid"
+        className="track__grid"
         style={{ width: '100%', height: '100%' }}
       />
     </div>

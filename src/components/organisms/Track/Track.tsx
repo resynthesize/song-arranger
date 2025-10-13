@@ -223,6 +223,7 @@ const Track = ({
               trackId={pattern.trackId}
               position={pattern.position}
               duration={pattern.duration}
+              sceneDuration={pattern.sceneDuration}
               viewport={viewport}
               snapValue={snapValue}
               isSelected={selectedPatternIds.includes(pattern.id)}

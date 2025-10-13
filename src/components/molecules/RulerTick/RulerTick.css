@@ -10,6 +10,7 @@
   flex-direction: column;
   align-items: flex-start;
   pointer-events: auto;
+  /* Position bar numbers to the right of their grid lines */
 }
 
 .ruler-tick__bar-number {

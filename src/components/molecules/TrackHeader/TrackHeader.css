@@ -1,9 +1,9 @@
 /**
- * LaneHeader Molecule Styles
- * Extracted from Lane.css
+ * TrackHeader Molecule Styles
+ * Extracted from Track.css
  */
 
-.lane-header {
+.track-header {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -16,7 +16,7 @@
   flex-shrink: 0;
 }
 
-.lane-header__current-indicator {
+.track-header__current-indicator {
   color: var(--color-primary, #00ff00);
   font-weight: bold;
   flex-shrink: 0;
@@ -24,7 +24,7 @@
 
 /* ColorSwatch styles are now handled by the ColorSwatch molecule */
 
-.lane-header__name {
+.track-header__name {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -33,7 +33,7 @@
   cursor: default;
 }
 
-.lane-header__name-input {
+.track-header__name-input {
   flex: 1;
   min-width: 0;
   background: rgba(0, 0, 0, 0.5);

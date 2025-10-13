@@ -6,6 +6,7 @@
 import MenuBar from '../../organisms/MenuBar';
 import Timeline from '../../organisms/Timeline';
 import CommandFooter from '../../organisms/CommandFooter';
+import StatusLine from '../../organisms/StatusLine';
 import './TimelineTemplate.css';
 
 interface TimelineTemplateProps {
@@ -19,6 +20,7 @@ const TimelineTemplate = ({ hasSelection, selectionCount, isEditing }: TimelineT
     <div className="timeline-template" data-testid="timeline-template">
       <MenuBar />
       <Timeline />
+      <StatusLine />
       <CommandFooter
         hasSelection={hasSelection}
         selectionCount={selectionCount}
