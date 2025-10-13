@@ -220,6 +220,17 @@ const timelineSlice = createSlice({
         state.viewport.offsetBeats = Math.max(0, startBeats - paddingBeats);
       }
     },
+
+    loadTimeline: (state, action: PayloadAction<Partial<TimelineState>>) => {
+      // Load timeline data but preserve current viewport dimensions
+      const { viewport, ...rest } = action.payload;
+      Object.assign(state, rest);
+      if (viewport) {
+        // Merge viewport but keep current width/height
+        state.viewport.offsetBeats = viewport.offsetBeats ?? state.viewport.offsetBeats;
+        state.viewport.zoom = viewport.zoom ?? state.viewport.zoom;
+      }
+    },
   },
 });
 
@@ -249,6 +260,7 @@ export const {
   movePlayheadToPosition,
   adjustTempo,
   frameViewport,
+  loadTimeline,
 } = timelineSlice.actions;
 
 /**

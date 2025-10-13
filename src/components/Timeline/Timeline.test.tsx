@@ -47,6 +47,7 @@ describe('Timeline', () => {
           { id: 'lane-2', name: 'Snare' },
         ],
         editingLaneId: null,
+        movingLaneId: null,
       },
       clips: { clips: [], editingClipId: null },
       selection: { selectedClipIds: [], currentLaneId: null },
@@ -67,6 +68,7 @@ describe('Timeline', () => {
       lanes: {
         lanes: [{ id: 'lane-1', name: 'Kick' }],
         editingLaneId: null,
+        movingLaneId: null,
       },
       clips: {
         clips: [
@@ -126,6 +128,7 @@ describe('Timeline', () => {
       lanes: {
         lanes: [{ id: 'lane-1', name: 'Kick' }],
         editingLaneId: null,
+        movingLaneId: null,
       },
       clips: {
         clips: [

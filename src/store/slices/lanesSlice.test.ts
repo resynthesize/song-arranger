@@ -17,6 +17,7 @@ describe('lanesSlice', () => {
   const initialState: LanesState = {
     lanes: [],
     editingLaneId: null,
+    movingLaneId: null,
   };
 
   const stateWithLanes: LanesState = {
@@ -26,6 +27,7 @@ describe('lanesSlice', () => {
       { id: 'lane-3', name: 'Hi-Hat' },
     ],
     editingLaneId: null,
+    movingLaneId: null,
   };
 
   it('should return the initial state', () => {
@@ -146,6 +148,7 @@ describe('lanesSlice', () => {
           { id: 'lane-2', name: 'Snare' },
         ],
         editingLaneId: null,
+        movingLaneId: null,
       };
       const newState = reducer(
         stateWithColor,

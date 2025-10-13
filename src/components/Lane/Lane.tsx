@@ -57,7 +57,7 @@ const Lane = ({
   onColorChange,
   onStartEditing,
   onStopEditing,
-  onRemove,
+  onRemove: _onRemove, // Kept for Timeline compatibility, but no longer used (X button removed)
   onClipSelect,
   onClipMove,
   onClipResize,
@@ -273,10 +273,6 @@ const Lane = ({
       const positionInBeats = viewport.offsetBeats + clickX / viewport.zoom;
       onDoubleClick(id, positionInBeats);
     }
-  };
-
-  const handleRemove = () => {
-    onRemove(id);
   };
 
   const handleContextMenu = (e: MouseEvent<HTMLDivElement>) => {

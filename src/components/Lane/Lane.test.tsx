@@ -38,6 +38,7 @@ describe('Lane', () => {
     verticalZoom: 100,
     isCurrent: false,
     isEditing: false,
+    isMoving: false,
     onNameChange: jest.fn(),
     onStartEditing: jest.fn(),
     onStopEditing: jest.fn(),
@@ -203,28 +204,5 @@ describe('Lane', () => {
     const callArgs = onDoubleClick.mock.calls[0] as [string, number];
     expect(callArgs[0]).toBe('lane-1');
     expect(callArgs[1]).toBe(4); // Position should be 4 beats
-  });
-
-  it('should render remove button', () => {
-    render(<Lane {...defaultProps} />);
-    const removeButton = screen.getByTestId('lane-lane-1-remove-button');
-    expect(removeButton).toBeInTheDocument();
-    expect(removeButton).toHaveTextContent('×');
-  });
-
-  it('should call onRemove when remove button is clicked', async () => {
-    const onRemove = jest.fn();
-    render(<Lane {...defaultProps} onRemove={onRemove} />);
-
-    const removeButton = screen.getByTestId('lane-lane-1-remove-button');
-    await userEvent.click(removeButton);
-
-    expect(onRemove).toHaveBeenCalledWith('lane-1');
-  });
-
-  it('should show remove button even when editing lane name', () => {
-    render(<Lane {...defaultProps} isEditing={true} />);
-    const removeButton = screen.getByTestId('lane-lane-1-remove-button');
-    expect(removeButton).toBeInTheDocument();
   });
 });

@@ -236,6 +236,10 @@ const clipsSlice = createSlice({
     clearEditingClip: (state) => {
       state.editingClipId = null;
     },
+
+    setClips: (state, action: PayloadAction<Clip[]>) => {
+      state.clips = action.payload;
+    },
   },
 });
 
@@ -258,6 +262,7 @@ export const {
   trimClipEnd,
   setEditingClip,
   clearEditingClip,
+  setClips,
 } = clipsSlice.actions;
 
 export default clipsSlice.reducer;

@@ -3,7 +3,7 @@
  * File operations menu for project management
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import {
   newProject,
@@ -11,6 +11,7 @@ import {
   saveCurrentProject,
   saveProjectAs,
   deleteProjectById,
+  setCurrentProjectName,
 } from '@/store/slices/projectSlice';
 import {
   saveProject,
@@ -19,8 +20,11 @@ import {
   listProjects,
   setTemplateProject,
   clearTemplateProject,
+  type ProjectFile,
 } from '@/utils/storage';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
+import ProjectSelector from '../ProjectSelector';
+import SaveAsDialog from '../SaveAsDialog';
 import './FileMenu.css';
 
 export interface FileMenuProps {
@@ -37,6 +41,11 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
   const clips = useAppSelector((state) => state.clips.clips);
   const lanes = useAppSelector((state) => state.lanes.lanes);
   const timeline = useAppSelector((state) => state.timeline);
+
+  // Dialog states
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [showSaveAsDialog, setShowSaveAsDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleNew = useCallback(() => {
     if (isDirty) {
@@ -72,9 +81,10 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
   }, [currentProjectId, currentProjectName, clips, lanes, timeline, dispatch]);
 
   const handleSaveAs = useCallback(() => {
-    const name = window.prompt('Enter project name:', currentProjectName);
-    if (!name) return;
+    setShowSaveAsDialog(true);
+  }, []);
 
+  const handleSaveAsConfirm = useCallback((name: string) => {
     try {
       const projectId = saveProject({
         name,
@@ -84,10 +94,11 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
       });
 
       dispatch(saveProjectAs({ projectId, projectName: name }));
+      setShowSaveAsDialog(false);
     } catch (error) {
       alert(`Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }, [currentProjectName, clips, lanes, timeline, dispatch]);
+  }, [clips, lanes, timeline, dispatch]);
 
   const handleLoad = useCallback(() => {
     if (isDirty) {
@@ -103,38 +114,33 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
       return;
     }
 
-    // Show project list
-    const projectList = projects
-      .map((p, i) => `${i + 1}. ${p.name}${p.isTemplate ? ' (Template)' : ''}`)
-      .join('\n');
+    setShowLoadDialog(true);
+  }, [isDirty]);
 
-    const selection = window.prompt(
-      `Select a project to load:\n\n${projectList}\n\nEnter project number:`,
-      '1'
-    );
-
-    if (!selection) return;
-
-    const index = parseInt(selection, 10) - 1;
-    const selectedProject = projects[index];
-
-    if (!selectedProject) {
-      alert('Invalid project number.');
-      return;
-    }
-
-    const project = loadProject(selectedProject.id);
-    if (!project) {
+  const handleLoadConfirm = useCallback((project: ProjectFile) => {
+    const loadedProject = loadProject(project.id);
+    if (!loadedProject) {
       alert('Failed to load project.');
       return;
     }
 
-    // Load project data into Redux
-    dispatch(loadProjectById({ projectId: project.id, projectName: project.name }));
+    // Load project metadata
+    dispatch(loadProjectById({ projectId: loadedProject.id, projectName: loadedProject.name }));
+
+    // Load clips data
+    dispatch({ type: 'clips/setClips', payload: loadedProject.data.clips });
+
+    // Load lanes data
+    dispatch({ type: 'lanes/setLanes', payload: loadedProject.data.lanes });
+
+    // Load timeline data (merge with existing viewport to preserve current view)
+    dispatch({ type: 'timeline/loadTimeline', payload: loadedProject.data.timeline });
+
+    setShowLoadDialog(false);
 
     // Notify parent if callback provided
     onProjectsListOpen?.();
-  }, [isDirty, dispatch, onProjectsListOpen]);
+  }, [dispatch, onProjectsListOpen]);
 
   const handleSetAsTemplate = useCallback(() => {
     if (!currentProjectId) {
@@ -160,45 +166,129 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
       return;
     }
 
-    const projectList = projects
-      .map((p, i) => `${i + 1}. ${p.name}${p.isTemplate ? ' (Template)' : ''}`)
-      .join('\n');
+    setShowDeleteDialog(true);
+  }, []);
 
-    const selection = window.prompt(
-      `Select a project to delete:\n\n${projectList}\n\nEnter project number:`,
-      '1'
-    );
-
-    if (!selection) return;
-
-    const index = parseInt(selection, 10) - 1;
-    const selectedProject = projects[index];
-
-    if (!selectedProject) {
-      alert('Invalid project number.');
-      return;
-    }
-
+  const handleDeleteConfirm = useCallback((project: ProjectFile) => {
     const confirm = window.confirm(
-      `Are you sure you want to delete "${selectedProject.name}"?`
+      `Are you sure you want to delete "${project.name}"?`
     );
 
     if (!confirm) return;
 
     try {
       // Clear template if this was the template
-      if (selectedProject.isTemplate) {
+      if (project.isTemplate) {
         clearTemplateProject();
       }
 
-      deleteProjectFromStorage(selectedProject.id);
-      dispatch(deleteProjectById(selectedProject.id));
+      deleteProjectFromStorage(project.id);
+      dispatch(deleteProjectById(project.id));
+      setShowDeleteDialog(false);
 
-      alert(`Project "${selectedProject.name}" has been deleted.`);
+      alert(`Project "${project.name}" has been deleted.`);
     } catch (error) {
       alert(`Failed to delete project: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }, [dispatch]);
+
+  const handleExport = useCallback(() => {
+    try {
+      // Create export data with current project state
+      const exportData = {
+        name: currentProjectName,
+        clips,
+        lanes,
+        timeline: {
+          tempo: timeline.tempo,
+          snapValue: timeline.snapValue,
+          snapMode: timeline.snapMode,
+          verticalZoom: timeline.verticalZoom,
+          minimapVisible: timeline.minimapVisible,
+          playheadPosition: timeline.playheadPosition,
+        },
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+      };
+
+      // Create JSON blob
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      // Create download link
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentProjectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      alert(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }, [currentProjectName, clips, lanes, timeline]);
+
+  const handleImport = useCallback(() => {
+    if (isDirty) {
+      const confirm = window.confirm(
+        'You have unsaved changes. Are you sure you want to import a project?'
+      );
+      if (!confirm) return;
+    }
+
+    // Create file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const jsonString = event.target?.result as string;
+          const importData = JSON.parse(jsonString);
+
+          // Validate import data
+          if (!importData.clips || !importData.lanes) {
+            throw new Error('Invalid project file: missing clips or lanes data');
+          }
+
+          // Load imported data into Redux
+          dispatch(newProject()); // Clear current project first
+
+          // Set project name
+          if (importData.name) {
+            dispatch(setCurrentProjectName(importData.name));
+          }
+
+          // Load clips
+          dispatch({ type: 'clips/setClips', payload: importData.clips });
+
+          // Load lanes
+          dispatch({ type: 'lanes/setLanes', payload: importData.lanes });
+
+          // Load timeline settings (if present)
+          if (importData.timeline) {
+            dispatch({ type: 'timeline/loadTimeline', payload: importData.timeline });
+          }
+
+          alert(`Successfully imported "${importData.name || 'project'}"`);
+        } catch (error) {
+          alert(`Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      };
+
+      reader.readAsText(file);
+    };
+
+    input.click();
+  }, [dispatch, isDirty]);
 
   const menuItems: TerminalMenuItem[] = [
     { id: 'new', label: 'New' },
@@ -206,8 +296,11 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     { id: 'save', label: isDirty ? 'Save*' : 'Save' },
     { id: 'save-as', label: 'Save As...' },
     { id: 'separator-1', separator: true },
-    { id: 'template', label: 'Set as Template' },
+    { id: 'import', label: 'Import JSON...' },
+    { id: 'export', label: 'Export JSON...' },
     { id: 'separator-2', separator: true },
+    { id: 'template', label: 'Set as Template' },
+    { id: 'separator-3', separator: true },
     { id: 'delete', label: 'Delete...' },
   ];
 
@@ -226,6 +319,12 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
         case 'save-as':
           handleSaveAs();
           break;
+        case 'import':
+          handleImport();
+          break;
+        case 'export':
+          handleExport();
+          break;
         case 'template':
           handleSetAsTemplate();
           break;
@@ -234,17 +333,47 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           break;
       }
     },
-    [handleNew, handleLoad, handleSave, handleSaveAs, handleSetAsTemplate, handleDelete]
+    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleExport, handleSetAsTemplate, handleDelete]
   );
 
   return (
-    <div className="file-menu" data-testid="file-menu">
-      <TerminalMenu
-        items={menuItems}
-        trigger={<span>FILE</span>}
-        onSelect={handleSelect}
-      />
-    </div>
+    <>
+      <div className="file-menu" data-testid="file-menu">
+        <TerminalMenu
+          items={menuItems}
+          trigger={<span>FILE</span>}
+          onSelect={handleSelect}
+        />
+      </div>
+
+      {showLoadDialog && (
+        <ProjectSelector
+          projects={listProjects()}
+          title="LOAD PROJECT"
+          mode="load"
+          onSelect={handleLoadConfirm}
+          onClose={() => setShowLoadDialog(false)}
+        />
+      )}
+
+      {showSaveAsDialog && (
+        <SaveAsDialog
+          defaultName={currentProjectName}
+          onSave={handleSaveAsConfirm}
+          onClose={() => setShowSaveAsDialog(false)}
+        />
+      )}
+
+      {showDeleteDialog && (
+        <ProjectSelector
+          projects={listProjects()}
+          title="DELETE PROJECT"
+          mode="delete"
+          onSelect={handleDeleteConfirm}
+          onClose={() => setShowDeleteDialog(false)}
+        />
+      )}
+    </>
   );
 };
 

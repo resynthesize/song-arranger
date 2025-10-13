@@ -89,9 +89,12 @@ const lanesSlice = createSlice({
       // Can't move first lane up
       if (index > 0) {
         // Swap with previous lane
-        const temp = state.lanes[index - 1];
-        state.lanes[index - 1] = state.lanes[index];
-        state.lanes[index] = temp;
+        const prev = state.lanes[index - 1];
+        const current = state.lanes[index];
+        if (prev && current) {
+          state.lanes[index - 1] = current;
+          state.lanes[index] = prev;
+        }
       }
     },
 
@@ -102,9 +105,12 @@ const lanesSlice = createSlice({
       // Can't move last lane down
       if (index >= 0 && index < state.lanes.length - 1) {
         // Swap with next lane
-        const temp = state.lanes[index + 1];
-        state.lanes[index + 1] = state.lanes[index];
-        state.lanes[index] = temp;
+        const current = state.lanes[index];
+        const next = state.lanes[index + 1];
+        if (current && next) {
+          state.lanes[index] = next;
+          state.lanes[index + 1] = current;
+        }
       }
     },
 
@@ -114,6 +120,10 @@ const lanesSlice = createSlice({
 
     clearMovingLane: (state) => {
       state.movingLaneId = null;
+    },
+
+    setLanes: (state, action: PayloadAction<import('@/types').Lane[]>) => {
+      state.lanes = action.payload;
     },
   },
 });
@@ -129,6 +139,7 @@ export const {
   moveLaneDown,
   setMovingLane,
   clearMovingLane,
+  setLanes,
 } = lanesSlice.actions;
 
 export default lanesSlice.reducer;
