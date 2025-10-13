@@ -25,6 +25,7 @@ import {
   clearTemplateProject,
   type ProjectFile,
 } from '@/utils/storage';
+import { parseCKSFile, importFromCirklon } from '@/utils/cirklon/import';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
 import ProjectSelector from '../ProjectSelector';
 import SaveAsDialog from '../SaveAsDialog';
@@ -297,6 +298,69 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     input.click();
   }, [dispatch, isDirty]);
 
+  const handleImportCirklon = useCallback(() => {
+    if (isDirty) {
+      const confirm = window.confirm(
+        'You have unsaved changes. Are you sure you want to import a Cirklon file?'
+      );
+      if (!confirm) return;
+    }
+
+    // Create file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.cks,.CKS,application/json';
+
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files) return;
+
+      const file = first(Array.from(files));
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const jsonString = event.target?.result as string;
+
+          // Parse CKS file
+          const cksData = parseCKSFile(jsonString);
+
+          // Import to Song Arranger format
+          const importResult = importFromCirklon(cksData);
+
+          // Load imported data into Redux
+          dispatch(newProject()); // Clear current project first
+
+          // Set project name from song name
+          dispatch(setCurrentProjectName(importResult.songName));
+
+          // Load tracks
+          dispatch(setTracks(importResult.tracks));
+
+          // Load patterns
+          dispatch(setPatterns(importResult.patterns));
+
+          // Set tempo
+          dispatch({ type: 'timeline/setTempo', payload: importResult.tempo });
+
+          alert(
+            `Successfully imported "${importResult.songName}"\n\n` +
+            `Tracks: ${importResult.tracks.length}\n` +
+            `Patterns: ${importResult.patterns.length}\n` +
+            `Muted patterns: ${importResult.patterns.filter(p => p.muted).length}`
+          );
+        } catch (error) {
+          alert(`Failed to import Cirklon file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      };
+
+      reader.readAsText(file);
+    };
+
+    input.click();
+  }, [dispatch, isDirty]);
+
   const menuItems: TerminalMenuItem[] = [
     { id: 'new', label: 'New' },
     { id: 'open', label: 'Open...' },
@@ -304,6 +368,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     { id: 'save-as', label: 'Save As...' },
     { id: 'separator-1', separator: true },
     { id: 'import', label: 'Import JSON...' },
+    { id: 'import-cirklon', label: 'Import Cirklon (.CKS)...' },
     { id: 'export', label: 'Export JSON...' },
     { id: 'separator-2', separator: true },
     { id: 'template', label: 'Set as Template' },
@@ -329,6 +394,9 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
         case 'import':
           handleImport();
           break;
+        case 'import-cirklon':
+          handleImportCirklon();
+          break;
         case 'export':
           handleExport();
           break;
@@ -340,7 +408,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           break;
       }
     },
-    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleExport, handleSetAsTemplate, handleDelete]
+    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleImportCirklon, handleExport, handleSetAsTemplate, handleDelete]
   );
 
   return (
