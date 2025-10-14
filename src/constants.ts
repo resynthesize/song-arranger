@@ -16,9 +16,17 @@ export const RULER_HEIGHT = 50;
 /** Lane header width in pixels */
 export const LANE_HEADER_WIDTH = 150;
 
-/** Default lane color */
+/** Default lane color (legacy) */
 export const DEFAULT_LANE_COLOR = '#00ff00';
-export const DEFAULT_TRACK_COLOR = DEFAULT_LANE_COLOR; // Alias for renamed concept
+
+// Import and re-export color palettes from centralized location
+export {
+  RETRO_COLOR_PALETTE,
+  MODERN_COLOR_PALETTE,
+  MODERN_TRACK_COLORS,
+  RETRO_TRACK_COLORS,
+  DEFAULT_TRACK_COLOR,
+} from './constants/colors';
 
 /** Default clip duration in beats */
 export const DEFAULT_CLIP_DURATION = 4;

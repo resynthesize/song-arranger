@@ -16,6 +16,7 @@ import {
 import { setPatterns } from '@/store/slices/patternsSlice';
 import { setTracks } from '@/store/slices/tracksSlice';
 import { setStatus } from '@/store/slices/statusSlice';
+import { setTheme } from '@/store/slices/themeSlice';
 import { selectAllPatterns, selectAllTracks } from '@/store/selectors';
 import {
   saveProject,
@@ -44,6 +45,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
   const currentProjectId = useAppSelector((state) => state.project.currentProjectId);
   const currentProjectName = useAppSelector((state) => state.project.currentProjectName);
   const isDirty = useAppSelector((state) => state.project.isDirty);
+  const currentTheme = useAppSelector((state) => state.theme.current);
 
   // Get all current state for saving using selectors
   const patterns = useAppSelector(selectAllPatterns);
@@ -345,12 +347,15 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           // Load patterns
           dispatch(setPatterns(importResult.patterns));
 
+          // Load scenes
+          dispatch({ type: 'scenes/setScenes', payload: importResult.scenes });
+
           // Set tempo
           dispatch({ type: 'timeline/setTempo', payload: importResult.tempo });
 
           // Show success message in status line
           dispatch(setStatus({
-            message: `Successfully imported "${importResult.songName}" (${importResult.tracks.length} tracks, ${importResult.patterns.length} patterns)`,
+            message: `Successfully imported "${importResult.songName}" (${importResult.tracks.length} tracks, ${importResult.patterns.length} patterns, ${importResult.scenes.length} scenes)`,
             type: 'success',
           }));
         } catch (error) {
@@ -400,6 +405,14 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     }
   }, [tracks, patterns]);
 
+  const handleSetThemeModern = useCallback(() => {
+    dispatch(setTheme('modern'));
+  }, [dispatch]);
+
+  const handleSetThemeRetro = useCallback(() => {
+    dispatch(setTheme('retro'));
+  }, [dispatch]);
+
   const menuItems: TerminalMenuItem[] = [
     { id: 'new', label: 'New' },
     { id: 'open', label: 'Open...' },
@@ -413,6 +426,9 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     { id: 'separator-2', separator: true },
     { id: 'template', label: 'Set as Template' },
     { id: 'separator-3', separator: true },
+    { id: 'theme-modern', label: currentTheme === 'modern' ? '✓ Modern Theme' : 'Modern Theme' },
+    { id: 'theme-retro', label: currentTheme === 'retro' ? '✓ Retro Theme' : 'Retro Theme' },
+    { id: 'separator-4', separator: true },
     { id: 'delete', label: 'Delete...' },
   ];
 
@@ -446,12 +462,18 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
         case 'template':
           handleSetAsTemplate();
           break;
+        case 'theme-modern':
+          handleSetThemeModern();
+          break;
+        case 'theme-retro':
+          handleSetThemeRetro();
+          break;
         case 'delete':
           handleDelete();
           break;
       }
     },
-    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleImportCirklon, handleExport, handleExportCirklon, handleSetAsTemplate, handleDelete]
+    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleImportCirklon, handleExport, handleExportCirklon, handleSetAsTemplate, handleSetThemeModern, handleSetThemeRetro, handleDelete]
   );
 
   return (

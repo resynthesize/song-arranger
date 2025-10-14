@@ -13,6 +13,7 @@ import selectionReducer from '@/store/slices/selectionSlice';
 import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
 import projectReducer from '@/store/slices/projectSlice';
 import statusReducer from '@/store/slices/statusSlice';
+import themeReducer from '@/store/slices/themeSlice';
 
 // Helper to create a test store
 const createTestStore = () => {
@@ -25,6 +26,7 @@ const createTestStore = () => {
       crtEffects: crtEffectsReducer,
       project: projectReducer,
       status: statusReducer,
+      theme: themeReducer,
     },
   });
 };

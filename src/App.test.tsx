@@ -16,6 +16,7 @@ import projectReducer from './store/slices/projectSlice';
 import quickInputReducer from './store/slices/quickInputSlice';
 import commandPaletteReducer from './store/slices/commandPaletteSlice';
 import statusReducer from './store/slices/statusSlice';
+import themeReducer from './store/slices/themeSlice';
 
 // Mock the storage util
 jest.mock('./utils/storage', () => ({
@@ -35,6 +36,7 @@ describe('App', () => {
         quickInput: quickInputReducer,
         commandPalette: commandPaletteReducer,
         status: statusReducer,
+        theme: themeReducer,
       },
       preloadedState: initialState,
     });

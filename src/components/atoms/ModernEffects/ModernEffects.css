@@ -1,0 +1,340 @@
+/**
+ * Song Arranger - Modern Effects CSS
+ * Glassmorphism, subtle animations, and modern visual polish
+ */
+
+.modern-effects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* ===== Ambient Gradient - Subtle animated background ===== */
+
+.modern-effects__ambient-gradient {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at 20% 50%,
+    rgba(74, 158, 255, 0.03) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    circle at 80% 50%,
+    rgba(139, 92, 246, 0.02) 0%,
+    transparent 50%
+  );
+  animation: ambientGradientMove 30s ease-in-out infinite alternate;
+  opacity: 0.6;
+}
+
+@keyframes ambientGradientMove {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate(2%, 2%) rotate(1deg);
+  }
+}
+
+/* ===== Glassmorphism Depth Layer ===== */
+
+.modern-effects__glass-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(0px);
+  background: transparent;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+/* Activate glass layer on certain interactions (can be toggled via JS) */
+.modern-effects--glass-active .modern-effects__glass-layer {
+  backdrop-filter: blur(8px);
+  background: rgba(28, 28, 28, 0.3);
+  opacity: 1;
+}
+
+/* ===== Subtle Light Particles ===== */
+
+.modern-effects__particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(74, 158, 255, 0.6);
+  border-radius: 50%;
+  filter: blur(1px);
+  animation: particleFloat 20s ease-in-out infinite;
+}
+
+.particle-1 {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 25s;
+}
+
+.particle-2 {
+  top: 60%;
+  left: 30%;
+  animation-delay: -5s;
+  animation-duration: 30s;
+}
+
+.particle-3 {
+  top: 40%;
+  left: 70%;
+  animation-delay: -10s;
+  animation-duration: 28s;
+}
+
+.particle-4 {
+  top: 80%;
+  left: 50%;
+  animation-delay: -15s;
+  animation-duration: 32s;
+}
+
+.particle-5 {
+  top: 30%;
+  left: 90%;
+  animation-delay: -20s;
+  animation-duration: 26s;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translate(0, 0);
+    opacity: 0.2;
+  }
+  25% {
+    transform: translate(20px, -30px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-10px, -60px);
+    opacity: 0.3;
+  }
+  75% {
+    transform: translate(30px, -40px);
+    opacity: 0.5;
+  }
+}
+
+/* ===== Ambient Glow Overlay ===== */
+
+.modern-effects__ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(74, 158, 255, 0.02) 0%,
+    transparent 70%
+  );
+  animation: ambientPulse 8s ease-in-out infinite;
+}
+
+@keyframes ambientPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+/* ===== Vignette - Subtle edge darkening ===== */
+
+.modern-effects__vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  opacity: 0.4;
+}
+
+/* ===== Micro-interactions - Enhanced hover states ===== */
+
+/* Add smooth glow to interactive elements in modern theme */
+.app.theme-modern button:hover,
+.app.theme-modern .pattern:hover,
+.app.theme-modern .track-header:hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Subtle lift effect on hover */
+.app.theme-modern button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(74, 158, 255, 0.2) !important;
+}
+
+.app.theme-modern button:active {
+  transform: translateY(0px);
+  transition: transform 0.1s ease;
+}
+
+/* Pattern hover with glow */
+.app.theme-modern .pattern:hover {
+  box-shadow: 0 0 12px rgba(74, 158, 255, 0.3) !important;
+}
+
+/* Smooth fade-in for newly created elements */
+.app.theme-modern .pattern--new {
+  animation: modernFadeInScale 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes modernFadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Playhead glow effect */
+.app.theme-modern .playhead {
+  box-shadow: 0 0 8px rgba(74, 158, 255, 0.5),
+              0 0 16px rgba(74, 158, 255, 0.3) !important;
+  animation: playheadGlow 2s ease-in-out infinite;
+}
+
+@keyframes playheadGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(74, 158, 255, 0.5),
+                0 0 16px rgba(74, 158, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(74, 158, 255, 0.7),
+                0 0 24px rgba(74, 158, 255, 0.4);
+  }
+}
+
+/* Menu bar with subtle glassmorphism */
+.app.theme-modern .menu-bar {
+  backdrop-filter: blur(12px);
+  background: rgba(42, 42, 42, 0.9) !important;
+  transition: all 0.3s ease;
+}
+
+/* Modal/overlay glassmorphism effect */
+.app.theme-modern .modal-overlay,
+.app.theme-modern .context-menu {
+  backdrop-filter: blur(8px);
+  background: rgba(28, 28, 28, 0.85) !important;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Smooth transitions for all theme changes */
+.app.theme-modern * {
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Completely disable ALL transitions on patterns to prevent positioning lag */
+.app.theme-modern .pattern,
+.app.theme-modern .pattern * {
+  transition: none !important;
+}
+
+/* Disable transitions during drag operations for performance */
+.app.theme-modern .pattern--dragging,
+.app.theme-modern .pattern--dragging *,
+.app.theme-modern .pattern--resizing,
+.app.theme-modern .pattern--resizing * {
+  transition: none !important;
+}
+
+/* Breathing animation for recording/active states */
+.app.theme-modern .recording-indicator,
+.app.theme-modern .active-indicator {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+}
+
+/* Smooth ripple effect on click (can be added via JS) */
+.app.theme-modern .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(74, 158, 255, 0.4);
+  transform: scale(0);
+  animation: rippleEffect 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .modern-effects__ambient-gradient,
+  .modern-effects__particles .particle,
+  .modern-effects__ambient-glow {
+    animation: none !important;
+  }
+
+  .app.theme-modern * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

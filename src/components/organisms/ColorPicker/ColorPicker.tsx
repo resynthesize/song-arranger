@@ -1,10 +1,12 @@
 /**
  * Song Arranger - ColorPicker Component
- * Retro terminal-styled color picker for lane colors
+ * Theme-aware color picker for lane colors
  */
 
 import { useEffect, useState } from 'react';
+import { useAppSelector } from '@/store/hooks';
 import { TerminalPanel } from '../../molecules/TerminalPanel';
+import { RETRO_COLOR_PALETTE, MODERN_COLOR_PALETTE } from '@/constants';
 import './ColorPicker.css';
 
 interface ColorPickerProps {
@@ -13,23 +15,13 @@ interface ColorPickerProps {
   onClose: () => void;
 }
 
-// Terminal-inspired color palette (~35 colors)
-const COLOR_PALETTE = [
-  // Green variants (classic terminal)
-  ['#001100', '#002200', '#003300', '#004400', '#005500', '#006600', '#007700', '#008800', '#00ff00'],
-  // Amber/Yellow variants
-  ['#221100', '#443300', '#665500', '#887700', '#aa9900', '#ccbb00', '#ffdd00', '#ffee00', '#ffff00'],
-  // Blue variants
-  ['#000033', '#000066', '#000099', '#0000cc', '#0000ff', '#0033ff', '#0066ff', '#0099ff', '#00ccff'],
-  // Red variants
-  ['#330000', '#660000', '#990000', '#cc0000', '#ff0000', '#ff3300', '#ff6600', '#ff9900', '#ffcc00'],
-  // Purple/Magenta variants
-  ['#330033', '#660066', '#990099', '#cc00cc', '#ff00ff', '#ff33ff', '#ff66ff', '#ff99ff', '#ffccff'],
-  // White/Gray variants
-  ['#111111', '#333333', '#555555', '#777777', '#999999', '#bbbbbb', '#dddddd', '#eeeeee', '#ffffff'],
-];
-
 const ColorPicker = ({ selectedColor, onSelectColor, onClose }: ColorPickerProps) => {
+  // Get current theme from Redux
+  const theme = useAppSelector((state) => state.theme.current);
+
+  // Select palette based on theme
+  const COLOR_PALETTE = theme === 'modern' ? MODERN_COLOR_PALETTE : RETRO_COLOR_PALETTE;
+
   const [currentColor, setCurrentColor] = useState(selectedColor);
   const [focusedIndex, setFocusedIndex] = useState(() => {
     // Find initial focused index
@@ -39,7 +31,7 @@ const ColorPicker = ({ selectedColor, onSelectColor, onClose }: ColorPickerProps
         return { row: rowIdx, col: colIdx };
       }
     }
-    return { row: 0, col: 8 }; // Default to bright green
+    return { row: 0, col: 8 }; // Default to last color in first row
   });
 
   useEffect(() => {
@@ -116,9 +108,11 @@ const ColorPicker = ({ selectedColor, onSelectColor, onClose }: ColorPickerProps
     onSelectColor(color);
   };
 
+  const panelTitle = theme === 'modern' ? 'SELECT TRACK COLOR' : 'SELECT LANE COLOR';
+
   return (
     <div className="color-picker">
-      <TerminalPanel title="SELECT LANE COLOR" variant="elevated" padding="md">
+      <TerminalPanel title={panelTitle} variant="elevated" padding="md">
         <div className="color-picker__content">
           <div className="color-picker__palette">
             {COLOR_PALETTE.map((row, rowIdx) => (

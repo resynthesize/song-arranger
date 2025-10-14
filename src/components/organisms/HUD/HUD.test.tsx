@@ -12,6 +12,7 @@ import tracksReducer from '@/store/slices/tracksSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
 import patternsReducer from '@/store/slices/patternsSlice';
 import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
+import themeReducer from '@/store/slices/themeSlice';
 import type { ViewportState } from '@/types';
 
 // Default viewport for tests
@@ -44,6 +45,7 @@ const createTestStore = (preloadedState = {}) => {
       selection: selectionReducer,
       patterns: patternsReducer,
       crtEffects: crtEffectsReducer,
+      theme: themeReducer,
     },
     preloadedState,
   });

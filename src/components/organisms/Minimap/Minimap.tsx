@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useAppSelector } from '@/store/hooks';
 import type { ViewportState, Track, Pattern } from '@/types';
 import {
   MINIMAP_EMBEDDED_HEIGHT,
@@ -42,6 +43,24 @@ const Minimap = ({
   const [dragStartX, setDragStartX] = useState(0);
   const [dragStartOffset, setDragStartOffset] = useState(0);
   const [containerWidth, setContainerWidth] = useState(MINIMAP_EMBEDDED_MIN_WIDTH);
+  const currentTheme = useAppSelector((state) => state.theme.current);
+
+  // Theme-aware colors
+  const getMinimapColors = useCallback(() => {
+    if (currentTheme === 'modern') {
+      return {
+        background: '#1c1c1c',
+        divider: 'rgba(179, 179, 179, 0.15)',
+        defaultClip: '#4a9eff',
+      };
+    }
+    // Retro theme
+    return {
+      background: '#000000',
+      divider: 'rgba(0, 136, 0, 0.2)',
+      defaultClip: '#00ff00',
+    };
+  }, [currentTheme]);
 
   // Track clip and lane IDs to detect real data changes (not just array reference changes)
   const clipsSignature = useMemo(() =>
@@ -135,8 +154,11 @@ const Minimap = ({
     canvas.width = minimapWidth;
     canvas.height = minimapHeight;
 
-    // Clear canvas
-    ctx.fillStyle = '#000000';
+    // Get theme colors
+    const colors = getMinimapColors();
+
+    // Clear canvas with theme background
+    ctx.fillStyle = colors.background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw clips
@@ -150,8 +172,8 @@ const Minimap = ({
       const width = clip.duration * scale;
       const height = Math.max(1, laneHeight - 1);
 
-      // Draw clip rectangle with lane color
-      ctx.fillStyle = lane?.color ?? '#00ff00';
+      // Draw clip rectangle with lane color or theme default
+      ctx.fillStyle = lane?.color ?? colors.defaultClip;
       ctx.fillRect(x, y, width, height);
 
       // Add subtle border (only if height is large enough)
@@ -164,7 +186,7 @@ const Minimap = ({
 
     // Draw lane dividers (only if not in embedded mode or if lanes are tall enough)
     if (!embedded || laneHeight > 3) {
-      ctx.strokeStyle = 'rgba(0, 136, 0, 0.2)';
+      ctx.strokeStyle = colors.divider;
       ctx.lineWidth = 1;
       for (let i = 1; i < lanes.length; i++) {
         const y = padding + i * laneHeight;
@@ -175,7 +197,7 @@ const Minimap = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, clipsSignature, lanesSignature, timelineLength, minimapHeight, minimapWidth, padding, laneHeight, scale, embedded]);
+  }, [visible, clipsSignature, lanesSignature, timelineLength, minimapHeight, minimapWidth, padding, laneHeight, scale, embedded, currentTheme, getMinimapColors]);
   // Note: lanes and clips are intentionally omitted from deps but used in the effect body
   // We rely on clipsSignature and lanesSignature to detect data changes without triggering
   // on array reference changes. This prevents unnecessary redraws during scrolling.

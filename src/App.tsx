@@ -8,6 +8,7 @@ import { useAppSelector } from './store/hooks';
 import BootSequence from './components/organisms/BootSequence';
 import { TimelinePage } from './components/pages';
 import CRTEffects from './components/atoms/CRTEffects';
+import ModernEffects from './components/atoms/ModernEffects';
 import TerminalNoise from './components/atoms/TerminalNoise';
 import './App.css';
 
@@ -16,6 +17,7 @@ function App() {
   const crtEffectsEnabled = useAppSelector(
     (state) => state.crtEffects.enabled
   );
+  const currentTheme = useAppSelector((state) => state.theme.current);
 
   const handleBootComplete = () => {
     setShowBootSequence(false);
@@ -26,9 +28,10 @@ function App() {
   }
 
   return (
-    <div className={`app ${crtEffectsEnabled ? '' : 'no-crt-effects'}`}>
+    <div className={`app theme-${currentTheme} ${crtEffectsEnabled ? '' : 'no-crt-effects'}`}>
       <TimelinePage />
       <CRTEffects />
+      <ModernEffects />
       <TerminalNoise />
     </div>
   );

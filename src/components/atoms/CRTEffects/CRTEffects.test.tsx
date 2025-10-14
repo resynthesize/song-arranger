@@ -8,12 +8,14 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import CRTEffects from './CRTEffects';
 import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
+import themeReducer from '@/store/slices/themeSlice';
 
 // Helper to create a test store
 const createTestStore = (enabled: boolean) => {
   return configureStore({
     reducer: {
       crtEffects: crtEffectsReducer,
+      theme: themeReducer,
     },
     preloadedState: {
       crtEffects: { enabled },

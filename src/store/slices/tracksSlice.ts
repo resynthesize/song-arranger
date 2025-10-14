@@ -5,6 +5,7 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { TracksState, ID } from '@/types';
+import { DEFAULT_TRACK_COLOR } from '@/constants';
 
 const initialState: TracksState = {
   tracks: [],
@@ -31,7 +32,7 @@ const tracksSlice = createSlice({
       state.tracks.push({
         id: `track-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
         name: trackName,
-        color: '#00ff00', // Default green terminal color
+        color: DEFAULT_TRACK_COLOR, // Default muted blue - works well in both modern and retro themes
       });
     },
 

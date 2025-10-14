@@ -28,6 +28,13 @@
   flex: 1;
   position: relative;
   overflow: hidden;
+  cursor: move; /* Move cursor indicates both zoom (vertical) and scroll (horizontal) */
+}
+
+/* Dragging state - show grabbing cursor */
+.ruler__content--dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
 /* Bar container - holds bar number and time marker vertically */

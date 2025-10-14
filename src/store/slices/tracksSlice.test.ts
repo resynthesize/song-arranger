@@ -167,7 +167,7 @@ describe('tracksSlice', () => {
 
     it('should add a new track with default color', () => {
       const newState = reducer(initialState, addTrack({ name: 'Bass' }));
-      expect(newState.tracks[0]?.color).toBe('#00ff00');
+      expect(newState.tracks[0]?.color).toBe('#6d8a9e'); // Muted blue default
     });
   });
 });

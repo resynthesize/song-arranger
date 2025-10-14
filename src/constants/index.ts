@@ -38,3 +38,12 @@ export {
   DEFAULT_LANE_COLOR,
   PRESET_COLORS,
 } from './ui';
+
+// Color palette constants
+export {
+  RETRO_COLOR_PALETTE,
+  MODERN_COLOR_PALETTE,
+  MODERN_TRACK_COLORS,
+  RETRO_TRACK_COLORS,
+  DEFAULT_TRACK_COLOR,
+} from './colors';

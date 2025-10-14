@@ -4,6 +4,7 @@
  */
 
 import { useRef, useEffect, memo } from 'react';
+import { useAppSelector } from '@/store/hooks';
 import type { ViewportState } from '@/types';
 import { beatsToViewportPx } from '@/utils/viewport';
 import { calculateGridMetrics } from '@/utils/grid';
@@ -21,6 +22,30 @@ interface GridCanvasProps {
 const GridCanvas = ({ viewport, snapValue }: GridCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const currentTheme = useAppSelector((state) => state.theme.current);
+
+  // Theme-aware colors
+  const getGridColors = () => {
+    if (currentTheme === 'modern') {
+      return {
+        barLine: 'rgba(179, 179, 179, 0.4)',      // Neutral gray for bar lines
+        barAlpha: 1,
+        barWidth: 1.5,
+        gridLine: 'rgba(179, 179, 179, 0.2)',     // Lighter gray for subdivision lines
+        gridAlpha: 1,
+        gridWidth: 1,
+      };
+    }
+    // Retro theme (original green)
+    return {
+      barLine: '#00ff00',
+      barAlpha: 0.5,
+      barWidth: 2,
+      gridLine: '#004400',
+      gridAlpha: 0.4,
+      gridWidth: 1,
+    };
+  };
 
   // Draw adaptive grid lines on canvas
   useEffect(() => {
@@ -51,6 +76,9 @@ const GridCanvas = ({ viewport, snapValue }: GridCanvasProps) => {
     // Calculate adaptive grid metrics using shared utility
     const { barInterval, gridIntervalBeats } = calculateGridMetrics(viewport, BEATS_PER_BAR);
 
+    // Get theme-aware colors
+    const colors = getGridColors();
+
     // Draw bar lines and grid lines (same logic as Ruler)
     // Start from the first bar that matches the interval and increment by barInterval
     const firstIntervalBar = Math.floor(startBar / barInterval) * barInterval;
@@ -60,9 +88,9 @@ const GridCanvas = ({ viewport, snapValue }: GridCanvasProps) => {
 
       // Draw bar line (numbered bars in ruler) - brighter and thicker
       if (x >= -5 && x <= canvas.width + 5) {
-        ctx.strokeStyle = '#00ff00';
-        ctx.globalAlpha = 0.5;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = colors.barLine;
+        ctx.globalAlpha = colors.barAlpha;
+        ctx.lineWidth = colors.barWidth;
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
@@ -70,9 +98,9 @@ const GridCanvas = ({ viewport, snapValue }: GridCanvasProps) => {
       }
 
       // Generate 3 grid lines between this bar and the next numbered bar
-      ctx.strokeStyle = '#004400';
-      ctx.globalAlpha = 0.4;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = colors.gridLine;
+      ctx.globalAlpha = colors.gridAlpha;
+      ctx.lineWidth = colors.gridWidth;
       for (let i = 1; i < 4; i++) {
         const gridBeat = barBeat + (i * gridIntervalBeats);
         const gridX = beatsToViewportPx(gridBeat, viewport);
@@ -86,7 +114,7 @@ const GridCanvas = ({ viewport, snapValue }: GridCanvasProps) => {
         }
       }
     }
-  }, [viewport, snapValue]);
+  }, [viewport, snapValue, currentTheme]);
 
   // Re-draw grid when window resizes
   useEffect(() => {

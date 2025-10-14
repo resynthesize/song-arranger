@@ -3,13 +3,16 @@
  * Bar and beat ruler positioned above the timeline
  */
 
-import { useMemo } from 'react';
-import { useAppSelector } from '@/store/hooks';
+import { useMemo, useState, useRef, useEffect, MouseEvent } from 'react';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { setZoomFocused, setViewportOffset } from '@/store/slices/timelineSlice';
+import { updateSceneName, setEditingScene, clearEditingScene } from '@/store/slices/scenesSlice';
 import { RulerTick } from '../../molecules/RulerTick';
-import type { ViewportState } from '@/types';
+import { SceneMarker } from '../../molecules/SceneMarker';
+import type { ViewportState, ID } from '@/types';
 import { beatsToViewportPx, viewportPxToBeats } from '@/utils/viewport';
 import { calculateGridMetrics } from '@/utils/grid';
-import { BEATS_PER_BAR } from '@/constants';
+import { BEATS_PER_BAR, MIN_ZOOM, MAX_ZOOM } from '@/constants';
 import './Ruler.css';
 
 interface RulerProps {
@@ -27,7 +30,22 @@ const beatsToTimeString = (beats: number, tempo: number): string => {
 };
 
 const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps) => {
+  const dispatch = useAppDispatch();
   const tempo = useAppSelector((state) => state.timeline.tempo);
+  const scenes = useAppSelector((state) => state.scenes.scenes);
+  const editingSceneId = useAppSelector((state) => state.scenes.editingSceneId);
+
+  // Drag state for zoom and scroll
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartX = useRef(0);
+  const dragStartY = useRef(0);
+  const dragStartZoom = useRef(0);
+  const dragStartOffset = useRef(0);
+  const dragFocusBeats = useRef(0);
+  const rafId = useRef<number | null>(null);
+  const currentDeltaX = useRef(0);
+  const currentDeltaY = useRef(0);
+
   // Calculate visible bars and adaptive grid lines
   const { bars, gridLines } = useMemo(() => {
     // Handle zero width gracefully
@@ -84,13 +102,141 @@ const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps)
     }
   };
 
+  // Handle scene marker editing
+  const handleSceneDoubleClick = (sceneId: ID) => {
+    dispatch(setEditingScene(sceneId));
+  };
+
+  const handleSceneNameChange = (sceneId: ID, newName: string) => {
+    if (newName.trim()) {
+      dispatch(updateSceneName({ sceneId, name: newName.trim() }));
+    }
+  };
+
+  const handleSceneStopEditing = () => {
+    dispatch(clearEditingScene());
+  };
+
+  // Handle mouse down to start drag for zoom and scroll
+  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    // Only on left click, and not if clicking on a ruler tick
+    if (e.button !== 0 || (e.target as HTMLElement).closest('.ruler-tick')) {
+      return;
+    }
+
+    e.preventDefault();
+    setIsDragging(true);
+    dragStartX.current = e.clientX;
+    dragStartY.current = e.clientY;
+    dragStartZoom.current = viewport.zoom;
+    dragStartOffset.current = viewport.offsetBeats;
+
+    // Calculate the beat position at the mouse cursor (this is our focus point for zooming)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pixelX = e.clientX - rect.left;
+    dragFocusBeats.current = viewportPxToBeats(pixelX, viewport);
+  };
+
+  // Handle drag for both zoom (vertical) and scroll (horizontal) with requestAnimationFrame for smoothness
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: globalThis.MouseEvent) => {
+      currentDeltaX.current = dragStartX.current - e.clientX;
+      currentDeltaY.current = dragStartY.current - e.clientY;
+
+      // Only schedule a new frame if one isn't already scheduled
+      if (rafId.current === null) {
+        rafId.current = requestAnimationFrame(() => {
+          const deltaX = currentDeltaX.current;
+          const deltaY = currentDeltaY.current;
+
+          // Determine primary drag direction based on magnitude
+          const absX = Math.abs(deltaX);
+          const absY = Math.abs(deltaY);
+
+          // If vertical movement is dominant, zoom
+          if (absY > absX && absY > 5) {
+            // Calculate zoom using exponential scaling for smooth feel
+            // Sensitivity: 100px vertical drag = ~2x zoom change
+            // Negative deltaY (drag down) = zoom in, positive deltaY (drag up) = zoom out (Ableton-style)
+            const sensitivity = 0.007; // Adjust this for faster/slower zoom
+            const zoomFactor = Math.exp(-deltaY * sensitivity);
+            const newZoom = dragStartZoom.current * zoomFactor;
+
+            // Clamp to valid range
+            const clampedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
+
+            // Update zoom with focus point maintained
+            dispatch(setZoomFocused({
+              zoom: clampedZoom,
+              focusBeats: dragFocusBeats.current,
+            }));
+          }
+          // If horizontal movement is dominant, scroll
+          else if (absX > absY && absX > 5) {
+            // Convert horizontal pixel movement to beat movement (from original drag start)
+            const deltaBeats = deltaX / dragStartZoom.current;
+
+            // Calculate new offset from the original starting position
+            const newOffset = Math.max(0, dragStartOffset.current + deltaBeats);
+
+            // Set viewport offset directly (absolute position from drag start)
+            dispatch(setViewportOffset(newOffset));
+          }
+
+          rafId.current = null;
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+      setIsDragging(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dispatch, viewport]);
+
   return (
     <div className="ruler" data-testid="ruler" role="none">
       {/* Header space to align with lane headers */}
       <div className="ruler__header" />
 
       {/* Content area with bar numbers and grid markers */}
-      <div className="ruler__content">
+      <div
+        className={`ruler__content ${isDragging ? 'ruler__content--dragging' : ''}`}
+        onMouseDown={handleMouseDown}
+      >
+        {/* Scene markers */}
+        {scenes.map((scene) => {
+          const scenePosition = beatsToViewportPx(scene.position, viewport);
+          return (
+            <SceneMarker
+              key={scene.id}
+              id={scene.id}
+              name={scene.name}
+              position={scenePosition}
+              isEditing={editingSceneId === scene.id}
+              onDoubleClick={() => { handleSceneDoubleClick(scene.id); }}
+              onNameChange={(newName) => { handleSceneNameChange(scene.id, newName); }}
+              onStopEditing={handleSceneStopEditing}
+            />
+          );
+        })}
+
         {/* Bar numbers and time markers */}
         {bars.map(({ barNumber, position, beats }) => (
           <RulerTick

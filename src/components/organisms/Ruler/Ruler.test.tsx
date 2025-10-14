@@ -7,6 +7,7 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import timelineReducer from '@/store/slices/timelineSlice';
+import themeReducer from '@/store/slices/themeSlice';
 import Ruler from './Ruler';
 import type { ViewportState } from '@/types';
 import React from 'react';
@@ -16,6 +17,7 @@ const createTestStore = () => {
   return configureStore({
     reducer: {
       timeline: timelineReducer,
+      theme: themeReducer,
     },
     preloadedState: {
       timeline: {

@@ -42,6 +42,16 @@ export interface Track {
 }
 
 /**
+ * Scene - A marker on the timeline representing a section of the song
+ */
+export interface Scene {
+  id: ID;
+  name: string;
+  position: Position; // Start position in beats
+  duration: Duration; // Length in beats
+}
+
+/**
  * @deprecated Use Pattern instead
  */
 export type Clip = Pattern;
@@ -106,6 +116,14 @@ export interface SelectionState {
 }
 
 /**
+ * Scenes State - Manages scene markers on the timeline
+ */
+export interface ScenesState {
+  scenes: Scene[];
+  editingSceneId: ID | null; // Scene currently being edited
+}
+
+/**
  * @deprecated Use TracksState instead
  */
 export type LanesState = TracksState;
@@ -123,4 +141,5 @@ export interface RootState {
   tracks: TracksState;
   patterns: PatternsState;
   selection: SelectionState;
+  scenes: ScenesState;
 }

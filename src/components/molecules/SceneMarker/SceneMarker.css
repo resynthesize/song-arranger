@@ -1,0 +1,84 @@
+/**
+ * Scene Marker Styles
+ * Terminal-styled scene markers for the ruler
+ * Ruler divided into 3 vertical zones: bar numbers (top), timestamps (middle), scenes (bottom)
+ */
+
+.scene-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Left-align contents */
+  pointer-events: auto;
+  z-index: 5; /* Above ruler ticks but below patterns */
+}
+
+/* Vertical line marking the scene position */
+.scene-marker__line {
+  width: 2px;
+  height: 100%;
+  background: var(--color-highlight);
+  opacity: 0.4;
+  box-shadow: 0 0 2px rgba(102, 255, 102, 0.2);
+  pointer-events: none;
+}
+
+/* Scene name label in bottom third (34-50px), left-aligned */
+.scene-marker__label {
+  position: absolute;
+  top: 36px; /* Bottom third of 50px ruler */
+  left: 4px; /* Start to the right of the vertical line */
+  padding: 1px 3px;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xs); /* Same size as time markers */
+  font-weight: normal;
+  color: var(--color-highlight);
+  background: var(--color-bg);
+  border: var(--border-width-thin) solid var(--color-highlight);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  line-height: 1;
+  text-shadow: 0 0 2px rgba(102, 255, 102, 0.3);
+  opacity: 0.9;
+}
+
+.scene-marker__label:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-sm);
+  background: rgba(0, 255, 0, 0.05);
+}
+
+/* Input for editing scene name - same positioning as label */
+.scene-marker__input {
+  position: absolute;
+  top: 36px; /* Bottom third of 50px ruler */
+  left: 4px; /* Start to the right of the vertical line */
+  padding: 1px 3px;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xs); /* Same size as label */
+  font-weight: normal;
+  color: var(--color-primary);
+  background: var(--color-bg);
+  border: var(--border-width-thin) solid var(--color-primary);
+  outline: none;
+  min-width: 40px;
+  max-width: 120px;
+  line-height: 1;
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+.scene-marker__input:focus {
+  border-color: var(--color-highlight);
+  box-shadow: 0 0 4px rgba(0, 255, 0, 0.3);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .scene-marker__label {
+    transition: none;
+  }
+}

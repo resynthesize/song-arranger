@@ -115,6 +115,26 @@ const timelineSlice = createSlice({
       state.viewport.offsetBeats = Math.max(0, focusBeats - (focusScreenPx / newZoom));
     },
 
+    /**
+     * Set zoom to a specific value while keeping a focus point at the same screen position
+     * Used for smooth drag-to-zoom interactions (Ableton-style)
+     * @param payload - Object with newZoom and focusBeats
+     */
+    setZoomFocused: (state, action: PayloadAction<{ zoom: number; focusBeats: number }>) => {
+      const { zoom: newZoom, focusBeats } = action.payload;
+      const oldZoom = state.viewport.zoom;
+
+      // Clamp zoom to valid range
+      const clampedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
+
+      // Calculate where the focus point is on screen before zoom
+      const focusScreenPx = (focusBeats - state.viewport.offsetBeats) * oldZoom;
+
+      // After zoom, adjust offset so focus point stays at same screen position
+      state.viewport.zoom = clampedZoom;
+      state.viewport.offsetBeats = Math.max(0, focusBeats - (focusScreenPx / clampedZoom));
+    },
+
     setViewportOffset: (state, action: PayloadAction<number>) => {
       state.viewport.offsetBeats = Math.max(0, action.payload);
     },
@@ -238,6 +258,7 @@ export const {
   zoomOut,
   zoomInFocused,
   zoomOutFocused,
+  setZoomFocused,
   setViewportOffset,
   panViewport,
   setViewportDimensions,

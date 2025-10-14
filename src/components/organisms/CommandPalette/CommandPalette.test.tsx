@@ -12,6 +12,7 @@ import timelineReducer from '@/store/slices/timelineSlice';
 import tracksReducer from '@/store/slices/tracksSlice';
 import patternsReducer from '@/store/slices/patternsSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
+import themeReducer from '@/store/slices/themeSlice';
 
 const createMockStore = () => configureStore({
   reducer: {
@@ -19,6 +20,7 @@ const createMockStore = () => configureStore({
     tracks: tracksReducer,
     patterns: patternsReducer,
     selection: selectionReducer,
+    theme: themeReducer,
   },
 });
 

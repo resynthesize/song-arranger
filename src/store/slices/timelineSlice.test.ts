@@ -7,6 +7,7 @@ import reducer, {
   setZoom,
   zoomIn,
   zoomOut,
+  setZoomFocused,
   setViewportOffset,
   panViewport,
   setViewportDimensions,
@@ -84,6 +85,114 @@ describe('timelineSlice', () => {
       const state = { ...initialState, viewport: { ...initialState.viewport, zoom: 0.25 } };
       const newState = reducer(state, zoomOut());
       expect(newState.viewport.zoom).toBe(0.25);
+    });
+  });
+
+  describe('setZoomFocused', () => {
+    it('should set zoom while maintaining focus point position on screen', () => {
+      // Setup: viewport at offset 100, zoom 10, focus at beat 150
+      // Focus point is (150 - 100) * 10 = 500px from left edge
+      const state = {
+        ...initialState,
+        viewport: {
+          ...initialState.viewport,
+          offsetBeats: 100,
+          zoom: 10,
+          widthPx: 1600,
+        },
+      };
+
+      // Zoom to 20 (2x zoom in) while keeping beat 150 at same screen position
+      const newState = reducer(state, setZoomFocused({ zoom: 20, focusBeats: 150 }));
+
+      // Focus should still be 500px from left edge
+      // 500 = (150 - newOffset) * 20
+      // newOffset = 150 - (500 / 20) = 150 - 25 = 125
+      expect(newState.viewport.zoom).toBe(20);
+      expect(newState.viewport.offsetBeats).toBe(125);
+
+      // Verify focus point stayed at same screen position
+      const oldScreenPos = (150 - 100) * 10; // 500px
+      const newScreenPos = (150 - 125) * 20; // 500px
+      expect(oldScreenPos).toBe(newScreenPos);
+    });
+
+    it('should handle zooming out while maintaining focus point', () => {
+      // Setup: viewport at offset 100, zoom 20, focus at beat 120
+      const state = {
+        ...initialState,
+        viewport: {
+          ...initialState.viewport,
+          offsetBeats: 100,
+          zoom: 20,
+        },
+      };
+
+      // Zoom out to 10 (0.5x zoom) while keeping beat 120 at same screen position
+      const newState = reducer(state, setZoomFocused({ zoom: 10, focusBeats: 120 }));
+
+      // Focus point screen position should remain the same
+      const oldScreenPos = (120 - 100) * 20; // 400px
+      const newScreenPos = (120 - newState.viewport.offsetBeats) * 10;
+      expect(oldScreenPos).toBe(newScreenPos);
+      expect(newState.viewport.zoom).toBe(10);
+    });
+
+    it('should clamp zoom to valid range', () => {
+      const state = { ...initialState, viewport: { ...initialState.viewport, zoom: 10 } };
+
+      // Try to zoom below minimum
+      const newState1 = reducer(state, setZoomFocused({ zoom: 0.1, focusBeats: 50 }));
+      expect(newState1.viewport.zoom).toBe(0.25); // MIN_ZOOM
+
+      // Try to zoom above maximum
+      const newState2 = reducer(state, setZoomFocused({ zoom: 1000, focusBeats: 50 }));
+      expect(newState2.viewport.zoom).toBe(800); // MAX_ZOOM
+    });
+
+    it('should not allow negative viewport offset', () => {
+      // Edge case: zooming out near start of timeline
+      const state = {
+        ...initialState,
+        viewport: {
+          ...initialState.viewport,
+          offsetBeats: 5,
+          zoom: 100,
+        },
+      };
+
+      // Zoom out dramatically while focused on beat 10
+      const newState = reducer(state, setZoomFocused({ zoom: 1, focusBeats: 10 }));
+
+      // Offset should be clamped to 0
+      expect(newState.viewport.offsetBeats).toBeGreaterThanOrEqual(0);
+      expect(newState.viewport.zoom).toBe(1);
+    });
+
+    it('should work smoothly for continuous zoom (drag-to-zoom)', () => {
+      // Simulate Ableton-style drag zoom with small incremental changes
+      let state = {
+        ...initialState,
+        viewport: {
+          ...initialState.viewport,
+          offsetBeats: 100,
+          zoom: 10,
+        },
+      };
+      const focusBeats = 150;
+
+      // Simulate 5 small zoom steps (like dragging mouse up)
+      for (let i = 0; i < 5; i++) {
+        const newZoom = 10 + i * 2; // 10, 12, 14, 16, 18
+        state = reducer(state, setZoomFocused({ zoom: newZoom, focusBeats }));
+
+        // Focus point should stay at same screen position throughout
+        const expectedScreenPos = (focusBeats - 100) * 10; // Original position: 500px
+        const actualScreenPos = (focusBeats - state.viewport.offsetBeats) * state.viewport.zoom;
+
+        // Allow small floating point errors
+        expect(Math.abs(actualScreenPos - expectedScreenPos)).toBeLessThan(0.01);
+      }
     });
   });
 

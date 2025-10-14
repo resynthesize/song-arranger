@@ -1,39 +1,49 @@
 /**
  * RulerTick Molecule Styles
- * Extracted from Ruler.css
+ * Ruler divided into 3 vertical zones: bar numbers (top), timestamps (middle), scenes (bottom)
  */
 
 .ruler-tick {
   position: absolute;
   top: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   pointer-events: auto;
-  /* Position bar numbers to the right of their grid lines */
 }
 
+/* Bar number in top third (0-16px) */
 .ruler-tick__bar-number {
+  position: absolute;
+  top: 2px;
   color: var(--color-primary, #00ff00);
   font-weight: bold;
   font-size: 14px;
   padding: 2px 4px;
   cursor: pointer;
   user-select: none;
+  line-height: 1;
 }
 
 .ruler-tick__bar-number:hover {
   background: rgba(0, 255, 0, 0.1);
 }
 
+/* Timestamp in middle third (17-33px) */
 .ruler-tick__time-marker {
+  position: absolute;
+  top: 19px;
   color: var(--color-secondary, #008800);
   font-size: 10px;
   padding: 1px 4px;
   cursor: pointer;
   user-select: none;
+  line-height: 1;
+  opacity: 0.7;
 }
 
 .ruler-tick__time-marker:hover {
   background: rgba(0, 255, 0, 0.05);
+  opacity: 1;
 }

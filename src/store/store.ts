@@ -8,11 +8,13 @@ import timelineReducer from './slices/timelineSlice';
 import tracksReducer from './slices/tracksSlice';
 import patternsReducer from './slices/patternsSlice';
 import selectionReducer from './slices/selectionSlice';
+import scenesReducer from './slices/scenesSlice';
 import crtEffectsReducer from './slices/crtEffectsSlice';
 import projectReducer from './slices/projectSlice';
 import quickInputReducer from './slices/quickInputSlice';
 import commandPaletteReducer from './slices/commandPaletteSlice';
 import statusReducer from './slices/statusSlice';
+import themeReducer from './slices/themeSlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,11 +22,13 @@ export const store = configureStore({
     tracks: tracksReducer,
     patterns: patternsReducer,
     selection: selectionReducer,
+    scenes: scenesReducer,
     crtEffects: crtEffectsReducer,
     project: projectReducer,
     quickInput: quickInputReducer,
     commandPalette: commandPaletteReducer,
     status: statusReducer,
+    theme: themeReducer,
   },
 });
 

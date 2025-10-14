@@ -12,6 +12,7 @@ import tracksReducer from '@/store/slices/tracksSlice';
 import patternsReducer from '@/store/slices/patternsSlice';
 import selectionReducer from '@/store/slices/selectionSlice';
 import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
+import themeReducer from '@/store/slices/themeSlice';
 import type { RootState } from '@/types';
 
 const createMockStore = (initialState?: Partial<RootState>) => {
@@ -22,6 +23,7 @@ const createMockStore = (initialState?: Partial<RootState>) => {
       patterns: patternsReducer,
       selection: selectionReducer,
       crtEffects: crtEffectsReducer,
+      theme: themeReducer,
     },
     preloadedState: initialState as RootState,
   });

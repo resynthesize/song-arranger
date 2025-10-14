@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import { store } from './store/store';
 import App from './App';
 import './styles/theme.css';
+import './styles/theme-modern.css';
 import './styles/phosphor-effects.css';
 import './styles/global.css';
 import './styles/crt-effects.css';

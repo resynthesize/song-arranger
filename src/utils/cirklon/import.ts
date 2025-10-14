@@ -3,9 +3,10 @@
  * Import Cirklon CKS files into Song Arranger format
  */
 
-import type { Track, Pattern } from '@/types';
+import type { Track, Pattern, Scene } from '@/types';
 import type { CirklonSongData, CirklonSong, CirklonScene } from './types';
 import { barsToBeats, calculateSceneDuration } from './conversion';
+import { MODERN_TRACK_COLORS } from '@/constants';
 
 /**
  * Result of importing a Cirklon file
@@ -13,6 +14,7 @@ import { barsToBeats, calculateSceneDuration } from './conversion';
 export interface ImportResult {
   tracks: Track[];
   patterns: Pattern[];
+  scenes: Scene[];
   tempo: number;
   songName: string;
 }
@@ -98,22 +100,12 @@ function generatePatternId(): string {
 
 /**
  * Get track color based on track number
- * Uses a color palette for variety
+ * Uses the centralized modern color palette for consistency
  * @param trackNum Track number
  * @returns Hex color string
  */
 function getTrackColor(trackNum: number): string {
-  const colors = [
-    '#00ff00', // Green
-    '#00ffff', // Cyan
-    '#ff00ff', // Magenta
-    '#ffff00', // Yellow
-    '#ff8800', // Orange
-    '#0088ff', // Blue
-    '#88ff00', // Lime
-    '#ff0088', // Pink
-  ];
-  return colors[(trackNum - 1) % colors.length] || '#00ff00';
+  return MODERN_TRACK_COLORS[(trackNum - 1) % MODERN_TRACK_COLORS.length] || MODERN_TRACK_COLORS[0];
 }
 
 /**
@@ -144,6 +136,7 @@ export function importFromCirklon(
     return {
       tracks: [],
       patterns: [],
+      scenes: [],
       tempo: 120,
       songName: 'Untitled',
     };
@@ -166,13 +159,23 @@ export function importFromCirklon(
 
   const tracks = Array.from(trackMap.values());
   const patterns: Pattern[] = [];
+  const scenes: Scene[] = [];
 
   // Process scenes in their original order from the file
   const orderedScenes = getOrderedScenes(song);
   let currentPosition = 0;
 
-  orderedScenes.forEach(([, scene]) => {
+  orderedScenes.forEach(([sceneName, scene]) => {
     const sceneDuration = calculateSceneDuration(scene, beatsPerBar);
+
+    // Create scene marker
+    const sceneMarker: Scene = {
+      id: `scene-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+      name: sceneName,
+      position: currentPosition,
+      duration: sceneDuration,
+    };
+    scenes.push(sceneMarker);
 
     // Process pattern assignments in this scene
     if (scene.pattern_assignments) {
@@ -225,6 +228,7 @@ export function importFromCirklon(
   return {
     tracks,
     patterns,
+    scenes,
     tempo: 120, // Default tempo
     songName,
   };
