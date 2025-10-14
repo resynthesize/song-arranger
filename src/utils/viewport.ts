@@ -63,7 +63,15 @@ export function isRangeVisible(
   const startPx = beatsToViewportPx(startBeat, viewport);
   const endPx = beatsToViewportPx(endBeat, viewport);
 
-  return endPx >= -margin && startPx <= viewport.widthPx + margin;
+  // Ensure margin scales with zoom level to maintain consistent beat-based buffer
+  // At high zoom levels, a fixed pixel margin becomes too small in terms of beats
+  // Minimum 2 beats worth of margin ensures patterns don't disappear at high zoom
+  const minMarginForZoom = viewport.zoom * 2;
+  const effectiveMargin = Math.max(margin, minMarginForZoom);
+
+  const isVisible = endPx >= -effectiveMargin && startPx <= viewport.widthPx + effectiveMargin;
+
+  return isVisible;
 }
 
 /**

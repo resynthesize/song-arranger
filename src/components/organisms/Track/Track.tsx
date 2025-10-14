@@ -112,7 +112,12 @@ const Track = ({
   const visiblePatterns = useMemo(() => {
     return trackPatterns.filter((pattern) => {
       const patternStart = pattern.position;
-      const patternEnd = pattern.position + pattern.duration;
+      // Use sceneDuration for visibility check if it exists and is larger than duration
+      // This ensures patterns with loop visualization are correctly kept visible
+      const displayDuration = pattern.sceneDuration && pattern.sceneDuration > pattern.duration
+        ? pattern.sceneDuration
+        : pattern.duration;
+      const patternEnd = pattern.position + displayDuration;
       return isRangeVisible(patternStart, patternEnd, viewport, 200);
     });
   }, [trackPatterns, viewport]);
@@ -179,6 +184,10 @@ const Track = ({
     },
   ];
 
+  // Ensure we always have a valid color for patterns
+  // Use the track's color if set, otherwise fall back to DEFAULT_TRACK_COLOR
+  const effectiveColor = color || DEFAULT_TRACK_COLOR;
+
   return (
     <div
       className={trackClassName}
@@ -188,7 +197,7 @@ const Track = ({
       <TrackHeader
         id={id}
         name={name}
-        color={color || DEFAULT_TRACK_COLOR}
+        color={effectiveColor}
         isCurrent={isCurrent}
         isEditing={isEditing}
         headerPadding={headerPadding}
@@ -230,7 +239,7 @@ const Track = ({
               externalVerticalDragDeltaY={externalVerticalDragDeltaY}
               label={pattern.label}
               trackName={name}
-              color={color}
+              color={effectiveColor}
               muted={pattern.muted}
               patternType={pattern.patternType}
               onSelect={onPatternSelect}
@@ -269,7 +278,7 @@ const Track = ({
       )}
       {showColorPicker && onColorChange && (
         <ColorPicker
-          selectedColor={color || DEFAULT_TRACK_COLOR}
+          selectedColor={effectiveColor}
           onSelectColor={(newColor) => {
             onColorChange(id, newColor);
           }}
