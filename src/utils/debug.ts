@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Debug Utilities
+ * Cyclone - Debug Utilities
  * Centralized logging that only runs in development mode
  */
 

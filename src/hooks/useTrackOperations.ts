@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Track Operations Hook
+ * Cyclone - Track Operations Hook
  * Custom hook for lane-related operations (rename, color change, remove, etc.)
  */
 

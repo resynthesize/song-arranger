@@ -1,5 +1,5 @@
 /**
- * Song Arranger - DurationDisplay Component
+ * Cyclone - DurationDisplay Component
  * Displays global and selected clip durations with retro terminal styling
  */
 

@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Grid Calculation Utilities Tests
+ * Cyclone - Grid Calculation Utilities Tests
  */
 
 import { calculateGridMetrics } from './grid';

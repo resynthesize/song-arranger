@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Selection Selectors Tests
+ * Cyclone - Selection Selectors Tests
  * Test suite for selection selectors with memoization
  */
 

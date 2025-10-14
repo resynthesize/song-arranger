@@ -1,5 +1,5 @@
 /**
- * Song Arranger - CRT Effects Slice
+ * Cyclone - CRT Effects Slice
  * Redux state management for CRT effects settings
  */
 

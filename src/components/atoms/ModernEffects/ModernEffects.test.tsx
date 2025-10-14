@@ -1,5 +1,5 @@
 /**
- * Song Arranger - ModernEffects Component Tests
+ * Cyclone - ModernEffects Component Tests
  * Tests for modern visual effects overlay
  */
 
@@ -7,13 +7,35 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import ModernEffects from './ModernEffects';
+import timelineReducer from '@/store/slices/timelineSlice';
+import tracksReducer from '@/store/slices/tracksSlice';
+import patternsReducer from '@/store/slices/patternsSlice';
+import selectionReducer from '@/store/slices/selectionSlice';
+import scenesReducer from '@/store/slices/scenesSlice';
+import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
+import projectReducer from '@/store/slices/projectSlice';
+import quickInputReducer from '@/store/slices/quickInputSlice';
+import commandPaletteReducer from '@/store/slices/commandPaletteSlice';
+import statusReducer from '@/store/slices/statusSlice';
 import themeReducer from '@/store/slices/themeSlice';
+import patternEditorReducer from '@/store/slices/patternEditorSlice';
 
 // Helper to create a test store
 const createTestStore = (theme: 'modern' | 'retro') => {
   return configureStore({
     reducer: {
+      timeline: timelineReducer,
+      tracks: tracksReducer,
+      patterns: patternsReducer,
+      selection: selectionReducer,
+      scenes: scenesReducer,
+      crtEffects: crtEffectsReducer,
+      project: projectReducer,
+      quickInput: quickInputReducer,
+      commandPalette: commandPaletteReducer,
+      status: statusReducer,
       theme: themeReducer,
+      patternEditor: patternEditorReducer,
     },
     preloadedState: {
       theme: { current: theme },

@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Application Entry Point
+ * Cyclone - Application Entry Point
  * Initializes React app with Redux store
  */
 

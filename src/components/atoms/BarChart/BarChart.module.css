@@ -1,0 +1,168 @@
+/* Container */
+.container {
+  position: relative;
+  width: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.15s ease;
+}
+
+.container:hover {
+  transform: translateY(-1px);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:focus {
+  outline: 2px solid var(--color-primary, #00ff00);
+  outline-offset: 2px;
+}
+
+/* Label */
+.label {
+  font-size: 10px;
+  font-family: 'VT323', 'Share Tech Mono', 'Courier', monospace;
+  color: var(--color-text, #e0e0e0);
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+/* Bar Container and Fill */
+.barContainer {
+  flex: 1;
+  width: 24px;
+  position: relative;
+  border: 1px solid var(--color-border, #444);
+  background: var(--color-bg-tertiary, #2a2a2a);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.container:hover .barContainer {
+  border-color: var(--color-accent, #00ff88);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.barFill {
+  width: 100%;
+  background: var(--color-accent, #00ff88);
+  transition: height 0.2s ease, background-color 0.15s ease;
+  box-shadow: 0 0 2px rgba(0, 255, 136, 0.3);
+}
+
+/* Active State */
+.active .barFill {
+  background: var(--color-accent, #00ff88);
+  box-shadow: 0 0 4px rgba(0, 255, 136, 0.4);
+}
+
+.active .barContainer {
+  border-color: var(--color-border, #555);
+  background: var(--color-bg-tertiary, #2a2a2a);
+}
+
+/* Inactive State */
+.container:not(.active) .barFill {
+  background: rgba(136, 136, 136, 0.3);
+  box-shadow: none;
+}
+
+.container:not(.active) .barContainer {
+  border-color: rgba(68, 68, 68, 0.5);
+  background: rgba(42, 42, 42, 0.5);
+}
+
+/* Selected State */
+.selected .barContainer {
+  border-color: var(--color-accent, #00ff88);
+  border-width: 2px;
+  background: rgba(0, 255, 136, 0.15);
+  box-shadow: 0 0 6px rgba(0, 255, 136, 0.3);
+}
+
+.selected .barFill {
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+}
+
+.selected .label {
+  color: var(--color-accent, #00ff88);
+  font-weight: bold;
+}
+
+/* Skipped State */
+.skipped .barContainer {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(42, 42, 42, 0.5),
+    rgba(42, 42, 42, 0.5) 4px,
+    rgba(136, 0, 0, 0.2) 4px,
+    rgba(136, 0, 0, 0.2) 8px
+  );
+  opacity: 0.5;
+}
+
+.skipped .barFill {
+  opacity: 0.5;
+}
+
+.skipped .label {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+/* Tie Indicator */
+.tieIndicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border: 1px dashed var(--color-accent, #00ff88);
+  border-radius: 50%;
+  background: rgba(0, 255, 136, 0.2);
+  pointer-events: none;
+}
+
+/* Last Step Indicator */
+.lastStep .barContainer {
+  border-right: 3px solid var(--color-accent, #00ff88);
+  box-shadow: 2px 0 4px rgba(0, 255, 136, 0.3);
+}
+
+/* Beyond Last Step State */
+.beyondLast {
+  opacity: 0.3;
+}
+
+.beyondLast .barContainer {
+  border-color: rgba(68, 68, 68, 0.3);
+  background: rgba(42, 42, 42, 0.3);
+}
+
+.beyondLast .barFill {
+  background: rgba(136, 136, 136, 0.2);
+}
+
+.beyondLast .label {
+  opacity: 0.5;
+}
+
+/* Responsive adjustments for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .barFill,
+  .barContainer {
+    transition: none;
+  }
+
+  .container:hover {
+    transform: none;
+  }
+}

@@ -1,7 +1,12 @@
 /**
- * Song Arranger - Type Definitions
+ * Cyclone - Type Definitions
  * Central location for TypeScript types and interfaces
  */
+
+import type { P3PatternData } from './patternData';
+
+// Re-export pattern data types for convenience
+export type { P3PatternData, P3Bar, P3Direction, AccumulatorConfig } from './patternData';
 
 /**
  * Unique identifier type
@@ -30,6 +35,7 @@ export interface Pattern {
   muted?: boolean;
   patternType?: 'P3' | 'CK';
   sceneDuration?: Duration; // Duration of the scene this pattern belongs to (for loop visualization)
+  patternData?: P3PatternData; // Full P3 pattern data (steps, bars, aux assignments)
 }
 
 /**
@@ -124,6 +130,39 @@ export interface ScenesState {
 }
 
 /**
+ * Pattern row type - represents the different editable rows in pattern editor
+ */
+export type PatternRow = 'note' | 'velocity' | 'length' | 'delay' | 'auxA' | 'auxB' | 'auxC' | 'auxD';
+
+/**
+ * View mode for pattern editor - switches between parameter and aux rows
+ */
+export type ViewMode = 'parameters' | 'aux';
+
+/**
+ * Clipboard data for copy/paste operations in pattern editor
+ */
+export interface ClipboardData {
+  steps: number[]; // Step indices that were copied (0-15)
+  barIndex: number; // Bar they were copied from (0-based)
+  row: PatternRow; // Which row was copied
+  values: unknown[]; // The actual values (notes, velocities, etc.)
+}
+
+/**
+ * Pattern Editor State - Manages pattern editor UI state
+ */
+export interface PatternEditorState {
+  openPatternId: ID | null; // Pattern currently being edited (null = closed)
+  selectedRow: PatternRow; // Currently selected editing row
+  selectedSteps: number[]; // Selected step indices (0-15)
+  currentBarIndex: number; // Current bar being viewed/edited (0-based)
+  editorHeight: number; // Editor pane height in pixels (for resize persistence)
+  clipboardSteps: ClipboardData | null; // Copy/paste clipboard
+  viewMode: ViewMode; // Current view mode (parameters or aux rows)
+}
+
+/**
  * @deprecated Use TracksState instead
  */
 export type LanesState = TracksState;
@@ -142,4 +181,5 @@ export interface RootState {
   patterns: PatternsState;
   selection: SelectionState;
   scenes: ScenesState;
+  patternEditor: PatternEditorState;
 }

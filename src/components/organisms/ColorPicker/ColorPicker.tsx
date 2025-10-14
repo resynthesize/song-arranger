@@ -1,5 +1,5 @@
 /**
- * Song Arranger - ColorPicker Component
+ * Cyclone - ColorPicker Component
  * Theme-aware color picker for lane colors
  */
 

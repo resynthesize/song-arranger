@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Music Constants
+ * Cyclone - Music Constants
  * Time signature, tempo, and clip duration settings
  */
 

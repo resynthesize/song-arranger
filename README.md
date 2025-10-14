@@ -1,10 +1,10 @@
-# Song Arranger
+# Cyclone
 
-Web-based timeline tool for sketching song structures with retro VT terminal aesthetic.
+Web-based sequence editor and timeline tool for the Sequentix Cirklon hardware sequencer.
 
 ## Overview
 
-Song Arranger lets you plan out song arrangements in a visual timeline interface similar to Ableton Live's arrange view, but without audio or MIDI processing. Perfect for planning your tracks while away from the studio or collaborating with hardware sequencers like the Sequentix Cirklon.
+Cyclone lets you edit and arrange Cirklon sequences in a visual timeline interface similar to Ableton Live's arrange view. Perfect for planning complex arrangements, working away from your hardware, or preparing songs before loading them onto your Cirklon.
 
 ## Demo
 

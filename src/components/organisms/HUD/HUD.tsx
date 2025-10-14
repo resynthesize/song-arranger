@@ -1,5 +1,5 @@
 /**
- * Song Arranger - HUD Component
+ * Cyclone - HUD Component
  * Terminal-styled information-dense heads-up display
  * Monolake 8bit inspired status bar with ASCII box-drawing characters
  */

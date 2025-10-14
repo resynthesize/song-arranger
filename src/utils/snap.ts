@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Snap Utility Functions
+ * Cyclone - Snap Utility Functions
  * Functions for snapping positions and durations to musical grid
  */
 

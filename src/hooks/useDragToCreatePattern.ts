@@ -1,5 +1,5 @@
 /**
- * Song Arranger - useDragToCreatePattern Hook
+ * Cyclone - useDragToCreatePattern Hook
  * Custom hook for drag-to-create pattern functionality
  */
 

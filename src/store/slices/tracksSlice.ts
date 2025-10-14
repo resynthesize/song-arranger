@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Tracks Slice
+ * Cyclone - Tracks Slice
  * Redux state management for tracks
  */
 

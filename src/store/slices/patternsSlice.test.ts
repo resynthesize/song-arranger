@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Patterns Slice Tests
+ * Cyclone - Patterns Slice Tests
  * Tests for patterns Redux reducer
  */
 

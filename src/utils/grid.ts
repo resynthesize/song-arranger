@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Grid Calculation Utilities
+ * Cyclone - Grid Calculation Utilities
  * Shared grid metrics calculation for ruler and lane components
  */
 

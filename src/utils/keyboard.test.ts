@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Keyboard Handler Tests
+ * Cyclone - Keyboard Handler Tests
  * Tests for keyboard shortcut system with context awareness
  */
 

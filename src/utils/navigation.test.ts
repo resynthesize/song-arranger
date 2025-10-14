@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Navigation Utilities Tests
+ * Cyclone - Navigation Utilities Tests
  * Tests for clip navigation in all 4 directions
  */
 

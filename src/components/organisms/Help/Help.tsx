@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Help Documentation Component
+ * Cyclone - Help Documentation Component
  * In-app help and keyboard shortcuts reference
  */
 
@@ -127,7 +127,7 @@ const Help = ({ isOpen, onClose }: HelpProps) => {
             <div className="help-section">
               <h2 className="help-section-title">About</h2>
               <p className="help-text">
-                Song Arranger v1.0.0
+                Cyclone v1.0.0
                 <br />
                 A retro terminal-styled timeline tool for sketching song structures
                 <br />

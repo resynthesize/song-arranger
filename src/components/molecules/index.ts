@@ -20,3 +20,12 @@ export type { DialogHeaderProps } from './DialogHeader';
 
 export { DialogFooter } from './DialogFooter';
 export type { DialogFooterProps, DialogAction } from './DialogFooter';
+
+export { ResizableDivider } from './ResizableDivider';
+export type { ResizableDividerProps } from './ResizableDivider';
+
+export { PatternRow } from './PatternRow';
+export type { PatternRowProps } from './PatternRow';
+
+export { RowSelector } from './RowSelector';
+export { default as RowSelectorDefault } from './RowSelector';

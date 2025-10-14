@@ -1,11 +1,30 @@
 /**
- * Song Arranger - Minimap Component Tests
+ * Cyclone - Minimap Component Tests
  * Tests for the arrangement overview minimap
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import Minimap from './Minimap';
+import themeReducer from '@/store/slices/themeSlice';
 import type { ViewportState, Lane, Clip } from '@/types';
+
+// Helper to create a test store
+const createTestStore = (preloadedState = {}) => {
+  return configureStore({
+    reducer: {
+      theme: themeReducer,
+    },
+    preloadedState,
+  });
+};
+
+// Helper to render component with store
+const renderWithStore = (component: React.ReactElement, preloadedState = {}) => {
+  const store = createTestStore(preloadedState);
+  return render(<Provider store={store}>{component}</Provider>);
+};
 
 describe('Minimap', () => {
   const mockLanes: Lane[] = [
@@ -44,44 +63,44 @@ describe('Minimap', () => {
 
   describe('Rendering', () => {
     it('should render when visible', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       expect(screen.getByTestId('minimap')).toBeInTheDocument();
     });
 
     it('should not render when not visible', () => {
-      render(<Minimap {...defaultProps} visible={false} />);
+      renderWithStore(<Minimap {...defaultProps} visible={false} />);
       expect(screen.queryByTestId('minimap')).not.toBeInTheDocument();
     });
 
     it('should render canvas element', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const canvas = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
       expect(canvas).toBeInTheDocument();
       expect(canvas.tagName).toBe('CANVAS');
     });
 
     it('should render close button', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const closeButton = screen.getByTestId('minimap-close');
       expect(closeButton).toBeInTheDocument();
     });
 
     it('should render title', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       expect(screen.getByText('ARRANGEMENT OVERVIEW')).toBeInTheDocument();
     });
   });
 
   describe('Canvas Rendering', () => {
     it('should set canvas dimensions', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const canvas = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
       expect(canvas.width).toBeGreaterThan(0);
       expect(canvas.height).toBeGreaterThan(0);
     });
 
     it('should render clips on canvas', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const canvas = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
       const ctx = canvas.getContext('2d');
       expect(ctx).toBeTruthy();
@@ -92,14 +111,14 @@ describe('Minimap', () => {
 
   describe('Viewport Indicator', () => {
     it('should render viewport rectangle', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const viewport = screen.getByTestId('minimap-viewport');
       expect(viewport).toBeInTheDocument();
     });
 
     it('should position viewport rectangle based on viewport state', () => {
       const viewport = { ...defaultViewport, offsetBeats: 16 };
-      render(<Minimap {...defaultProps} viewport={viewport} />);
+      renderWithStore(<Minimap {...defaultProps} viewport={viewport} />);
       const viewportRect = screen.getByTestId('minimap-viewport');
       // Should be offset from the left
       const style = window.getComputedStyle(viewportRect);
@@ -107,7 +126,7 @@ describe('Minimap', () => {
     });
 
     it('should size viewport rectangle based on visible area', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const viewportRect = screen.getByTestId('minimap-viewport');
       // Should have width and height
       const style = window.getComputedStyle(viewportRect);
@@ -119,7 +138,7 @@ describe('Minimap', () => {
   describe('Click to Jump', () => {
     it('should call onViewportChange when canvas is clicked', () => {
       const onViewportChange = jest.fn();
-      render(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
+      renderWithStore(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
 
       const canvas = screen.getByTestId('minimap-canvas');
       fireEvent.click(canvas, { clientX: 200, clientY: 50 });
@@ -129,7 +148,7 @@ describe('Minimap', () => {
 
     it('should jump to correct beat position when clicked', () => {
       const onViewportChange = jest.fn();
-      render(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
+      renderWithStore(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
 
       const canvas = screen.getByTestId('minimap-canvas');
 
@@ -151,7 +170,7 @@ describe('Minimap', () => {
   describe('Drag Viewport', () => {
     it('should allow dragging viewport rectangle', (done) => {
       const onViewportChange = jest.fn();
-      render(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
+      renderWithStore(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
 
       const viewportRect = screen.getByTestId('minimap-viewport');
 
@@ -173,7 +192,7 @@ describe('Minimap', () => {
 
     it('should update viewport position during drag', (done) => {
       const onViewportChange = jest.fn();
-      render(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
+      renderWithStore(<Minimap {...defaultProps} onViewportChange={onViewportChange} />);
 
       const viewportRect = screen.getByTestId('minimap-viewport');
 
@@ -195,7 +214,7 @@ describe('Minimap', () => {
   describe('Toggle Visibility', () => {
     it('should call onToggle when close button is clicked', () => {
       const onToggle = jest.fn();
-      render(<Minimap {...defaultProps} onToggle={onToggle} />);
+      renderWithStore(<Minimap {...defaultProps} onToggle={onToggle} />);
 
       const closeButton = screen.getByTestId('minimap-close');
       fireEvent.click(closeButton);
@@ -206,7 +225,7 @@ describe('Minimap', () => {
 
   describe('Scaling', () => {
     it('should fit entire timeline horizontally', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const canvas = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
       // Canvas width should accommodate entire timeline
       expect(canvas.width).toBeGreaterThan(0);
@@ -214,11 +233,20 @@ describe('Minimap', () => {
 
     it('should scale clips proportionally', () => {
       // Render with different timeline lengths
-      const { rerender } = render(<Minimap {...defaultProps} timelineLength={64} />);
+      const store = createTestStore();
+      const { rerender } = render(
+        <Provider store={store}>
+          <Minimap {...defaultProps} timelineLength={64} />
+        </Provider>
+      );
       const canvas1 = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
       const width1 = canvas1.width;
 
-      rerender(<Minimap {...defaultProps} timelineLength={128} />);
+      rerender(
+        <Provider store={store}>
+          <Minimap {...defaultProps} timelineLength={128} />
+        </Provider>
+      );
       const canvas2 = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
       const width2 = canvas2.width;
 
@@ -227,7 +255,7 @@ describe('Minimap', () => {
     });
 
     it('should render all lanes with fixed height', () => {
-      render(<Minimap {...defaultProps} embedded={false} />);
+      renderWithStore(<Minimap {...defaultProps} embedded={false} />);
       const canvas = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
       // Canvas height should accommodate all lanes in overlay mode
       // Actual height is 40px (verified by test run)
@@ -237,13 +265,13 @@ describe('Minimap', () => {
 
   describe('Accessibility', () => {
     it('should have appropriate ARIA labels', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const minimap = screen.getByTestId('minimap');
       expect(minimap).toHaveAttribute('role');
     });
 
     it('should be keyboard accessible', () => {
-      render(<Minimap {...defaultProps} />);
+      renderWithStore(<Minimap {...defaultProps} />);
       const canvas = screen.getByTestId('minimap-canvas');
       // Canvas should be focusable or wrapped in focusable element
       expect(canvas).toBeInTheDocument();
@@ -252,17 +280,17 @@ describe('Minimap', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty lanes array', () => {
-      render(<Minimap {...defaultProps} lanes={[]} />);
+      renderWithStore(<Minimap {...defaultProps} lanes={[]} />);
       expect(screen.getByTestId('minimap')).toBeInTheDocument();
     });
 
     it('should handle empty clips array', () => {
-      render(<Minimap {...defaultProps} clips={[]} />);
+      renderWithStore(<Minimap {...defaultProps} clips={[]} />);
       expect(screen.getByTestId('minimap')).toBeInTheDocument();
     });
 
     it('should handle very long timeline', () => {
-      render(<Minimap {...defaultProps} timelineLength={1000} />);
+      renderWithStore(<Minimap {...defaultProps} timelineLength={1000} />);
       const canvas = screen.getByTestId('minimap-canvas') as HTMLCanvasElement;
       expect(canvas).toBeInTheDocument();
     });
@@ -273,7 +301,7 @@ describe('Minimap', () => {
         name: `Lane ${i}`,
         color: '#00ff00',
       }));
-      render(<Minimap {...defaultProps} lanes={manyLanes} />);
+      renderWithStore(<Minimap {...defaultProps} lanes={manyLanes} />);
       expect(screen.getByTestId('minimap')).toBeInTheDocument();
     });
   });

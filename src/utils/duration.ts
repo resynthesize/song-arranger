@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Duration Utilities
+ * Cyclone - Duration Utilities
  * Functions for calculating and formatting durations
  */
 

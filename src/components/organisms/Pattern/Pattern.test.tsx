@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Pattern Component Tests
+ * Cyclone - Pattern Component Tests
  * Tests for the Pattern component
  */
 
@@ -251,6 +251,58 @@ describe('Pattern', () => {
       render(<Pattern {...defaultProps} viewport={wideViewport} />);
       const badge = screen.getByTestId('pattern-pattern-1-type-badge');
       expect(badge).toBeInTheDocument();
+    });
+  });
+
+  describe('Pattern Editor Integration', () => {
+    it('should call onOpenEditor on double-click when callback provided', async () => {
+      const onOpenEditor = jest.fn();
+      render(<Pattern {...defaultProps} onOpenEditor={onOpenEditor} />);
+
+      const content = screen.getByTestId('pattern-pattern-1').querySelector('.pattern__content');
+
+      // Simulate double-click
+      if (content) {
+        await userEvent.dblClick(content);
+      }
+
+      expect(onOpenEditor).toHaveBeenCalledWith('pattern-1');
+    });
+
+    it('should call onStartEditing on double-click when onOpenEditor not provided', async () => {
+      const onStartEditing = jest.fn();
+      render(<Pattern {...defaultProps} onStartEditing={onStartEditing} />);
+
+      const content = screen.getByTestId('pattern-pattern-1').querySelector('.pattern__content');
+
+      // Simulate double-click
+      if (content) {
+        await userEvent.dblClick(content);
+      }
+
+      expect(onStartEditing).toHaveBeenCalledWith('pattern-1');
+    });
+
+    it('should prioritize onOpenEditor over onStartEditing when both provided', async () => {
+      const onOpenEditor = jest.fn();
+      const onStartEditing = jest.fn();
+      render(
+        <Pattern
+          {...defaultProps}
+          onOpenEditor={onOpenEditor}
+          onStartEditing={onStartEditing}
+        />
+      );
+
+      const content = screen.getByTestId('pattern-pattern-1').querySelector('.pattern__content');
+
+      // Simulate double-click
+      if (content) {
+        await userEvent.dblClick(content);
+      }
+
+      expect(onOpenEditor).toHaveBeenCalledWith('pattern-1');
+      expect(onStartEditing).not.toHaveBeenCalled();
     });
   });
 

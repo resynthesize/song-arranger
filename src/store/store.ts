@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Redux Store Configuration
+ * Cyclone - Redux Store Configuration
  * Central store setup with Redux Toolkit
  */
 
@@ -15,6 +15,7 @@ import quickInputReducer from './slices/quickInputSlice';
 import commandPaletteReducer from './slices/commandPaletteSlice';
 import statusReducer from './slices/statusSlice';
 import themeReducer from './slices/themeSlice';
+import patternEditorReducer from './slices/patternEditorSlice';
 
 export const store = configureStore({
   reducer: {
@@ -29,6 +30,7 @@ export const store = configureStore({
     commandPalette: commandPaletteReducer,
     status: statusReducer,
     theme: themeReducer,
+    patternEditor: patternEditorReducer,
   },
 });
 

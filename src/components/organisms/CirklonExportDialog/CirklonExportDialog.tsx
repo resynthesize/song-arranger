@@ -1,5 +1,5 @@
 /**
- * Song Arranger - CirklonExportDialog Component
+ * Cyclone - CirklonExportDialog Component
  * Dialog for exporting project to Cirklon CKS format
  */
 

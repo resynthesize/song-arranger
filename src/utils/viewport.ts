@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Viewport Utilities
+ * Cyclone - Viewport Utilities
  * Coordinate conversion and viewport calculations for infinite scroll timeline
  */
 

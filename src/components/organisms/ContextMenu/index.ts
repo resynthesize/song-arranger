@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Context Menu Component Exports
+ * Cyclone - Context Menu Component Exports
  */
 
 export { default } from './ContextMenu';

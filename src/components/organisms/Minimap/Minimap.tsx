@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Minimap Component
+ * Cyclone - Minimap Component
  * Provides an overview of the entire arrangement with navigation
  */
 

@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Keyboard Shortcuts System
+ * Cyclone - Keyboard Shortcuts System
  * Context-aware keyboard shortcut handling
  */
 

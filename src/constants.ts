@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Constants
+ * Cyclone - Constants
  * Shared constants used across the application
  */
 

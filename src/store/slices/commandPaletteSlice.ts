@@ -1,5 +1,5 @@
 /**
- * Song Arranger - CommandPalette Slice
+ * Cyclone - CommandPalette Slice
  * Redux state management for command palette visibility
  */
 

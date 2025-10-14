@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Array Utilities
+ * Cyclone - Array Utilities
  * Helper functions for safe array access
  */
 

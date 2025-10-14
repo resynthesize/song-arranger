@@ -1,5 +1,5 @@
 /**
- * Song Arranger - BootSequence Component Tests
+ * Cyclone - BootSequence Component Tests
  * Terminal boot sequence with localStorage preference
  */
 

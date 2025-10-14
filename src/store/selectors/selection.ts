@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Selection Selectors
+ * Cyclone - Selection Selectors
  * Reusable memoized selectors for selection state
  */
 

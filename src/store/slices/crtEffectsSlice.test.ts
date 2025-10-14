@@ -1,5 +1,5 @@
 /**
- * Song Arranger - CRT Effects Slice Tests
+ * Cyclone - CRT Effects Slice Tests
  * Tests for CRT effects state management
  */
 

@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Command Definitions
+ * Cyclone - Command Definitions
  * Central registry of all application commands for command palette
  */
 

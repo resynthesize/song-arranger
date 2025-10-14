@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Command Footer Tests
+ * Cyclone - Command Footer Tests
  * Tests for context-sensitive command footer component
  */
 

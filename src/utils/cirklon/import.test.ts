@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Cirklon Import Tests
+ * Cyclone - Cirklon Import Tests
  * Test-driven development: Write tests first, then implement
  */
 
@@ -514,6 +514,362 @@ describe('Cirklon Import', () => {
       // Third pattern should be from scene 3 (third in file)
       expect(result.patterns[2]?.label).toBe('Trk1 P3');
       expect(result.patterns[2]?.position).toBe(32); // After 8 bars = 32 beats
+    });
+
+    describe('P3 Pattern Data Import', () => {
+      it('should preserve full P3 pattern data when importing', () => {
+        const cksData: CirklonSongData = {
+          song_data: {
+            'test': {
+              patterns: {
+                'Trk1 P1': {
+                  type: 'P3',
+                  creator_track: 1,
+                  saved: true,
+                  bar_count: 1,
+                  loop_start: 1,
+                  loop_end: 1,
+                  aux_A: 'cc #1',
+                  aux_B: 'cc #4',
+                  aux_C: 'cc #6',
+                  aux_D: 'cc #10',
+                  accumulator_config: {
+                    note: { limit: 36, mode: 'rtz', out: 'clip' },
+                    velo: { limit: 127, mode: 'rtz', out: 'clip' },
+                    auxD: { limit: 127, mode: 'rtz', out: 'clip' },
+                    RoPS: true,
+                    XdAcD: false,
+                  },
+                  bars: [{
+                    direction: 'forward',
+                    tbase: ' 16',
+                    last_step: 8,
+                    xpos: 0,
+                    reps: 1,
+                    gbar: false,
+                    note: ['C 3', 'D 3', 'E 3', 'F 3', 'G 3', 'A 3', 'B 3', 'C 4', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3'],
+                    velo: [100, 105, 110, 115, 120, 125, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127],
+                    length: [48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48],
+                    delay: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    gate: [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                    tie: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    skip: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    note_X: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    aux_A_value: [10, 20, 30, 40, 50, 60, 70, 80, 0, 0, 0, 0, 0, 0, 0, 0],
+                    aux_A_flag: [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                    aux_B_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    aux_B_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    aux_C_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    aux_C_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    aux_D_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    aux_D_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  }],
+                },
+              },
+              scenes: {
+                'scene 1': {
+                  gbar: 0,
+                  length: 4,
+                  advance: 'auto',
+                  pattern_assignments: { track_1: 'Trk1 P1' },
+                },
+              },
+            },
+          },
+        };
+
+        const result = importFromCirklon(cksData);
+        const pattern = result.patterns[0];
+
+        expect(pattern).toBeDefined();
+        if (!pattern) return;
+
+        // Check that patternData exists
+        expect(pattern.patternData).toBeDefined();
+        if (!pattern.patternData) return;
+
+        // Check pattern-level settings
+        expect(pattern.patternData.loop_start).toBe(1);
+        expect(pattern.patternData.loop_end).toBe(1);
+        expect(pattern.patternData.aux_A).toBe('cc #1');
+        expect(pattern.patternData.aux_B).toBe('cc #4');
+        expect(pattern.patternData.aux_C).toBe('cc #6');
+        expect(pattern.patternData.aux_D).toBe('cc #10');
+
+        // Check accumulator config
+        expect(pattern.patternData.accumulator_config).toBeDefined();
+
+        // Check bars array
+        expect(pattern.patternData.bars).toBeDefined();
+        expect(pattern.patternData.bars).toHaveLength(1);
+
+        const bar = pattern.patternData.bars[0];
+        expect(bar).toBeDefined();
+        if (!bar) return;
+
+        // Check bar-level settings
+        expect(bar.direction).toBe('forward');
+        expect(bar.tbase).toBe(' 16');
+        expect(bar.last_step).toBe(8);
+        expect(bar.xpos).toBe(0);
+        expect(bar.reps).toBe(1);
+        expect(bar.gbar).toBe(false);
+
+        // Check step arrays
+        expect(bar.note).toHaveLength(16);
+        expect(bar.note[0]).toBe('C 3');
+        expect(bar.note[7]).toBe('C 4');
+        expect(bar.velo).toHaveLength(16);
+        expect(bar.velo[0]).toBe(100);
+        expect(bar.gate).toHaveLength(16);
+        expect(bar.gate[0]).toBe(1);
+        expect(bar.gate[8]).toBe(0);
+        expect(bar.aux_A_value[0]).toBe(10);
+        expect(bar.aux_A_flag[0]).toBe(1);
+      });
+
+      it('should not populate patternData for CK patterns', () => {
+        const cksData: CirklonSongData = {
+          song_data: {
+            'test': {
+              patterns: {
+                'Trk1 CK1': {
+                  type: 'CK',
+                  creator_track: 1,
+                  saved: true,
+                  bar_count: 4,
+                },
+              },
+              scenes: {
+                'scene 1': {
+                  gbar: 0,
+                  length: 4,
+                  advance: 'auto',
+                  pattern_assignments: { track_1: 'Trk1 CK1' },
+                },
+              },
+            },
+          },
+        };
+
+        const result = importFromCirklon(cksData);
+        const pattern = result.patterns[0];
+
+        expect(pattern).toBeDefined();
+        if (!pattern) return;
+
+        expect(pattern.patternType).toBe('CK');
+        expect(pattern.patternData).toBeUndefined();
+      });
+
+      it('should handle P3 patterns without bars data gracefully', () => {
+        const cksData: CirklonSongData = {
+          song_data: {
+            'test': {
+              patterns: {
+                'Trk1 P1': {
+                  type: 'P3',
+                  creator_track: 1,
+                  saved: true,
+                  bar_count: 1,
+                  // No bars array
+                },
+              },
+              scenes: {
+                'scene 1': {
+                  gbar: 0,
+                  length: 4,
+                  advance: 'auto',
+                  pattern_assignments: { track_1: 'Trk1 P1' },
+                },
+              },
+            },
+          },
+        };
+
+        // Should not crash
+        const result = importFromCirklon(cksData);
+        const pattern = result.patterns[0];
+
+        expect(pattern).toBeDefined();
+        if (!pattern) return;
+
+        expect(pattern.patternType).toBe('P3');
+        // patternData should be undefined if there are no bars
+        expect(pattern.patternData).toBeUndefined();
+      });
+
+      it('should handle P3 patterns with empty bars array', () => {
+        const cksData: CirklonSongData = {
+          song_data: {
+            'test': {
+              patterns: {
+                'Trk1 P1': {
+                  type: 'P3',
+                  creator_track: 1,
+                  saved: true,
+                  bar_count: 1,
+                  bars: [], // Empty bars array
+                },
+              },
+              scenes: {
+                'scene 1': {
+                  gbar: 0,
+                  length: 4,
+                  advance: 'auto',
+                  pattern_assignments: { track_1: 'Trk1 P1' },
+                },
+              },
+            },
+          },
+        };
+
+        const result = importFromCirklon(cksData);
+        const pattern = result.patterns[0];
+
+        expect(pattern).toBeDefined();
+        if (!pattern) return;
+
+        expect(pattern.patternType).toBe('P3');
+        // patternData should be undefined if bars array is empty
+        expect(pattern.patternData).toBeUndefined();
+      });
+
+      it('should preserve multiple bars in pattern data', () => {
+        const cksData: CirklonSongData = {
+          song_data: {
+            'test': {
+              patterns: {
+                'Trk1 P1': {
+                  type: 'P3',
+                  creator_track: 1,
+                  saved: true,
+                  bar_count: 2,
+                  bars: [
+                    {
+                      direction: 'forward',
+                      tbase: ' 16',
+                      last_step: 16,
+                      xpos: 0,
+                      reps: 1,
+                      gbar: false,
+                      note: ['C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3', 'C 3'],
+                      velo: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+                      length: [48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48],
+                      delay: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      gate: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                      tie: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      skip: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      note_X: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_A_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_A_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_B_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_B_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_C_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_C_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_D_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_D_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    },
+                    {
+                      direction: 'reverse A',
+                      tbase: '  8',
+                      last_step: 8,
+                      xpos: 12,
+                      reps: 2,
+                      gbar: true,
+                      note: ['D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3', 'D 3'],
+                      velo: [80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
+                      length: [24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24],
+                      delay: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      gate: [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                      tie: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      skip: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      note_X: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_A_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_A_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_B_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_B_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_C_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_C_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_D_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      aux_D_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    },
+                  ],
+                },
+              },
+              scenes: {
+                'scene 1': {
+                  gbar: 0,
+                  length: 4,
+                  advance: 'auto',
+                  pattern_assignments: { track_1: 'Trk1 P1' },
+                },
+              },
+            },
+          },
+        };
+
+        const result = importFromCirklon(cksData);
+        const pattern = result.patterns[0];
+
+        expect(pattern).toBeDefined();
+        if (!pattern || !pattern.patternData) return;
+
+        expect(pattern.patternData.bars).toHaveLength(2);
+
+        const bar1 = pattern.patternData.bars[0];
+        const bar2 = pattern.patternData.bars[1];
+
+        if (!bar1 || !bar2) return;
+
+        expect(bar1.direction).toBe('forward');
+        expect(bar1.last_step).toBe(16);
+        expect(bar1.note[0]).toBe('C 3');
+
+        expect(bar2.direction).toBe('reverse A');
+        expect(bar2.last_step).toBe(8);
+        expect(bar2.xpos).toBe(12);
+        expect(bar2.reps).toBe(2);
+        expect(bar2.gbar).toBe(true);
+        expect(bar2.note[0]).toBe('D 3');
+      });
+
+      it('should handle P3 patterns with aux assignments but no bars', () => {
+        const cksData: CirklonSongData = {
+          song_data: {
+            'test': {
+              patterns: {
+                'Trk1 P1': {
+                  type: 'P3',
+                  creator_track: 1,
+                  saved: true,
+                  bar_count: 1,
+                  aux_A: 'cc #1',
+                  aux_B: 'cc #4',
+                  // No bars array
+                },
+              },
+              scenes: {
+                'scene 1': {
+                  gbar: 0,
+                  length: 4,
+                  advance: 'auto',
+                  pattern_assignments: { track_1: 'Trk1 P1' },
+                },
+              },
+            },
+          },
+        };
+
+        const result = importFromCirklon(cksData);
+        const pattern = result.patterns[0];
+
+        expect(pattern).toBeDefined();
+        if (!pattern) return;
+
+        // Should not have patternData if no bars
+        expect(pattern.patternData).toBeUndefined();
+      });
     });
   });
 });

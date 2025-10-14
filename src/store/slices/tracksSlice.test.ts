@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Tracks Slice Tests
+ * Cyclone - Tracks Slice Tests
  * Tests for tracks Redux reducer
  */
 

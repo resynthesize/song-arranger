@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Context Menu Component
+ * Cyclone - Context Menu Component
  * Terminal-styled right-click context menu
  */
 

@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Scenes Slice
+ * Cyclone - Scenes Slice
  * Redux state management for scene markers
  */
 

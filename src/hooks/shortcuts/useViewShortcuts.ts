@@ -1,5 +1,5 @@
 /**
- * Song Arranger - View Shortcuts Hook
+ * Cyclone - View Shortcuts Hook
  * Handles keyboard shortcuts for view and zoom operations
  */
 

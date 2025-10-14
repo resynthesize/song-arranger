@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Track Shortcuts Hook
+ * Cyclone - Track Shortcuts Hook
  * Handles keyboard shortcuts for track manipulation
  */
 

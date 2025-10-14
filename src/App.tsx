@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Main App Component
+ * Cyclone - Main App Component
  * Root component with retro terminal styling and keyboard shortcuts
  */
 

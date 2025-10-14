@@ -1,5 +1,5 @@
 /**
- * Song Arranger - ModernEffects Component
+ * Cyclone - ModernEffects Component
  * Overlay component providing modern visual effects with glassmorphism and subtle animations
  */
 

@@ -1,12 +1,13 @@
 /**
- * Song Arranger - Cirklon Import
- * Import Cirklon CKS files into Song Arranger format
+ * Cyclone - Cirklon Import
+ * Import Cirklon CKS files into Cyclone format
  */
 
-import type { Track, Pattern, Scene } from '@/types';
-import type { CirklonSongData, CirklonSong, CirklonScene } from './types';
+import type { Track, Pattern, Scene, P3PatternData } from '@/types';
+import type { CirklonSongData, CirklonSong, CirklonScene, CirklonPattern } from './types';
 import { barsToBeats, calculateSceneDuration } from './conversion';
 import { MODERN_TRACK_COLORS } from '@/constants';
+import { isValidP3Bar } from '@/types/patternData';
 
 /**
  * Result of importing a Cirklon file
@@ -121,7 +122,64 @@ function getOrderedScenes(song: CirklonSong): Array<[string, CirklonScene]> {
 }
 
 /**
- * Import Cirklon song data into Song Arranger format
+ * Extract full P3 pattern data from Cirklon pattern
+ * Only extracts data for P3 patterns with valid bars array
+ * @param patternDef Cirklon pattern definition
+ * @returns P3PatternData or undefined if not a valid P3 pattern with bars
+ */
+function extractP3PatternData(patternDef: CirklonPattern): P3PatternData | undefined {
+  // Only process P3 patterns
+  if (patternDef.type !== 'P3') {
+    return undefined;
+  }
+
+  // Must have bars array with at least one bar
+  if (!patternDef.bars || !Array.isArray(patternDef.bars) || patternDef.bars.length === 0) {
+    return undefined;
+  }
+
+  // Validate all bars before creating pattern data
+  const validBars = patternDef.bars.filter(isValidP3Bar);
+  if (validBars.length === 0) {
+    return undefined;
+  }
+
+  // Build P3PatternData object
+  const patternData: P3PatternData = {
+    bars: validBars,
+  };
+
+  // Add optional pattern-level fields if they exist
+  if (patternDef.loop_start !== undefined) {
+    patternData.loop_start = patternDef.loop_start;
+  }
+  if (patternDef.loop_end !== undefined) {
+    patternData.loop_end = patternDef.loop_end;
+  }
+  if (patternDef.aux_A !== undefined) {
+    patternData.aux_A = patternDef.aux_A;
+  }
+  if (patternDef.aux_B !== undefined) {
+    patternData.aux_B = patternDef.aux_B;
+  }
+  if (patternDef.aux_C !== undefined) {
+    patternData.aux_C = patternDef.aux_C;
+  }
+  if (patternDef.aux_D !== undefined) {
+    patternData.aux_D = patternDef.aux_D;
+  }
+  if (patternDef.accumulator_config !== undefined &&
+      patternDef.accumulator_config !== null &&
+      typeof patternDef.accumulator_config === 'object' &&
+      Object.keys(patternDef.accumulator_config).length > 0) {
+    patternData.accumulator_config = patternDef.accumulator_config as never;
+  }
+
+  return patternData;
+}
+
+/**
+ * Import Cirklon song data into Cyclone format
  * @param cksData Parsed Cirklon song data
  * @param beatsPerBar Beats per bar (default 4)
  * @returns Import result with tracks, patterns, tempo, and song name
@@ -215,6 +273,12 @@ export function importFromCirklon(
         // Only add muted property if true
         if (isMuted) {
           pattern.muted = true;
+        }
+
+        // Extract and add P3 pattern data if available
+        const patternData = extractP3PatternData(patternDef);
+        if (patternData) {
+          pattern.patternData = patternData;
         }
 
         patterns.push(pattern);

@@ -1,6 +1,6 @@
 /**
- * Song Arranger - Cirklon Conversion Utilities
- * Utilities for converting between Cirklon and Song Arranger formats
+ * Cyclone - Cirklon Conversion Utilities
+ * Utilities for converting between Cirklon and Cyclone formats
  */
 
 import type { CirklonScene } from './types';

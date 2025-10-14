@@ -1,5 +1,5 @@
 /**
- * Song Arranger - BootSequence Component
+ * Cyclone - BootSequence Component
  * Authentic terminal boot sequence with localStorage skip preference
  * Inspired by Commodore 8032 and vintage computing
  */

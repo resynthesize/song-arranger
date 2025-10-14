@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Array Utilities Tests
+ * Cyclone - Array Utilities Tests
  * Tests for safe array access helpers
  */
 

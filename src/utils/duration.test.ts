@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Duration Utilities Tests
+ * Cyclone - Duration Utilities Tests
  * Tests for duration calculation and formatting utilities
  */
 

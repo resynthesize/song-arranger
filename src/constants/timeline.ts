@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Timeline Constants
+ * Cyclone - Timeline Constants
  * Zoom levels, layout dimensions, and viewport configuration
  */
 

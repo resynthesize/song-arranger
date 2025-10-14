@@ -8,4 +8,18 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
+  overflow: hidden; /* Prevent scrollbars on template container */
+}
+
+/**
+ * Main content area containing the timeline
+ * Grows to fill available space when pattern editor is closed
+ * Shrinks to make room for pattern editor when open
+ */
+.timeline-template__content {
+  flex: 1;
+  min-height: 0; /* Allow flex item to shrink below content size */
+  overflow: hidden; /* Timeline handles its own scrolling */
+  display: flex;
+  flex-direction: column;
 }

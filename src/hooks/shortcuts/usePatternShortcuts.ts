@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Pattern Shortcuts Hook
+ * Cyclone - Pattern Shortcuts Hook
  * Handles keyboard shortcuts for pattern manipulation
  */
 

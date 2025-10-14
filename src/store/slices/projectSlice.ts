@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Project Slice
+ * Cyclone - Project Slice
  * Redux state management for project/file management
  */
 

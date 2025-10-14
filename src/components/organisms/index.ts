@@ -13,6 +13,8 @@ export { default as Minimap } from './Minimap/Minimap';
 
 export { default as ColorPicker } from './ColorPicker/ColorPicker';
 
+export { default as PatternEditor } from './PatternEditor/PatternEditor';
+
 // Navigation organisms
 export { default as MenuBar } from './MenuBar/MenuBar';
 export { default as CommandFooter } from './CommandFooter/CommandFooter';

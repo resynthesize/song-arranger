@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Pattern Color Tests
+ * Cyclone - Pattern Color Tests
  * Tests to verify pattern colors work correctly, especially white colors
  */
 

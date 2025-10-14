@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Selection Slice
+ * Cyclone - Selection Slice
  * Redux state management for pattern selection
  */
 

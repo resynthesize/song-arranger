@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Selector Barrel Export
+ * Cyclone - Selector Barrel Export
  * Central export point for all selectors
  */
 

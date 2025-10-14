@@ -1,5 +1,5 @@
 /**
- * Song Arranger - TimelinePage
+ * Cyclone - TimelinePage
  * Main timeline page with project loading, keyboard shortcuts, and modals
  */
 

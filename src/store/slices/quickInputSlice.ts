@@ -1,5 +1,5 @@
 /**
- * Song Arranger - QuickInput Slice
+ * Cyclone - QuickInput Slice
  * Redux state management for quick input modal dialog
  */
 

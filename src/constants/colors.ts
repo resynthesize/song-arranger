@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Color Palette Constants
+ * Cyclone - Color Palette Constants
  * Centralized color palettes for theme-aware track colors
  */
 

@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Cirklon Type Definitions
+ * Cyclone - Cirklon Type Definitions
  * TypeScript interfaces for Cirklon CKS file format
  */
 
@@ -30,7 +30,16 @@ export interface CirklonPattern {
   saved: boolean;
   bar_count?: number;  // P3 patterns have explicit bar_count
   last_step?: number;  // CK patterns have last_step (we'll need to convert)
-  // Additional fields exist but are not needed for import
+
+  // P3-specific fields for full pattern data
+  loop_start?: number;
+  loop_end?: number;
+  aux_A?: string;
+  aux_B?: string;
+  aux_C?: string;
+  aux_D?: string;
+  accumulator_config?: unknown; // Accumulator configuration (typed as unknown for now)
+  bars?: unknown[]; // Array of bar data with 16 steps each
 }
 
 /**

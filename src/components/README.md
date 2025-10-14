@@ -1,6 +1,6 @@
-# Song Arranger - Component Architecture
+# Cyclone - Component Architecture
 
-This document describes the component organization for the Song Arranger project using the **Atomic Design** methodology by Brad Frost.
+This document describes the component organization for the Cyclone project using the **Atomic Design** methodology by Brad Frost.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ Atomic Design is a methodology for creating design systems by breaking interface
 4. **Templates** - Page layouts with placeholder content
 5. **Pages** - Specific instances of templates with real content
 
-### Benefits for Song Arranger
+### Benefits for Cyclone
 
 - **Clear Hierarchy** - Easy to locate components by complexity
 - **Improved Reusability** - DRY principle at the component level
@@ -439,7 +439,7 @@ export const TerminalButton: React.FC<TerminalButtonProps> = ({
 - [Atomic Design by Brad Frost](https://atomicdesign.bradfrost.com/) - Original methodology
 - [Atomic Design Principles](https://bradfrost.com/blog/post/atomic-web-design/) - Core concepts
 
-### Song Arranger Docs
+### Cyclone Docs
 
 - [CLAUDE.md](/CLAUDE.md) - Development workflow and standards
 - [Project README](/README.md) - Project overview and setup

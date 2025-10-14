@@ -1,5 +1,5 @@
 /**
- * Song Arranger - StatusLine Component
+ * Cyclone - StatusLine Component
  * Displays status messages above the footer
  */
 

@@ -1,0 +1,107 @@
+.divider {
+  height: 6px;
+  background-color: var(--color-bg-secondary, #1a1a1a);
+  border-top: 1px solid var(--color-border, #333);
+  border-bottom: 1px solid var(--color-border, #333);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  transition: background-color 0.2s ease;
+  position: relative;
+  user-select: none;
+}
+
+.divider:focus {
+  outline: 2px solid var(--color-primary, #00ff00);
+  outline-offset: -2px;
+}
+
+.divider.hover {
+  cursor: ns-resize;
+  background-color: var(--color-bg-hover, #2a2a2a);
+}
+
+.divider.dragging {
+  cursor: ns-resize;
+  background-color: var(--color-primary-dark, #006600);
+}
+
+.handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 0;
+  pointer-events: none;
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: var(--color-text-secondary, #666);
+  transition: background-color 0.2s ease;
+}
+
+.hover .dot {
+  background-color: var(--color-text, #999);
+}
+
+.dragging .dot {
+  background-color: var(--color-primary, #00ff00);
+}
+
+/* Smooth transition for visual feedback */
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-border, #333) 50%,
+    transparent
+  );
+  opacity: 0.5;
+}
+
+.divider::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-border, #333) 50%,
+    transparent
+  );
+  opacity: 0.5;
+}
+
+.divider:hover::before,
+.divider:hover::after {
+  opacity: 0.8;
+}
+
+.dragging::before,
+.dragging::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary, #00ff00) 50%,
+    transparent
+  );
+  opacity: 1;
+}

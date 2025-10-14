@@ -1,5 +1,5 @@
 /**
- * Song Arranger - ProjectSelector Component
+ * Cyclone - ProjectSelector Component
  * Retro terminal-styled project selection dialog
  */
 

@@ -23,7 +23,7 @@ describe('PatternHandle', () => {
 
     const handle = screen.getByTestId('pattern-pattern-1-handle-left');
     expect(handle).toBeInTheDocument();
-    expect(handle).toHaveClass('pattern-handle--left');
+    expect(handle).toHaveClass('pattern__handle--left');
   });
 
   it('should render right handle', () => {
@@ -37,7 +37,7 @@ describe('PatternHandle', () => {
 
     const handle = screen.getByTestId('pattern-pattern-1-handle-right');
     expect(handle).toBeInTheDocument();
-    expect(handle).toHaveClass('pattern-handle--right');
+    expect(handle).toHaveClass('pattern__handle--right');
   });
 
   it('should call onResizeStart when mouse down on left handle', () => {

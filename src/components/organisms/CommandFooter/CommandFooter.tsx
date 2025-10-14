@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Command Footer Component
+ * Cyclone - Command Footer Component
  * Context-sensitive keyboard shortcuts display
  * Shows only relevant shortcuts for current context
  */

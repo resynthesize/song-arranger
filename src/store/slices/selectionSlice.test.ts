@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Selection Slice Tests
+ * Cyclone - Selection Slice Tests
  * Tests for selection Redux reducer
  */
 

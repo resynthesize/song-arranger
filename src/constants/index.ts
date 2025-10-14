@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Constants Barrel Export
+ * Cyclone - Constants Barrel Export
  * Central export point for all application constants
  */
 

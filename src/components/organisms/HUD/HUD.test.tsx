@@ -1,5 +1,5 @@
 /**
- * Song Arranger - HUD Component Tests
+ * Cyclone - HUD Component Tests
  * Terminal-styled information-dense heads-up display
  */
 
@@ -9,10 +9,16 @@ import { configureStore } from '@reduxjs/toolkit';
 import HUD from './HUD';
 import timelineReducer from '@/store/slices/timelineSlice';
 import tracksReducer from '@/store/slices/tracksSlice';
-import selectionReducer from '@/store/slices/selectionSlice';
 import patternsReducer from '@/store/slices/patternsSlice';
+import selectionReducer from '@/store/slices/selectionSlice';
+import scenesReducer from '@/store/slices/scenesSlice';
 import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
+import projectReducer from '@/store/slices/projectSlice';
+import quickInputReducer from '@/store/slices/quickInputSlice';
+import commandPaletteReducer from '@/store/slices/commandPaletteSlice';
+import statusReducer from '@/store/slices/statusSlice';
 import themeReducer from '@/store/slices/themeSlice';
+import patternEditorReducer from '@/store/slices/patternEditorSlice';
 import type { ViewportState } from '@/types';
 
 // Default viewport for tests
@@ -42,10 +48,16 @@ const createTestStore = (preloadedState = {}) => {
     reducer: {
       timeline: timelineReducer,
       tracks: tracksReducer,
-      selection: selectionReducer,
       patterns: patternsReducer,
+      selection: selectionReducer,
+      scenes: scenesReducer,
       crtEffects: crtEffectsReducer,
+      project: projectReducer,
+      quickInput: quickInputReducer,
+      commandPalette: commandPaletteReducer,
+      status: statusReducer,
       theme: themeReducer,
+      patternEditor: patternEditorReducer,
     },
     preloadedState,
   });
@@ -119,7 +131,7 @@ describe('HUD', () => {
       },
     });
 
-    const patternsSection = screen.getByText(/PATTERNS/i).parentElement;
+    const patternsSection = screen.getByText(/CLIPS/i).parentElement;
     expect(patternsSection).toHaveTextContent('3');
   });
 
@@ -134,7 +146,7 @@ describe('HUD', () => {
       },
     });
 
-    expect(screen.getByText(/TRACKS/i)).toBeInTheDocument();
+    expect(screen.getByText(/LANES/i)).toBeInTheDocument();
     expect(screen.getByText(/3/)).toBeInTheDocument();
   });
 

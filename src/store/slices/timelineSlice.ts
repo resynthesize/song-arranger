@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Timeline Slice
+ * Cyclone - Timeline Slice
  * Redux state management for timeline operations
  */
 

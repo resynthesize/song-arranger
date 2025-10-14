@@ -1,14 +1,53 @@
 /**
- * Song Arranger - Lane Component Tests
+ * Cyclone - Lane Component Tests
  * Tests for the Lane component
  */
 
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import timelineReducer from '@/store/slices/timelineSlice';
+import tracksReducer from '@/store/slices/tracksSlice';
+import patternsReducer from '@/store/slices/patternsSlice';
+import selectionReducer from '@/store/slices/selectionSlice';
+import scenesReducer from '@/store/slices/scenesSlice';
+import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
+import projectReducer from '@/store/slices/projectSlice';
+import quickInputReducer from '@/store/slices/quickInputSlice';
+import commandPaletteReducer from '@/store/slices/commandPaletteSlice';
+import statusReducer from '@/store/slices/statusSlice';
+import themeReducer from '@/store/slices/themeSlice';
+import patternEditorReducer from '@/store/slices/patternEditorSlice';
 import Track from './Track';
 import type { Pattern, ViewportState } from '@/types';
 
 describe('Lane', () => {
+  // Helper function to create mock Redux store
+  const createMockStore = () => configureStore({
+    reducer: {
+      timeline: timelineReducer,
+      tracks: tracksReducer,
+      patterns: patternsReducer,
+      selection: selectionReducer,
+      scenes: scenesReducer,
+      crtEffects: crtEffectsReducer,
+      project: projectReducer,
+      quickInput: quickInputReducer,
+      commandPalette: commandPaletteReducer,
+      status: statusReducer,
+      theme: themeReducer,
+      patternEditor: patternEditorReducer,
+    },
+  });
+
+  // Helper function to render with Redux Provider
+  const renderWithProvider = (ui: React.ReactElement) => {
+    const store = createMockStore();
+    return render(<Provider store={store}>{ui}</Provider>);
+  };
+
   // Helper function to simulate a double-click (two mousedowns within 500ms)
   const simulateDoubleClick = (element: HTMLElement, clientX: number, clientY: number) => {
     // First click
@@ -69,14 +108,14 @@ describe('Lane', () => {
   });
 
   it('should render lane with name', () => {
-    render(<Track {...defaultProps} />);
+    renderWithProvider(<Track {...defaultProps} />);
     expect(screen.getByText('Kick')).toBeInTheDocument();
   });
 
   it('should render all clips in the lane', () => {
-    render(<Track {...defaultProps} />);
-    expect(screen.getByTestId('clip-clip-1')).toBeInTheDocument();
-    expect(screen.getByTestId('clip-clip-2')).toBeInTheDocument();
+    renderWithProvider(<Track {...defaultProps} />);
+    expect(screen.getByTestId('pattern-clip-1')).toBeInTheDocument();
+    expect(screen.getByTestId('pattern-clip-2')).toBeInTheDocument();
   });
 
   it('should only render clips that belong to this lane', () => {
@@ -84,15 +123,15 @@ describe('Lane', () => {
       ...mockPatterns,
       { id: 'clip-3', trackId: 'lane-2', position: 0, duration: 4 },
     ];
-    render(<Track {...defaultProps} patterns={patternsWithDifferentTracks} />);
+    renderWithProvider(<Track {...defaultProps} patterns={patternsWithDifferentTracks} />);
 
-    expect(screen.getByTestId('clip-clip-1')).toBeInTheDocument();
-    expect(screen.getByTestId('clip-clip-2')).toBeInTheDocument();
-    expect(screen.queryByTestId('clip-clip-3')).not.toBeInTheDocument();
+    expect(screen.getByTestId('pattern-clip-1')).toBeInTheDocument();
+    expect(screen.getByTestId('pattern-clip-2')).toBeInTheDocument();
+    expect(screen.queryByTestId('pattern-clip-3')).not.toBeInTheDocument();
   });
 
   it('should show input when editing', () => {
-    render(<Track {...defaultProps} isEditing={true} />);
+    renderWithProvider(<Track {...defaultProps} isEditing={true} />);
     const input = screen.getByDisplayValue('Kick');
     expect(input).toBeInTheDocument();
     expect(input).toHaveFocus();
@@ -100,7 +139,7 @@ describe('Lane', () => {
 
   it('should call onStartEditing when name is double-clicked', async () => {
     const onStartEditing = jest.fn();
-    render(<Track {...defaultProps} onStartEditing={onStartEditing} />);
+    renderWithProvider(<Track {...defaultProps} onStartEditing={onStartEditing} />);
 
     const nameLabel = screen.getByText('Kick');
     await userEvent.dblClick(nameLabel);
@@ -111,7 +150,7 @@ describe('Lane', () => {
   it('should call onNameChange and onStopEditing when Enter is pressed', async () => {
     const onNameChange = jest.fn();
     const onStopEditing = jest.fn();
-    render(
+    renderWithProvider(
       <Track
         {...defaultProps}
         isEditing={true}
@@ -131,7 +170,7 @@ describe('Lane', () => {
   it('should call onStopEditing when Escape is pressed without saving', async () => {
     const onNameChange = jest.fn();
     const onStopEditing = jest.fn();
-    render(
+    renderWithProvider(
       <Track
         {...defaultProps}
         isEditing={true}
@@ -150,7 +189,7 @@ describe('Lane', () => {
   it('should call onStopEditing when input loses focus', async () => {
     const onNameChange = jest.fn();
     const onStopEditing = jest.fn();
-    render(
+    renderWithProvider(
       <Track
         {...defaultProps}
         isEditing={true}
@@ -171,16 +210,16 @@ describe('Lane', () => {
   });
 
   it('should pass selected state to clips', () => {
-    render(<Track {...defaultProps} selectedPatternIds={['clip-1']} />);
-    const clip1 = screen.getByTestId('clip-clip-1');
-    expect(clip1).toHaveClass('clip--selected');
+    renderWithProvider(<Track {...defaultProps} selectedPatternIds={['clip-1']} />);
+    const clip1 = screen.getByTestId('pattern-clip-1');
+    expect(clip1).toHaveClass('pattern--selected');
   });
 
   it('should call onDoubleClick when lane area is double-clicked', async () => {
     const onDoubleClick = jest.fn();
-    render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+    renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
-    const laneContent = screen.getByTestId('lane-lane-1-content');
+    const laneContent = screen.getByTestId('track-lane-1-content');
 
     // Mock getBoundingClientRect
     const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -212,9 +251,9 @@ describe('Lane', () => {
 
   it('should calculate click position in beats', async () => {
     const onDoubleClick = jest.fn();
-    render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+    renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
-    const laneContent = screen.getByTestId('lane-lane-1-content');
+    const laneContent = screen.getByTestId('track-lane-1-content');
 
     // Mock getBoundingClientRect to return a stable position
     const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -253,9 +292,9 @@ describe('Lane', () => {
   describe('Click-and-drag clip creation', () => {
     it('should create clip with dragged width when user drags on empty space', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -294,9 +333,9 @@ describe('Lane', () => {
 
     it('should show ghost clip preview while dragging', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -323,16 +362,16 @@ describe('Lane', () => {
 
       // Should show ghost clip element
       await waitFor(() => {
-        const ghostClip = screen.getByTestId('ghost-clip');
+        const ghostClip = screen.getByTestId('ghost-pattern');
         expect(ghostClip).toBeInTheDocument();
       });
     });
 
     it('should enforce minimum clip duration of snap value', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -369,9 +408,9 @@ describe('Lane', () => {
 
     it('should create default 4-beat clip on quick double-click without drag', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -404,9 +443,9 @@ describe('Lane', () => {
 
     it('should snap start position to grid when snap is enabled', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -444,10 +483,10 @@ describe('Lane', () => {
 
     it('should not trigger on existing clip', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
       // Get the first clip element
-      const clip = screen.getByTestId('clip-clip-1');
+      const clip = screen.getByTestId('pattern-clip-1');
 
       // Simulate double-click on the clip (not the empty lane)
       fireEvent.dblClick(clip, {
@@ -470,9 +509,9 @@ describe('Lane', () => {
 
     it('should cancel creation if dragging outside lane boundaries', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -511,9 +550,9 @@ describe('Lane', () => {
 
     it('should create clip backwards when dragging left (backward in time)', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -553,9 +592,9 @@ describe('Lane', () => {
 
     it('should show correct ghost clip preview when dragging backwards', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -582,7 +621,7 @@ describe('Lane', () => {
 
       // Should show ghost clip element at the correct position (starting from left)
       await waitFor(() => {
-        const ghostClip = screen.getByTestId('ghost-clip');
+        const ghostClip = screen.getByTestId('ghost-pattern');
         expect(ghostClip).toBeInTheDocument();
         // Ghost should be at 100px (1 beat) with width 400px (4 beats)
         expect(ghostClip).toHaveStyle({ left: '100px', width: '400px' });
@@ -591,9 +630,9 @@ describe('Lane', () => {
 
     it('should handle backward drag with snapping correctly', async () => {
       const onDoubleClick = jest.fn();
-      render(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
+      renderWithProvider(<Track {...defaultProps} snapValue={1} onDoubleClick={onDoubleClick} />);
 
-      const laneContent = screen.getByTestId('lane-lane-1-content');
+      const laneContent = screen.getByTestId('track-lane-1-content');
 
       // Mock getBoundingClientRect
       const mockGetBoundingClientRect = jest.fn().mockReturnValue({
@@ -609,10 +648,10 @@ describe('Lane', () => {
       });
       laneContent.getBoundingClientRect = mockGetBoundingClientRect;
 
-      // Start at x=650 (550px = 5.5 beats, should snap to 5)
+      // Start at x=650 (550px = 5.5 beats, should snap to 6)
       simulateDoubleClick(laneContent, 650, 40);
 
-      // Drag back to x=250 (150px = 1.5 beats, should snap to 2)
+      // Drag back to x=250 (150px = 1.5 beats, should snap to 1)
       fireEvent.mouseMove(document, {
         clientX: 250,
         clientY: 40,
@@ -623,9 +662,9 @@ describe('Lane', () => {
         clientY: 40,
       });
 
-      // Ending position snaps to 2, start position is 5, so clip should be at position 2 with duration 3
+      // Ending position snaps to 1, start position is 6, so clip should be at position 1 with duration 5
       await waitFor(() => {
-        expect(onDoubleClick).toHaveBeenCalledWith('lane-1', 2, 3);
+        expect(onDoubleClick).toHaveBeenCalledWith('lane-1', 1, 5);
       });
     });
   });

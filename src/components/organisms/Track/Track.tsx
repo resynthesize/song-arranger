@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Track Component
+ * Cyclone - Track Component
  * Horizontal track that contains patterns
  */
 
@@ -38,6 +38,7 @@ interface TrackProps {
   onPatternSelect: (patternId: ID, isMultiSelect: boolean) => void;
   onPatternMove: (patternId: ID, newPosition: Position, delta: number) => void;
   onPatternResize: (patternId: ID, newDuration: Duration, edge: 'left' | 'right', startDuration: Duration, startPosition: Position) => void;
+  onPatternOpenEditor?: (patternId: ID) => void;
   onPatternLabelChange?: (patternId: ID, label: string) => void;
   onPatternCopy?: (patternId: ID) => void;
   onPatternDelete?: (patternId: ID) => void;
@@ -68,6 +69,7 @@ const Track = ({
   onPatternSelect,
   onPatternMove,
   onPatternResize,
+  onPatternOpenEditor,
   onPatternLabelChange,
   onPatternCopy,
   onPatternDelete,
@@ -245,6 +247,7 @@ const Track = ({
               onSelect={onPatternSelect}
               onMove={onPatternMove}
               onResize={onPatternResize}
+              onOpenEditor={onPatternOpenEditor}
               onLabelChange={onPatternLabelChange}
               onCopy={onPatternCopy}
               onDelete={onPatternDelete}

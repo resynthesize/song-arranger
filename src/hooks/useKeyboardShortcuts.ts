@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Keyboard Shortcuts Hook
+ * Cyclone - Keyboard Shortcuts Hook
  * Main entry point for keyboard shortcuts functionality
  *
  * This file re-exports the orchestrated keyboard shortcuts from the shortcuts module.

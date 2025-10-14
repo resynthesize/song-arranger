@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Navigation Utilities
+ * Cyclone - Navigation Utilities
  * Functions for finding patterns in different directions for arrow key navigation
  */
 

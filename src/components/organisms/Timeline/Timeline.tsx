@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Timeline Component
+ * Cyclone - Timeline Component
  * Main timeline container with lanes and clips
  */
 
@@ -24,6 +24,7 @@ import {
   selectMovingTrackId,
 } from '@/store/selectors';
 import { setPlayheadPosition, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
+import { openPattern } from '@/store/slices/patternEditorSlice';
 import { snapToGrid } from '@/utils/snap';
 import { LANE_HEIGHT } from '@/constants';
 import { logger } from '@/utils/debug';
@@ -111,6 +112,14 @@ const Timeline = () => {
       } else {
         dispatch(selectPattern(clipId));
       }
+    },
+    [dispatch]
+  );
+
+  // Handle opening pattern editor
+  const handleOpenPatternEditor = useCallback(
+    (patternId: ID) => {
+      dispatch(openPattern(patternId));
     },
     [dispatch]
   );
@@ -208,6 +217,7 @@ const Timeline = () => {
                 onPatternSelect={handleClipSelect}
                 onPatternMove={clipOperations.handleClipMove}
                 onPatternResize={clipOperations.handleClipResize}
+                onPatternOpenEditor={handleOpenPatternEditor}
                 onPatternLabelChange={clipOperations.handleClipLabelChange}
                 onPatternCopy={clipOperations.handleClipCopy}
                 onPatternDelete={clipOperations.handleClipDelete}

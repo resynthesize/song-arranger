@@ -1,10 +1,10 @@
-# Song Arranger - Development Guide
+# Cyclone - Development Guide
 
-This document outlines development practices and workflows for the Song Arranger project.
+This document outlines development practices and workflows for the Cyclone project.
 
 ## Project Overview
 
-Song Arranger is a web-based timeline tool for sketching song structures with a retro VT terminal aesthetic inspired by the Monolake 8bit project.
+Cyclone is a web-based sequence editor and timeline tool for the Sequentix Cirklon hardware sequencer, featuring retro VT terminal and modern minimalist themes.
 
 ## Tech Stack
 

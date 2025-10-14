@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Theme Slice Tests
+ * Cyclone - Theme Slice Tests
  * Tests for theme management Redux slice
  */
 

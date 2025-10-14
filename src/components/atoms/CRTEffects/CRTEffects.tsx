@@ -1,5 +1,5 @@
 /**
- * Song Arranger - CRTEffects Component
+ * Cyclone - CRTEffects Component
  * Overlay component providing authentic CRT monitor effects
  */
 

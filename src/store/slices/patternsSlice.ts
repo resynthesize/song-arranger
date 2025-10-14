@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Patterns Slice
+ * Cyclone - Patterns Slice
  * Redux state management for patterns
  */
 

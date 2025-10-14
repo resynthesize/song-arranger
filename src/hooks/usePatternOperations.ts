@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Pattern Operations Hook
+ * Cyclone - Pattern Operations Hook
  * Custom hook for clip-related operations (move, resize, delete, duplicate, etc.)
  */
 

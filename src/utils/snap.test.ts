@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Snap Utility Tests
+ * Cyclone - Snap Utility Tests
  * Tests for snap-to-grid functionality
  */
 

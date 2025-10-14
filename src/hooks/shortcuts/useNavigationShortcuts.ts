@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Navigation Shortcuts Hook
+ * Cyclone - Navigation Shortcuts Hook
  * Handles keyboard shortcuts for playhead and timeline navigation
  */
 

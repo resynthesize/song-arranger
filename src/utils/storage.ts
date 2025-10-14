@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Storage Utilities
+ * Cyclone - Storage Utilities
  * localStorage-based project file management
  */
 

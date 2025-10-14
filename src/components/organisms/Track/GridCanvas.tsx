@@ -1,5 +1,5 @@
 /**
- * Song Arranger - GridCanvas Component
+ * Cyclone - GridCanvas Component
  * Canvas-based grid rendering for lane backgrounds
  */
 

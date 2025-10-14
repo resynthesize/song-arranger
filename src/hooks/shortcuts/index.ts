@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Keyboard Shortcuts Orchestrator
+ * Cyclone - Keyboard Shortcuts Orchestrator
  * Combines all domain-specific shortcut hooks into a unified interface
  */
 

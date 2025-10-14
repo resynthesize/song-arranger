@@ -1,5 +1,5 @@
 /**
- * Song Arranger - CirklonExportDialog Tests
+ * Cyclone - CirklonExportDialog Tests
  * Test-driven development: Write tests first, then implement
  */
 

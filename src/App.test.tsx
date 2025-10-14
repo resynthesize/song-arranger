@@ -1,5 +1,5 @@
 /**
- * Song Arranger - App Component Tests
+ * Cyclone - App Component Tests
  * Tests for the main App component
  */
 
@@ -18,6 +18,7 @@ import quickInputReducer from './store/slices/quickInputSlice';
 import commandPaletteReducer from './store/slices/commandPaletteSlice';
 import statusReducer from './store/slices/statusSlice';
 import themeReducer from './store/slices/themeSlice';
+import patternEditorReducer from './store/slices/patternEditorSlice';
 
 // Mock the storage util
 jest.mock('./utils/storage', () => ({
@@ -39,6 +40,7 @@ describe('App', () => {
         commandPalette: commandPaletteReducer,
         status: statusReducer,
         theme: themeReducer,
+        patternEditor: patternEditorReducer,
       },
       preloadedState: initialState,
     });

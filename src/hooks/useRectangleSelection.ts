@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Rectangle Selection Hook
+ * Cyclone - Rectangle Selection Hook
  * Custom hook for rectangle selection logic
  */
 

@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Viewport Hook
+ * Cyclone - Viewport Hook
  * Custom hook for viewport pan/zoom interactions
  */
 

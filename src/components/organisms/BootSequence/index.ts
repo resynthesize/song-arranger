@@ -1,5 +1,5 @@
 /**
- * Song Arranger - BootSequence Component Export
+ * Cyclone - BootSequence Component Export
  */
 
 export { default } from './BootSequence';

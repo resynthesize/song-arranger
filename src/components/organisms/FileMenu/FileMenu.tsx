@@ -1,5 +1,5 @@
 /**
- * Song Arranger - FileMenu Component
+ * Cyclone - FileMenu Component
  * File operations menu for project management
  */
 
@@ -332,7 +332,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           // Parse CKS file
           const cksData = parseCKSFile(jsonString);
 
-          // Import to Song Arranger format
+          // Import to Cyclone format
           const importResult = importFromCirklon(cksData);
 
           // Load imported data into Redux

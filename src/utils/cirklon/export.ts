@@ -1,6 +1,6 @@
 /**
- * Song Arranger - Cirklon Export
- * Export Song Arranger format to Cirklon CKS files
+ * Cyclone - Cirklon Export
+ * Export Cyclone format to Cirklon CKS files
  */
 
 import type { Track, Pattern } from '@/types';
@@ -152,7 +152,7 @@ function findScenePatterns(
 
 /**
  * Create a Cirklon pattern definition
- * @param pattern Song Arranger pattern
+ * @param pattern Cyclone pattern
  * @param trackNum Track number (1-based)
  * @param beatsPerBar Beats per bar
  * @returns Cirklon pattern
@@ -174,7 +174,7 @@ function createCirklonPattern(
 }
 
 /**
- * Export Song Arranger tracks and patterns to Cirklon format
+ * Export Cyclone tracks and patterns to Cirklon format
  * @param tracks Array of tracks
  * @param patterns Array of patterns
  * @param options Export options

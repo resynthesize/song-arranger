@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Test Setup
+ * Cyclone - Test Setup
  * Configuration for Jest and React Testing Library
  */
 

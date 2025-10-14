@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Timeline Slice Tests
+ * Cyclone - Timeline Slice Tests
  * Tests for timeline Redux reducer
  */
 

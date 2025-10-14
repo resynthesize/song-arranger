@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Status Slice
+ * Cyclone - Status Slice
  * Manages status line messages
  */
 

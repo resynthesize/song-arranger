@@ -1,5 +1,5 @@
 /**
- * Song Arranger - MenuBar Component
+ * Cyclone - MenuBar Component
  * Top menu bar with controls and arrangement overview
  */
 

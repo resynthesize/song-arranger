@@ -1,5 +1,5 @@
 /**
- * Song Arranger - TerminalNoise Component
+ * Cyclone - TerminalNoise Component
  * Subtle character noise/glitches for authentic terminal aesthetic
  * Very rare, 1-2 glitches per second
  */

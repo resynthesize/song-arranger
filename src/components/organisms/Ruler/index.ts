@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Ruler Component
+ * Cyclone - Ruler Component
  * Export barrel file
  */
 

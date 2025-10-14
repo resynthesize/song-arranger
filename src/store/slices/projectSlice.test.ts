@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Project Slice Tests
+ * Cyclone - Project Slice Tests
  * Tests for project management Redux reducer
  */
 

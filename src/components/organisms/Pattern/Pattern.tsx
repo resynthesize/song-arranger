@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Pattern Component
+ * Cyclone - Pattern Component
  * Represents a pattern on the timeline with drag and resize functionality
  */
 
@@ -34,6 +34,7 @@ interface PatternProps {
   onVerticalDrag?: (patternId: ID, startingTrackId: ID, deltaY: number) => void;
   onVerticalDragUpdate?: (patternId: ID, deltaY: number) => void;
   onCopy?: (patternId: ID) => void;
+  onOpenEditor?: (patternId: ID) => void;
   onStartEditing?: (patternId: ID) => void;
   onStopEditing?: () => void;
   onLabelChange?: (patternId: ID, label: string) => void;
@@ -62,6 +63,7 @@ const Pattern = ({
   onVerticalDrag,
   onVerticalDragUpdate,
   onCopy,
+  onOpenEditor,
   onStartEditing,
   onStopEditing,
   onLabelChange,
@@ -141,7 +143,10 @@ const Pattern = ({
 
   const handleDoubleClick = (e: MouseEvent) => {
     e.stopPropagation();
-    if (onStartEditing) {
+    // Prioritize onOpenEditor over onStartEditing
+    if (onOpenEditor) {
+      onOpenEditor(id);
+    } else if (onStartEditing) {
       onStartEditing(id);
     }
   };

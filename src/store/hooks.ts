@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Redux Hooks
+ * Cyclone - Redux Hooks
  * Typed versions of useDispatch and useSelector
  */
 

@@ -1,5 +1,5 @@
 /**
- * Song Arranger - UI Constants
+ * Cyclone - UI Constants
  * Color scheme and styling constants for retro terminal aesthetic
  */
 

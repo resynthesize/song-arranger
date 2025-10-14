@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Ruler Component
+ * Cyclone - Ruler Component
  * Bar and beat ruler positioned above the timeline
  */
 

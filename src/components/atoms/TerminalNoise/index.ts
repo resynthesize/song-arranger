@@ -1,5 +1,5 @@
 /**
- * Song Arranger - TerminalNoise Component Export
+ * Cyclone - TerminalNoise Component Export
  */
 
 export { default } from './TerminalNoise';

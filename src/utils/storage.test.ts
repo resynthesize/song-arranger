@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Storage Utilities Tests
+ * Cyclone - Storage Utilities Tests
  * TDD tests for localStorage-based project file management
  */
 

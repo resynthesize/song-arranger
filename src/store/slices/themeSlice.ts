@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Theme Management Slice
+ * Cyclone - Theme Management Slice
  * Redux slice for managing application theme (modern/retro)
  */
 

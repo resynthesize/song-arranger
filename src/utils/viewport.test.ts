@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Viewport Utilities Tests
+ * Cyclone - Viewport Utilities Tests
  * Tests for viewport coordinate conversion and visibility calculations
  */
 

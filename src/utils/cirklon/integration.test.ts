@@ -1,5 +1,5 @@
 /**
- * Song Arranger - Cirklon Integration Tests
+ * Cyclone - Cirklon Integration Tests
  * Real-world test with xtlove.CKS file and round-trip tests
  */
 
@@ -155,5 +155,79 @@ describe('Cirklon Integration - xtlove.CKS', () => {
     console.log(`  Original muted: ${muted1}, After round-trip: ${muted2}`);
     console.log(`  Original P3: ${p3Count1}, After round-trip: ${p3Count2}`);
     console.log(`  Original CK: ${ckCount1}, After round-trip: ${ckCount2}`);
+  });
+
+  it('should import and preserve P3 pattern data from real CKS file', () => {
+    // Read and import xtlove.CKS
+    const cksPath = path.join(__dirname, '../../../cirklon/xtlove.CKS');
+    const cksContent = fs.readFileSync(cksPath, 'utf-8');
+    const cksData = parseCKSFile(cksContent);
+    const result = importFromCirklon(cksData);
+
+    // Find P3 patterns with pattern data
+    const p3PatternsWithData = result.patterns.filter((p) =>
+      p.patternType === 'P3' && p.patternData !== undefined
+    );
+
+    // We know "Trk9 P1" exists in the file with full bar data
+    // Let's verify at least some P3 patterns have full data
+    expect(p3PatternsWithData.length).toBeGreaterThan(0);
+
+    // Check a specific pattern we know has data
+    const trk9P1 = result.patterns.find((p) => p.label === 'Trk9 P1');
+    expect(trk9P1).toBeDefined();
+    if (!trk9P1) return;
+
+    // Verify it has pattern data
+    expect(trk9P1.patternData).toBeDefined();
+    if (!trk9P1.patternData) return;
+
+    // Verify pattern-level settings from the CKS file
+    expect(trk9P1.patternData.loop_start).toBe(1);
+    expect(trk9P1.patternData.loop_end).toBe(1);
+    expect(trk9P1.patternData.aux_A).toBe('cc #1');
+    expect(trk9P1.patternData.aux_B).toBe('cc #4');
+    expect(trk9P1.patternData.aux_C).toBe('cc #6');
+    expect(trk9P1.patternData.aux_D).toBe('cc #10');
+
+    // Verify accumulator config exists
+    expect(trk9P1.patternData.accumulator_config).toBeDefined();
+
+    // Verify bars array
+    expect(trk9P1.patternData.bars).toBeDefined();
+    expect(trk9P1.patternData.bars.length).toBe(1);
+
+    const bar = trk9P1.patternData.bars[0];
+    expect(bar).toBeDefined();
+    if (!bar) return;
+
+    // Verify bar properties match the CKS file
+    expect(bar.direction).toBe('forward');
+    expect(bar.tbase).toBe('  4');
+    expect(bar.last_step).toBe(8);
+    expect(bar.xpos).toBe(-12);
+    expect(bar.reps).toBe(1);
+    expect(bar.gbar).toBe(false);
+
+    // Verify step arrays have correct length
+    expect(bar.note).toHaveLength(16);
+    expect(bar.velo).toHaveLength(16);
+    expect(bar.length).toHaveLength(16);
+    expect(bar.delay).toHaveLength(16);
+    expect(bar.gate).toHaveLength(16);
+
+    // Verify some actual values from the CKS file
+    expect(bar.note[0]).toBe('C 3');
+    expect(bar.note[2]).toBe('D#5');
+    expect(bar.velo[0]).toBe(36);
+    expect(bar.velo[1]).toBe(107);
+    expect(bar.gate[0]).toBe(1);
+    expect(bar.gate[8]).toBe(1);
+
+    // Log summary
+    console.log('P3 Pattern Data Import Summary:');
+    console.log(`  P3 patterns with data: ${p3PatternsWithData.length}`);
+    console.log(`  Total P3 patterns: ${result.patterns.filter((p) => p.patternType === 'P3').length}`);
+    console.log(`  Pattern data coverage: ${Math.round(p3PatternsWithData.length / result.patterns.filter((p) => p.patternType === 'P3').length * 100)}%`);
   });
 });
