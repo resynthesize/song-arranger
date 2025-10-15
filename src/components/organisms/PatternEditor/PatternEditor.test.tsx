@@ -89,6 +89,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [],
@@ -115,6 +116,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -149,6 +151,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -190,6 +193,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -229,6 +233,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -272,6 +277,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -314,6 +320,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -360,6 +367,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -403,6 +411,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -446,6 +455,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 500, // Custom height
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -483,6 +493,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -535,6 +546,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -572,6 +584,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -610,6 +623,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -650,6 +664,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -689,6 +704,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -731,6 +747,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -782,6 +799,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -823,6 +841,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0,
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -864,6 +883,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0, // First bar
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -903,6 +923,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 1, // Last bar (0-indexed, so bar 2 of 2)
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -943,6 +964,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 1, // Second bar
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -987,6 +1009,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 0, // First bar
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -1033,6 +1056,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 1, // Second bar (0-indexed)
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [
@@ -1072,6 +1096,7 @@ describe('PatternEditor', () => {
           currentBarIndex: 5, // Invalid index (out of bounds)
           editorHeight: 400,
           clipboardSteps: null,
+          viewMode: 'parameters',
         },
         patterns: {
           patterns: [

@@ -5,6 +5,7 @@
 
 import type { Pattern, Track, TimelineState } from '@/types';
 import { logger } from './debug';
+import { generateId } from './id';
 
 // Current data version - v2.0.0 is a breaking change (Lane→Track, Clip→Pattern)
 const DATA_VERSION = '2.0.0';
@@ -44,9 +45,11 @@ export interface SaveProjectParams {
 
 /**
  * Generate a unique project ID
+ * Note: Project IDs don't include a 'project-' prefix for backward compatibility
  */
 const generateProjectId = (): string => {
-  return `${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`;
+  // Use generateId and strip the 'project-' prefix for backward compatibility
+  return generateId('project').replace('project-', '');
 };
 
 /**

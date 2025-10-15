@@ -9,6 +9,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import CirklonExportDialog from './CirklonExportDialog';
 import type { ExportOptions } from '@/utils/cirklon/export';
+import { actUser } from '@/utils/testUtils';
 
 describe('CirklonExportDialog', () => {
   const mockOnClose = jest.fn();
@@ -128,7 +129,7 @@ describe('CirklonExportDialog', () => {
     );
 
     const cancelButton = screen.getByTestId('export-cancel-button');
-    await user.click(cancelButton);
+    await actUser(() => user.click(cancelButton));
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
@@ -145,12 +146,12 @@ describe('CirklonExportDialog', () => {
 
     // Set song name
     const songNameInput = screen.getByLabelText(/Song Name/i);
-    await user.clear(songNameInput);
-    await user.type(songNameInput, 'My Song');
+    await actUser(() => user.clear(songNameInput));
+    await actUser(() => user.type(songNameInput, 'My Song'));
 
     // Click export
     const exportButton = screen.getByTestId('export-button');
-    await user.click(exportButton);
+    await actUser(() => user.click(exportButton));
 
     expect(mockOnExport).toHaveBeenCalledTimes(1);
     expect(mockOnExport).toHaveBeenCalledWith({
@@ -172,7 +173,7 @@ describe('CirklonExportDialog', () => {
     );
 
     const select = screen.getByLabelText(/Scene Length/i);
-    await user.selectOptions(select, '16');
+    await actUser(() => user.selectOptions(select, '16'));
 
     expect((select as HTMLSelectElement).value).toBe('16');
   });
@@ -188,8 +189,8 @@ describe('CirklonExportDialog', () => {
     );
 
     const input = screen.getByLabelText(/Beats Per Bar/i);
-    await user.clear(input);
-    await user.type(input, '3');
+    await actUser(() => user.clear(input));
+    await actUser(() => user.type(input, '3'));
 
     expect((input as HTMLInputElement).value).toBe('3');
   });
@@ -206,21 +207,21 @@ describe('CirklonExportDialog', () => {
 
     // Change scene length
     const sceneSelect = screen.getByLabelText(/Scene Length/i);
-    await user.selectOptions(sceneSelect, '16');
+    await actUser(() => user.selectOptions(sceneSelect, '16'));
 
     // Change beats per bar
     const beatsInput = screen.getByLabelText(/Beats Per Bar/i);
-    await user.clear(beatsInput);
-    await user.type(beatsInput, '3');
+    await actUser(() => user.clear(beatsInput));
+    await actUser(() => user.type(beatsInput, '3'));
 
     // Set song name
     const songNameInput = screen.getByLabelText(/Song Name/i);
-    await user.clear(songNameInput);
-    await user.type(songNameInput, 'Custom Song');
+    await actUser(() => user.clear(songNameInput));
+    await actUser(() => user.type(songNameInput, 'Custom Song'));
 
     // Click export
     const exportButton = screen.getByTestId('export-button');
-    await user.click(exportButton);
+    await actUser(() => user.click(exportButton));
 
     expect(mockOnExport).toHaveBeenCalledWith({
       sceneLengthBars: 16,
@@ -241,8 +242,8 @@ describe('CirklonExportDialog', () => {
     );
 
     const beatsInput = screen.getByLabelText(/Beats Per Bar/i) as HTMLInputElement;
-    await user.clear(beatsInput);
-    await user.type(beatsInput, '0');
+    await actUser(() => user.clear(beatsInput));
+    await actUser(() => user.type(beatsInput, '0'));
 
     const exportButton = screen.getByTestId('export-button');
 
@@ -264,10 +265,10 @@ describe('CirklonExportDialog', () => {
     );
 
     const songNameInput = screen.getByLabelText(/Song Name/i);
-    await user.clear(songNameInput);
+    await actUser(() => user.clear(songNameInput));
 
     const exportButton = screen.getByTestId('export-button');
-    await user.click(exportButton);
+    await actUser(() => user.click(exportButton));
 
     // Should not call onExport with empty song name
     expect(mockOnExport).not.toHaveBeenCalled();
@@ -283,7 +284,7 @@ describe('CirklonExportDialog', () => {
       />
     );
 
-    await user.keyboard('{Escape}');
+    await actUser(() => user.keyboard('{Escape}'));
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });

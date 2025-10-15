@@ -6,6 +6,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { TracksState, ID } from '@/types';
 import { DEFAULT_TRACK_COLOR } from '@/constants';
+import { generateId } from '@/utils/id';
 
 const initialState: TracksState = {
   tracks: [],
@@ -30,7 +31,7 @@ const tracksSlice = createSlice({
       }
 
       state.tracks.push({
-        id: `track-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+        id: generateId('track'),
         name: trackName,
         color: DEFAULT_TRACK_COLOR, // Default muted blue - works well in both modern and retro themes
       });

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { parseCKSFile, importFromCirklon } from './import';
+import { parseCKSFile, importFromCirklon, importSongCollectionFromCirklon } from './import';
 import type { CirklonSongData } from './types';
 
 describe('Cirklon Import', () => {
@@ -870,6 +870,289 @@ describe('Cirklon Import', () => {
         // Should not have patternData if no bars
         expect(pattern.patternData).toBeUndefined();
       });
+    });
+  });
+
+  describe('importSongCollectionFromCirklon', () => {
+    it('should return empty result for empty song collection', () => {
+      const cksData: CirklonSongData = {
+        song_data: {},
+      };
+
+      const mockSave = jest.fn().mockReturnValue('mock-id');
+      const result = importSongCollectionFromCirklon(cksData, 4, mockSave);
+
+      expect(result.successCount).toBe(0);
+      expect(result.failureCount).toBe(0);
+      expect(result.songNames).toEqual([]);
+      expect(result.errors).toEqual([]);
+      expect(mockSave).not.toHaveBeenCalled();
+    });
+
+    it('should import single song and save to storage', () => {
+      const cksData: CirklonSongData = {
+        song_data: {
+          'test song': {
+            patterns: {
+              'Trk1 P1': {
+                type: 'P3',
+                creator_track: 1,
+                saved: true,
+                bar_count: 4,
+              },
+            },
+            scenes: {
+              'scene 1': {
+                gbar: 0,
+                length: 4,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P1',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const mockSave = jest.fn().mockReturnValue('saved-id-1');
+      const result = importSongCollectionFromCirklon(cksData, 4, mockSave);
+
+      expect(result.successCount).toBe(1);
+      expect(result.failureCount).toBe(0);
+      expect(result.songNames).toEqual(['test song']);
+      expect(result.errors).toEqual([]);
+
+      expect(mockSave).toHaveBeenCalledTimes(1);
+      expect(mockSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'test song',
+          patterns: expect.arrayContaining([
+            expect.objectContaining({
+              label: 'Trk1 P1',
+              duration: 16,
+            }),
+          ]),
+          tracks: expect.arrayContaining([
+            expect.objectContaining({
+              name: 'Track 1',
+            }),
+          ]),
+          timeline: expect.objectContaining({
+            tempo: 120,
+            snapValue: 1,
+            snapMode: 'grid',
+            verticalZoom: 100,
+            isPlaying: false,
+            playheadPosition: 0,
+            viewport: expect.objectContaining({
+              offsetBeats: 0,
+              zoom: 5,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should import multiple songs and save each to storage', () => {
+      const cksData: CirklonSongData = {
+        song_data: {
+          'song 1': {
+            patterns: {
+              'Trk1 P1': {
+                type: 'P3',
+                creator_track: 1,
+                saved: true,
+                bar_count: 2,
+              },
+            },
+            scenes: {
+              'scene 1': {
+                gbar: 0,
+                length: 2,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P1',
+                },
+              },
+            },
+          },
+          'song 2': {
+            patterns: {
+              'Trk2 P1': {
+                type: 'CK',
+                creator_track: 2,
+                saved: true,
+                bar_count: 4,
+              },
+            },
+            scenes: {
+              'scene 1': {
+                gbar: 0,
+                length: 4,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_2: 'Trk2 P1',
+                },
+              },
+            },
+          },
+          'song 3': {
+            patterns: {},
+            scenes: {},
+          },
+        },
+      };
+
+      const mockSave = jest.fn()
+        .mockReturnValueOnce('saved-id-1')
+        .mockReturnValueOnce('saved-id-2')
+        .mockReturnValueOnce('saved-id-3');
+
+      const result = importSongCollectionFromCirklon(cksData, 4, mockSave);
+
+      expect(result.successCount).toBe(3);
+      expect(result.failureCount).toBe(0);
+      expect(result.songNames).toEqual(['song 1', 'song 2', 'song 3']);
+      expect(result.errors).toEqual([]);
+
+      expect(mockSave).toHaveBeenCalledTimes(3);
+
+      // Verify first song
+      expect(mockSave).toHaveBeenNthCalledWith(1,
+        expect.objectContaining({
+          name: 'song 1',
+          patterns: expect.any(Array),
+        })
+      );
+
+      // Verify second song
+      expect(mockSave).toHaveBeenNthCalledWith(2,
+        expect.objectContaining({
+          name: 'song 2',
+          patterns: expect.any(Array),
+        })
+      );
+
+      // Verify third song
+      expect(mockSave).toHaveBeenNthCalledWith(3,
+        expect.objectContaining({
+          name: 'song 3',
+          patterns: [],
+          tracks: [],
+        })
+      );
+    });
+
+    it('should handle errors and continue with remaining songs', () => {
+      const cksData: CirklonSongData = {
+        song_data: {
+          'good song': {
+            patterns: {
+              'Trk1 P1': {
+                type: 'P3',
+                creator_track: 1,
+                saved: true,
+                bar_count: 4,
+              },
+            },
+            scenes: {
+              'scene 1': {
+                gbar: 0,
+                length: 4,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P1',
+                },
+              },
+            },
+          },
+          'bad song': {
+            patterns: {},
+            scenes: {},
+          },
+          'another good song': {
+            patterns: {
+              'Trk2 P1': {
+                type: 'P3',
+                creator_track: 2,
+                saved: true,
+                bar_count: 2,
+              },
+            },
+            scenes: {
+              'scene 1': {
+                gbar: 0,
+                length: 2,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_2: 'Trk2 P1',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const mockSave = jest.fn()
+        .mockReturnValueOnce('saved-id-1')
+        .mockImplementationOnce(() => {
+          throw new Error('Storage quota exceeded');
+        })
+        .mockReturnValueOnce('saved-id-3');
+
+      const result = importSongCollectionFromCirklon(cksData, 4, mockSave);
+
+      expect(result.successCount).toBe(2);
+      expect(result.failureCount).toBe(1);
+      expect(result.songNames).toEqual(['good song', 'another good song']);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toEqual({
+        songName: 'bad song',
+        error: 'Storage quota exceeded',
+      });
+
+      expect(mockSave).toHaveBeenCalledTimes(3);
+    });
+
+    it('should respect custom beatsPerBar parameter', () => {
+      const cksData: CirklonSongData = {
+        song_data: {
+          '3/4 song': {
+            patterns: {
+              'Trk1 P1': {
+                type: 'P3',
+                creator_track: 1,
+                saved: true,
+                bar_count: 4,
+              },
+            },
+            scenes: {
+              'scene 1': {
+                gbar: 0,
+                length: 4,
+                advance: 'auto',
+                pattern_assignments: {
+                  track_1: 'Trk1 P1',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const mockSave = jest.fn().mockReturnValue('saved-id-1');
+      importSongCollectionFromCirklon(cksData, 3, mockSave); // 3 beats per bar
+
+      expect(mockSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patterns: expect.arrayContaining([
+            expect.objectContaining({
+              duration: 12, // 4 bars * 3 beats
+            }),
+          ]),
+        })
+      );
     });
   });
 });

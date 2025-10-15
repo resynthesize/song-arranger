@@ -15,8 +15,12 @@ import reducer, {
   duplicatePattern,
   duplicatePatterns,
   updatePatternTrack,
+  updateStepValue,
+  updateStepNote,
+  toggleGate,
+  toggleAuxFlag,
 } from './patternsSlice';
-import type { PatternsState, Pattern } from '@/types';
+import type { PatternsState, Pattern, P3Bar, P3PatternData } from '@/types';
 
 describe('patternsSlice', () => {
   const initialState: PatternsState = {
@@ -319,6 +323,481 @@ describe('patternsSlice', () => {
         updatePatternTrack({ patternId: 'non-existent', trackId: 'track-2' })
       );
       expect(newState.patterns).toEqual(stateWithPatterns.patterns);
+    });
+  });
+
+  describe('updateStepValue', () => {
+    // Helper to create a pattern with P3 data
+    const createPatternWithData = (): Pattern => ({
+      id: 'pattern-p3',
+      trackId: 'track-1',
+      position: 0,
+      duration: 4,
+      patternType: 'P3',
+      patternData: {
+        bars: [
+          {
+            direction: 'forward',
+            tbase: ' 16',
+            last_step: 16,
+            xpos: 0,
+            reps: 1,
+            gbar: false,
+            note: Array(16).fill('C 4'),
+            velo: Array(16).fill(64),
+            length: Array(16).fill(24),
+            delay: Array(16).fill(0),
+            aux_A_value: Array(16).fill(0),
+            aux_B_value: Array(16).fill(0),
+            aux_C_value: Array(16).fill(0),
+            aux_D_value: Array(16).fill(0),
+            gate: Array(16).fill(1),
+            tie: Array(16).fill(0),
+            skip: Array(16).fill(0),
+            note_X: Array(16).fill(0),
+            aux_A_flag: Array(16).fill(0),
+            aux_B_flag: Array(16).fill(0),
+            aux_C_flag: Array(16).fill(0),
+            aux_D_flag: Array(16).fill(0),
+          } as P3Bar,
+        ],
+      },
+    });
+
+    it('should update velocity value for a step', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        updateStepValue({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 5,
+          row: 'velocity',
+          value: 100,
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.velo[5]).toBe(100);
+        // Other steps unchanged
+        expect(pattern.patternData.bars[0]?.velo[0]).toBe(64);
+      }
+    });
+
+    it('should clamp velocity to min value of 1', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        updateStepValue({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 3,
+          row: 'velocity',
+          value: 0,
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.velo[3]).toBe(1);
+      }
+    });
+
+    it('should clamp velocity to max value of 127', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        updateStepValue({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 3,
+          row: 'velocity',
+          value: 200,
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.velo[3]).toBe(127);
+      }
+    });
+
+    it('should update delay value', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        updateStepValue({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 2,
+          row: 'delay',
+          value: 24,
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.delay[2]).toBe(24);
+      }
+    });
+
+    it('should clamp delay to range 0-47', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      let newState = reducer(
+        stateWithP3,
+        updateStepValue({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 1,
+          row: 'delay',
+          value: 60,
+        })
+      );
+
+      let pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.delay[1]).toBe(47);
+      }
+
+      newState = reducer(
+        stateWithP3,
+        updateStepValue({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 1,
+          row: 'delay',
+          value: -5,
+        })
+      );
+
+      pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.delay[1]).toBe(0);
+      }
+    });
+
+    it('should do nothing if pattern has no patternData', () => {
+      const stateWithoutData: PatternsState = {
+        patterns: [pattern1],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithoutData,
+        updateStepValue({
+          patternId: 'pattern-1',
+          barIndex: 0,
+          stepIndex: 0,
+          row: 'velocity',
+          value: 100,
+        })
+      );
+
+      expect(newState.patterns).toEqual(stateWithoutData.patterns);
+    });
+  });
+
+  describe('updateStepNote', () => {
+    const createPatternWithData = (): Pattern => ({
+      id: 'pattern-p3',
+      trackId: 'track-1',
+      position: 0,
+      duration: 4,
+      patternType: 'P3',
+      patternData: {
+        bars: [
+          {
+            direction: 'forward',
+            tbase: ' 16',
+            last_step: 16,
+            xpos: 0,
+            reps: 1,
+            gbar: false,
+            note: Array(16).fill('C 4'),
+            velo: Array(16).fill(64),
+            length: Array(16).fill(24),
+            delay: Array(16).fill(0),
+            aux_A_value: Array(16).fill(0),
+            aux_B_value: Array(16).fill(0),
+            aux_C_value: Array(16).fill(0),
+            aux_D_value: Array(16).fill(0),
+            gate: Array(16).fill(1),
+            tie: Array(16).fill(0),
+            skip: Array(16).fill(0),
+            note_X: Array(16).fill(0),
+            aux_A_flag: Array(16).fill(0),
+            aux_B_flag: Array(16).fill(0),
+            aux_C_flag: Array(16).fill(0),
+            aux_D_flag: Array(16).fill(0),
+          } as P3Bar,
+        ],
+      },
+    });
+
+    it('should update note value for a step', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        updateStepNote({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 7,
+          note: 'G#5',
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.note[7]).toBe('G#5');
+        // Other steps unchanged
+        expect(pattern.patternData.bars[0]?.note[0]).toBe('C 4');
+      }
+    });
+  });
+
+  describe('toggleGate', () => {
+    const createPatternWithData = (): Pattern => ({
+      id: 'pattern-p3',
+      trackId: 'track-1',
+      position: 0,
+      duration: 4,
+      patternType: 'P3',
+      patternData: {
+        bars: [
+          {
+            direction: 'forward',
+            tbase: ' 16',
+            last_step: 16,
+            xpos: 0,
+            reps: 1,
+            gbar: false,
+            note: Array(16).fill('C 4'),
+            velo: Array(16).fill(64),
+            length: Array(16).fill(24),
+            delay: Array(16).fill(0),
+            aux_A_value: Array(16).fill(0),
+            aux_B_value: Array(16).fill(0),
+            aux_C_value: Array(16).fill(0),
+            aux_D_value: Array(16).fill(0),
+            gate: Array(16).fill(1),
+            tie: Array(16).fill(0),
+            skip: Array(16).fill(0),
+            note_X: Array(16).fill(0),
+            aux_A_flag: Array(16).fill(0),
+            aux_B_flag: Array(16).fill(0),
+            aux_C_flag: Array(16).fill(0),
+            aux_D_flag: Array(16).fill(0),
+          } as P3Bar,
+        ],
+      },
+    });
+
+    it('should toggle gate from on to off', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        toggleGate({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 3,
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.gate[3]).toBe(0);
+        // Other steps unchanged
+        expect(pattern.patternData.bars[0]?.gate[0]).toBe(1);
+      }
+    });
+
+    it('should toggle gate from off to on', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      // First toggle off
+      let newState = reducer(
+        stateWithP3,
+        toggleGate({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 5,
+        })
+      );
+
+      // Then toggle back on
+      newState = reducer(
+        newState,
+        toggleGate({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 5,
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.gate[5]).toBe(1);
+      }
+    });
+  });
+
+  describe('toggleAuxFlag', () => {
+    const createPatternWithData = (): Pattern => ({
+      id: 'pattern-p3',
+      trackId: 'track-1',
+      position: 0,
+      duration: 4,
+      patternType: 'P3',
+      patternData: {
+        bars: [
+          {
+            direction: 'forward',
+            tbase: ' 16',
+            last_step: 16,
+            xpos: 0,
+            reps: 1,
+            gbar: false,
+            note: Array(16).fill('C 4'),
+            velo: Array(16).fill(64),
+            length: Array(16).fill(24),
+            delay: Array(16).fill(0),
+            aux_A_value: Array(16).fill(0),
+            aux_B_value: Array(16).fill(0),
+            aux_C_value: Array(16).fill(0),
+            aux_D_value: Array(16).fill(0),
+            gate: Array(16).fill(1),
+            tie: Array(16).fill(0),
+            skip: Array(16).fill(0),
+            note_X: Array(16).fill(0),
+            aux_A_flag: Array(16).fill(0),
+            aux_B_flag: Array(16).fill(0),
+            aux_C_flag: Array(16).fill(0),
+            aux_D_flag: Array(16).fill(0),
+          } as P3Bar,
+        ],
+      },
+    });
+
+    it('should toggle aux A flag from off to on', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        toggleAuxFlag({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 4,
+          auxRow: 'auxA',
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.aux_A_flag[4]).toBe(1);
+        // Other steps unchanged
+        expect(pattern.patternData.bars[0]?.aux_A_flag[0]).toBe(0);
+      }
+    });
+
+    it('should toggle aux B flag', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        toggleAuxFlag({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 6,
+          auxRow: 'auxB',
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.aux_B_flag[6]).toBe(1);
+      }
+    });
+
+    it('should toggle aux C flag', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        toggleAuxFlag({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 8,
+          auxRow: 'auxC',
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.aux_C_flag[8]).toBe(1);
+      }
+    });
+
+    it('should toggle aux D flag', () => {
+      const stateWithP3: PatternsState = {
+        patterns: [createPatternWithData()],
+        editingPatternId: null,
+      };
+
+      const newState = reducer(
+        stateWithP3,
+        toggleAuxFlag({
+          patternId: 'pattern-p3',
+          barIndex: 0,
+          stepIndex: 10,
+          auxRow: 'auxD',
+        })
+      );
+
+      const pattern = newState.patterns[0];
+      if (pattern && pattern.patternData) {
+        expect(pattern.patternData.bars[0]?.aux_D_flag[10]).toBe(1);
+      }
     });
   });
 });

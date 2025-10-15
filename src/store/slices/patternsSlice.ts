@@ -4,8 +4,9 @@
  */
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { PatternsState, Pattern, ID, Position, Duration } from '@/types';
+import type { PatternsState, Pattern, ID, Position, Duration, PatternRow } from '@/types';
 import { logger } from '@/utils/debug';
+import { generateId } from '@/utils/id';
 
 const initialState: PatternsState = {
   patterns: [],
@@ -29,7 +30,7 @@ const patternsSlice = createSlice({
     ) => {
       const { trackId, position, duration = 4, label } = action.payload;
       const newPattern: Pattern = {
-        id: `pattern-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+        id: generateId('pattern'),
         trackId,
         position,
         duration,
@@ -121,7 +122,7 @@ const patternsSlice = createSlice({
       if (originalPattern) {
         const newPattern: Pattern = {
           ...originalPattern,
-          id: `pattern-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+          id: generateId('pattern'),
         };
         state.patterns.push(newPattern);
       }
@@ -135,7 +136,7 @@ const patternsSlice = createSlice({
       patternsToDuplicate.forEach((pattern) => {
         const newPattern: Pattern = {
           ...pattern,
-          id: `pattern-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+          id: generateId('pattern'),
         };
         state.patterns.push(newPattern);
       });
@@ -168,7 +169,7 @@ const patternsSlice = createSlice({
       patternsToDuplicate.forEach((pattern) => {
         const newPattern: Pattern = {
           ...pattern,
-          id: `pattern-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+          id: generateId('pattern'),
           position: pattern.position + pattern.duration, // Offset by duration
         };
         state.patterns.push(newPattern);
@@ -186,7 +187,7 @@ const patternsSlice = createSlice({
         // Create second half
         const newPattern: Pattern = {
           ...pattern,
-          id: `pattern-${Date.now().toString()}-${Math.random().toString(36).slice(2, 11)}`,
+          id: generateId('pattern'),
           position,
           duration: pattern.duration - (position - pattern.position),
         };
@@ -270,6 +271,181 @@ const patternsSlice = createSlice({
     setPatterns: (state, action: PayloadAction<Pattern[]>) => {
       state.patterns = action.payload;
     },
+
+    /**
+     * Update a step value in a pattern's bar
+     * Handles velocity, length, delay, and aux values with proper constraints
+     */
+    updateStepValue: (
+      state,
+      action: PayloadAction<{
+        patternId: ID;
+        barIndex: number;
+        stepIndex: number;
+        row: PatternRow;
+        value: number;
+      }>
+    ) => {
+      const { patternId, barIndex, stepIndex, row, value } = action.payload;
+      const pattern = state.patterns.find((p) => p.id === patternId);
+
+      if (!pattern || !pattern.patternData) {
+        return;
+      }
+
+      const bar = pattern.patternData.bars[barIndex];
+      if (!bar) {
+        return;
+      }
+
+      // Apply value constraints based on row type
+      let constrainedValue = value;
+
+      switch (row) {
+        case 'velocity':
+          // Velocity: 1-127
+          constrainedValue = Math.min(Math.max(value, 1), 127);
+          bar.velo[stepIndex] = constrainedValue;
+          break;
+
+        case 'length':
+          // Length: 0-47 ticks for fractional, up to larger values for whole steps
+          // For now, we'll allow 0-127 to support various length values
+          constrainedValue = Math.max(value, 0);
+          bar.length[stepIndex] = constrainedValue;
+          break;
+
+        case 'delay':
+          // Delay: 0-47
+          constrainedValue = Math.min(Math.max(value, 0), 47);
+          bar.delay[stepIndex] = constrainedValue;
+          break;
+
+        case 'auxA':
+          // Aux A: 0-127 for MIDI CCs
+          constrainedValue = Math.min(Math.max(value, 0), 127);
+          bar.aux_A_value[stepIndex] = constrainedValue;
+          break;
+
+        case 'auxB':
+          // Aux B: 0-127 for MIDI CCs
+          constrainedValue = Math.min(Math.max(value, 0), 127);
+          bar.aux_B_value[stepIndex] = constrainedValue;
+          break;
+
+        case 'auxC':
+          // Aux C: 0-127 for MIDI CCs
+          constrainedValue = Math.min(Math.max(value, 0), 127);
+          bar.aux_C_value[stepIndex] = constrainedValue;
+          break;
+
+        case 'auxD':
+          // Aux D: 0-127 for MIDI CCs
+          constrainedValue = Math.min(Math.max(value, 0), 127);
+          bar.aux_D_value[stepIndex] = constrainedValue;
+          break;
+
+        case 'note':
+          // Note is handled by updateStepNote
+          break;
+      }
+    },
+
+    /**
+     * Update a step note value
+     * Notes are strings like "C 4", "D#5", etc.
+     */
+    updateStepNote: (
+      state,
+      action: PayloadAction<{
+        patternId: ID;
+        barIndex: number;
+        stepIndex: number;
+        note: string;
+      }>
+    ) => {
+      const { patternId, barIndex, stepIndex, note } = action.payload;
+      const pattern = state.patterns.find((p) => p.id === patternId);
+
+      if (!pattern || !pattern.patternData) {
+        return;
+      }
+
+      const bar = pattern.patternData.bars[barIndex];
+      if (!bar) {
+        return;
+      }
+
+      bar.note[stepIndex] = note;
+    },
+
+    /**
+     * Toggle gate flag for a step
+     */
+    toggleGate: (
+      state,
+      action: PayloadAction<{
+        patternId: ID;
+        barIndex: number;
+        stepIndex: number;
+      }>
+    ) => {
+      const { patternId, barIndex, stepIndex } = action.payload;
+      const pattern = state.patterns.find((p) => p.id === patternId);
+
+      if (!pattern || !pattern.patternData) {
+        return;
+      }
+
+      const bar = pattern.patternData.bars[barIndex];
+      if (!bar) {
+        return;
+      }
+
+      // Toggle: 0 -> 1, 1 -> 0
+      bar.gate[stepIndex] = bar.gate[stepIndex] === 1 ? 0 : 1;
+    },
+
+    /**
+     * Toggle aux flag for a step
+     */
+    toggleAuxFlag: (
+      state,
+      action: PayloadAction<{
+        patternId: ID;
+        barIndex: number;
+        stepIndex: number;
+        auxRow: 'auxA' | 'auxB' | 'auxC' | 'auxD';
+      }>
+    ) => {
+      const { patternId, barIndex, stepIndex, auxRow } = action.payload;
+      const pattern = state.patterns.find((p) => p.id === patternId);
+
+      if (!pattern || !pattern.patternData) {
+        return;
+      }
+
+      const bar = pattern.patternData.bars[barIndex];
+      if (!bar) {
+        return;
+      }
+
+      // Toggle the appropriate aux flag
+      switch (auxRow) {
+        case 'auxA':
+          bar.aux_A_flag[stepIndex] = bar.aux_A_flag[stepIndex] === 1 ? 0 : 1;
+          break;
+        case 'auxB':
+          bar.aux_B_flag[stepIndex] = bar.aux_B_flag[stepIndex] === 1 ? 0 : 1;
+          break;
+        case 'auxC':
+          bar.aux_C_flag[stepIndex] = bar.aux_C_flag[stepIndex] === 1 ? 0 : 1;
+          break;
+        case 'auxD':
+          bar.aux_D_flag[stepIndex] = bar.aux_D_flag[stepIndex] === 1 ? 0 : 1;
+          break;
+      }
+    },
   },
 });
 
@@ -295,6 +471,10 @@ export const {
   setEditingPattern,
   clearEditingPattern,
   setPatterns,
+  updateStepValue,
+  updateStepNote,
+  toggleGate,
+  toggleAuxFlag,
 } = patternsSlice.actions;
 
 export default patternsSlice.reducer;

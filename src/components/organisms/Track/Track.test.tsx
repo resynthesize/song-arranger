@@ -22,6 +22,7 @@ import themeReducer from '@/store/slices/themeSlice';
 import patternEditorReducer from '@/store/slices/patternEditorSlice';
 import Track from './Track';
 import type { Pattern, ViewportState } from '@/types';
+import patternStyles from '../Pattern/Pattern.module.css';
 
 describe('Lane', () => {
   // Helper function to create mock Redux store
@@ -212,7 +213,7 @@ describe('Lane', () => {
   it('should pass selected state to clips', () => {
     renderWithProvider(<Track {...defaultProps} selectedPatternIds={['clip-1']} />);
     const clip1 = screen.getByTestId('pattern-clip-1');
-    expect(clip1).toHaveClass('pattern--selected');
+    expect(clip1).toHaveClass(patternStyles.selected);
   });
 
   it('should call onDoubleClick when lane area is double-clicked', async () => {

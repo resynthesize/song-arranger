@@ -1,0 +1,114 @@
+/**
+ * Cyclone - PatternEditorHeader Styles
+ * Modern theme priority with clean, minimal styling
+ */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-tertiary, #2a2a2a);
+  border-bottom: 1px solid var(--color-border, #333);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text, #e0e0e0);
+}
+
+.metadata {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #888);
+}
+
+.barCount {
+  font-weight: 500;
+  color: var(--color-accent, #00ff88);
+}
+
+.timebase {
+  font-weight: 500;
+  color: var(--color-accent, #00ff88);
+  font-family: 'Courier New', monospace;
+}
+
+.auxInfo {
+  font-family: 'Courier New', monospace;
+}
+
+.closeButton {
+  padding: 0.5rem 1rem;
+  background: var(--color-bg-primary, #0f0f0f);
+  color: var(--color-text, #e0e0e0);
+  border: 1px solid var(--color-border, #333);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.closeButton:hover {
+  background: var(--color-bg-hover, #3a3a3a);
+  border-color: var(--color-border-hover, #555);
+}
+
+.closeButton:active {
+  background: var(--color-bg-active, #4a4a4a);
+  transform: translateY(1px);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--color-accent, #00ff88);
+  outline-offset: 2px;
+}
+
+/* CRT theme overrides */
+:global(.theme-crt) .header {
+  background: #001100;
+  border-bottom-color: var(--color-primary, #00ff00);
+}
+
+:global(.theme-crt) .title {
+  color: var(--color-primary, #00ff00);
+  text-shadow: 0 0 4px var(--color-primary, #00ff00);
+}
+
+:global(.theme-crt) .barCount {
+  color: var(--color-highlight, #66ff66);
+  text-shadow: 0 0 2px var(--color-highlight, #66ff66);
+}
+
+:global(.theme-crt) .timebase {
+  color: var(--color-highlight, #66ff66);
+  text-shadow: 0 0 2px var(--color-highlight, #66ff66);
+}
+
+:global(.theme-crt) .metadata {
+  color: var(--color-secondary, #008800);
+}
+
+:global(.theme-crt) .closeButton {
+  background: transparent;
+  border-color: var(--color-primary, #00ff00);
+  color: var(--color-primary, #00ff00);
+  text-shadow: 0 0 2px var(--color-primary, #00ff00);
+}
+
+:global(.theme-crt) .closeButton:hover {
+  background: rgba(0, 255, 0, 0.1);
+  box-shadow: 0 0 4px var(--color-primary, #00ff00);
+}

@@ -29,3 +29,12 @@ export type { PatternRowProps } from './PatternRow';
 
 export { RowSelector } from './RowSelector';
 export { default as RowSelectorDefault } from './RowSelector';
+
+export { StepValueEditor } from './StepValueEditor/StepValueEditor';
+export type { StepValueEditorProps } from './StepValueEditor/StepValueEditor';
+
+export { PatternEditorHeader } from './PatternEditorHeader/PatternEditorHeader';
+export type { PatternEditorHeaderProps } from './PatternEditorHeader/PatternEditorHeader';
+
+export { BarNavigation } from './BarNavigation/BarNavigation';
+export type { BarNavigationProps } from './BarNavigation/BarNavigation';

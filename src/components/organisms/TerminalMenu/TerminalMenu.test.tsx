@@ -2,9 +2,10 @@
  * TerminalMenu Component Tests
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TerminalMenu } from './TerminalMenu';
+import { actUser } from '@/utils/testUtils';
 
 describe('TerminalMenu', () => {
   const mockItems = [
@@ -37,7 +38,7 @@ describe('TerminalMenu', () => {
       const user = userEvent.setup();
       render(<TerminalMenu items={mockItems} trigger="Menu" />);
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
@@ -53,13 +54,15 @@ describe('TerminalMenu', () => {
         </div>
       );
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
       expect(screen.getByText('Item 1')).toBeInTheDocument();
 
       // Click outside - use mousedown since that's what the component listens for
       const outsideElement = screen.getByTestId('outside');
       const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true });
-      outsideElement.dispatchEvent(mouseDownEvent);
+      act(() => {
+        outsideElement.dispatchEvent(mouseDownEvent);
+      });
 
       await waitFor(() => {
         expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
@@ -74,8 +77,8 @@ describe('TerminalMenu', () => {
         <TerminalMenu items={mockItems} trigger="Menu" onSelect={handleSelect} />
       );
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
-      await user.click(screen.getByText('Item 2'));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
+      await actUser(() => user.click(screen.getByText('Item 2')));
 
       expect(handleSelect).toHaveBeenCalledWith(mockItems[1]);
     });
@@ -84,8 +87,8 @@ describe('TerminalMenu', () => {
       const user = userEvent.setup();
       render(<TerminalMenu items={mockItems} trigger="Menu" />);
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
-      await user.click(screen.getByText('Item 1'));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
+      await actUser(() => user.click(screen.getByText('Item 1')));
 
       await waitFor(() => {
         expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
@@ -108,8 +111,8 @@ describe('TerminalMenu', () => {
         />
       );
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
-      await user.click(screen.getByText('Item 2'));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
+      await actUser(() => user.click(screen.getByText('Item 2')));
 
       expect(handleSelect).not.toHaveBeenCalled();
     });
@@ -122,7 +125,7 @@ describe('TerminalMenu', () => {
 
       const trigger = screen.getByRole('button', { name: /menu/i });
       trigger.focus();
-      await user.keyboard('{Enter}');
+      await actUser(() => user.keyboard('{Enter}'));
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
     });
@@ -131,10 +134,10 @@ describe('TerminalMenu', () => {
       const user = userEvent.setup();
       render(<TerminalMenu items={mockItems} trigger="Menu" />);
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
       expect(screen.getByText('Item 1')).toBeInTheDocument();
 
-      await user.keyboard('{Escape}');
+      await actUser(() => user.keyboard('{Escape}'));
       await waitFor(() => {
         expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
       });
@@ -144,15 +147,15 @@ describe('TerminalMenu', () => {
       const user = userEvent.setup();
       render(<TerminalMenu items={mockItems} trigger="Menu" />);
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
 
       // Arrow down should highlight first item
-      await user.keyboard('{ArrowDown}');
+      await actUser(() => user.keyboard('{ArrowDown}'));
       const firstItem = screen.getByText('Item 1').closest('.terminal-menu__item');
       expect(firstItem).toHaveClass('terminal-menu__item--highlighted');
 
       // Arrow down again should highlight second item
-      await user.keyboard('{ArrowDown}');
+      await actUser(() => user.keyboard('{ArrowDown}'));
       const secondItem = screen.getByText('Item 2').closest('.terminal-menu__item');
       expect(secondItem).toHaveClass('terminal-menu__item--highlighted');
     });
@@ -165,9 +168,9 @@ describe('TerminalMenu', () => {
         <TerminalMenu items={mockItems} trigger="Menu" onSelect={handleSelect} />
       );
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
-      await user.keyboard('{ArrowDown}');
-      await user.keyboard('{Enter}');
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
+      await actUser(() => user.keyboard('{ArrowDown}'));
+      await actUser(() => user.keyboard('{Enter}'));
 
       expect(handleSelect).toHaveBeenCalledWith(mockItems[0]);
     });
@@ -187,7 +190,7 @@ describe('TerminalMenu', () => {
       render(<TerminalMenu items={mockItems} trigger="Menu" />);
       const trigger = screen.getByRole('button', { name: /menu/i });
 
-      await user.click(trigger);
+      await actUser(() => user.click(trigger));
       expect(trigger).toHaveAttribute('aria-expanded', 'true');
     });
 
@@ -195,7 +198,7 @@ describe('TerminalMenu', () => {
       const user = userEvent.setup();
       render(<TerminalMenu items={mockItems} trigger="Menu" />);
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
       expect(screen.getByRole('menu')).toBeInTheDocument();
     });
 
@@ -203,7 +206,7 @@ describe('TerminalMenu', () => {
       const user = userEvent.setup();
       render(<TerminalMenu items={mockItems} trigger="Menu" />);
 
-      await user.click(screen.getByRole('button', { name: /menu/i }));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
       const menuItems = screen.getAllByRole('menuitem');
       expect(menuItems).toHaveLength(3);
     });
@@ -221,7 +224,7 @@ describe('TerminalMenu', () => {
       const { container } = render(
         <TerminalMenu items={itemsWithSeparator} trigger="Menu" />
       );
-      await user.click(screen.getByRole('button', { name: /menu/i }));
+      await actUser(() => user.click(screen.getByRole('button', { name: /menu/i })));
 
       const separator = container.querySelector('.terminal-menu__separator');
       expect(separator).toBeInTheDocument();

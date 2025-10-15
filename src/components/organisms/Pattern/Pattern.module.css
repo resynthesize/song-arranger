@@ -45,7 +45,7 @@
 }
 
 /* Selected state with phosphor persistence fade-in and pulsing */
-.pattern--selected {
+.selected {
   border-color: var(--color-highlight);
   border-width: 2px;
   box-shadow:
@@ -109,7 +109,7 @@
 }
 
 /* Hover on selected patterns - enhance glow further */
-.pattern--selected:hover {
+.selected:hover {
   box-shadow:
     0 0 6px rgba(102, 255, 102, 1),
     0 0 14px rgba(102, 255, 102, 0.95),
@@ -119,19 +119,19 @@
   border-color: #ffffff;
 }
 
-.pattern--selected .pattern__corner {
+.selected .corner {
   color: var(--color-highlight);
   text-shadow: var(--phosphor-glow-lg);
 }
 
-.pattern--dragging,
-.pattern--resizing {
+.dragging,
+.resizing {
   opacity: 0.8;
   cursor: grabbing;
   z-index: var(--z-tooltip); /* Ensure dragging patterns are above everything */
 }
 
-.pattern--copying {
+.copying {
   box-shadow: var(--phosphor-glow-lg);
   animation: pattern-copying-pulse 400ms ease-in-out infinite;
 }
@@ -146,7 +146,7 @@
 }
 
 /* Pattern Content */
-.pattern__content {
+.content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -158,12 +158,12 @@
   box-sizing: border-box;
 }
 
-.pattern--dragging .pattern__content {
+.dragging .content {
   cursor: grabbing;
 }
 
 /* ASCII Corner Characters */
-.pattern__corners {
+.corners {
   display: flex;
   justify-content: space-between;
   font-family: var(--font-primary);
@@ -172,15 +172,15 @@
   line-height: 1;
 }
 
-.pattern--selected .pattern__corners {
+.selected .corners {
   color: var(--color-highlight);
 }
 
-.pattern__corners--bottom {
+.cornersBottom {
   margin-top: auto;
 }
 
-.pattern__corner {
+.corner {
   display: inline-block;
   pointer-events: none;
   transition:
@@ -189,7 +189,7 @@
 }
 
 /* Pattern Label */
-.pattern__label {
+.label {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -211,13 +211,13 @@
     text-shadow var(--transition-base);
 }
 
-.pattern--selected .pattern__label {
+.selected .label {
   color: var(--color-highlight);
   text-shadow: var(--phosphor-glow-sm);
 }
 
 /* Pattern Label Input */
-.pattern__label-input {
+.labelInput {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -233,14 +233,14 @@
   z-index: 10;
 }
 
-.pattern__label-input:focus {
+.labelInput:focus {
   outline: none;
   border-color: var(--color-highlight);
   box-shadow: var(--phosphor-glow-sm);
 }
 
 /* Resize Handles */
-.pattern__handle {
+.handle {
   /* Dynamic width: larger patterns get wider handles, small patterns get minimal handles */
   width: min(16px, max(4px, 20%));
   cursor: ew-resize;
@@ -253,7 +253,7 @@
 }
 
 /* Extended hit area using pseudo-element for better grab at all sizes */
-.pattern__handle::before {
+.handle::before {
   content: '';
   position: absolute;
   top: -4px;
@@ -263,33 +263,33 @@
   cursor: inherit;
 }
 
-.pattern__handle--left::before {
+.handleLeft::before {
   left: -8px;
   right: 0;
 }
 
-.pattern__handle--right::before {
+.handleRight::before {
   left: 0;
   right: -8px;
 }
 
-.pattern__handle:hover {
+.handle:hover {
   background: var(--color-primary);
   opacity: 0.5;
 }
 
-.pattern__handle--left {
+.handleLeft {
   left: 0;
   cursor: w-resize;
 }
 
-.pattern__handle--right {
+.handleRight {
   right: 0;
   cursor: e-resize;
 }
 
 /* Muted pattern state - reduced opacity with diagonal stripes */
-.pattern--muted {
+.muted {
   opacity: 0.5;
   background-image: repeating-linear-gradient(
     45deg,
@@ -301,7 +301,7 @@
 }
 
 /* Pattern type badge (P3 or CK) */
-.pattern__type-badge {
+.typeBadge {
   position: absolute;
   top: 2px;
   right: 2px;
@@ -317,7 +317,7 @@
   transition: color var(--transition-base), border-color var(--transition-base);
 }
 
-.pattern--selected .pattern__type-badge {
+.selected .typeBadge {
   color: var(--color-highlight);
   border-color: var(--color-highlight);
 }
@@ -343,12 +343,12 @@
   }
 }
 
-.pattern--new {
+.new {
   animation: pattern-burn-in 400ms ease-out;
 }
 
 /* Pattern Loop Visualization - Shows the full scene duration with looped portion */
-.pattern__loop-fill {
+.loopFill {
   position: absolute;
   top: 0;
   left: 0;
@@ -367,13 +367,13 @@
 }
 
 /* When pattern is looping, ensure content sits on top */
-.pattern--looping .pattern__content {
+.looping .content {
   position: relative;
   z-index: 1;
 }
 
 /* Ensure handles are visible on looping patterns */
-.pattern--looping .pattern__handle {
+.looping .handle {
   position: relative;
   z-index: 2;
 }
@@ -381,18 +381,18 @@
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .pattern,
-  .pattern--selected,
-  .pattern__handle {
+  .selected,
+  .handle {
     transition: none;
     animation: none;
   }
 
-  .pattern--new {
+  .new {
     animation: none;
     opacity: 1;
   }
 
-  .pattern--selected {
+  .selected {
     /* Keep selection visible but remove animations */
     animation: none;
     box-shadow: var(--box-glow-xl);

@@ -3,12 +3,16 @@
  * Container component for editing P3 pattern data
  */
 
+import { useState, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, PatternRow } from '@/types';
-import type { P3PatternData } from '@/types/patternData';
-import { closePattern, selectRow, setCurrentBar, toggleViewMode } from '@/store/slices/patternEditorSlice';
+import type { P3PatternData, P3Bar } from '@/types/patternData';
+import { closePattern, selectRow, selectSteps, setCurrentBar, toggleViewMode } from '@/store/slices/patternEditorSlice';
+import { updateStepValue, updateStepNote, toggleGate, toggleAuxFlag } from '@/store/slices/patternsSlice';
 import { ViewModeToggle } from '@/components/atoms/ViewModeToggle';
 import { PatternRow as PatternRowComponent } from '@/components/molecules/PatternRow/PatternRow';
+import { StepValueEditor, PatternEditorHeader, BarNavigation } from '@/components/molecules';
+import { usePatternEditorKeyboard } from '@/hooks/usePatternEditorKeyboard';
 import styles from './PatternEditor.module.css';
 
 // Row groups for different view modes
@@ -39,6 +43,41 @@ const getRowLabel = (row: PatternRow, patternData: P3PatternData): string => {
   }
 };
 
+/**
+ * Get current value for editing step
+ */
+const getCurrentEditingValue = (
+  editingStep: { row: PatternRow; stepIndex: number } | null,
+  currentBar: P3Bar | undefined
+): number | string => {
+  if (!editingStep || !currentBar) {
+    return '';
+  }
+
+  const { row, stepIndex } = editingStep;
+
+  switch (row) {
+    case 'note':
+      return currentBar.note[stepIndex] ?? '';
+    case 'velocity':
+      return currentBar.velo[stepIndex] ?? 64;
+    case 'length':
+      return currentBar.length[stepIndex] ?? 24;
+    case 'delay':
+      return currentBar.delay[stepIndex] ?? 0;
+    case 'auxA':
+      return currentBar.aux_A_value[stepIndex] ?? 0;
+    case 'auxB':
+      return currentBar.aux_B_value[stepIndex] ?? 0;
+    case 'auxC':
+      return currentBar.aux_C_value[stepIndex] ?? 0;
+    case 'auxD':
+      return currentBar.aux_D_value[stepIndex] ?? 0;
+    default:
+      return '';
+  }
+};
+
 const PatternEditor = () => {
   const dispatch = useDispatch();
 
@@ -50,6 +89,16 @@ const PatternEditor = () => {
   const currentBarIndex = useSelector((state: RootState) => state.patternEditor.currentBarIndex);
   const viewMode = useSelector((state: RootState) => state.patternEditor.viewMode);
 
+  // Local state for editing
+  const [editingStep, setEditingStep] = useState<{
+    row: PatternRow;
+    stepIndex: number;
+    position: { top: number; left: number };
+  } | null>(null);
+
+  // Track which step has keyboard focus (separate from selection)
+  const [focusedStepIndex, setFocusedStepIndex] = useState<number>(0);
+
   // Get the actual pattern data
   const pattern = useSelector((state: RootState) => {
     if (!openPatternId) {
@@ -57,6 +106,166 @@ const PatternEditor = () => {
     }
     return state.patterns.patterns.find(p => p.id === openPatternId);
   });
+
+  // Handle step click to open editor
+  const handleStepClick = useCallback((row: PatternRow, stepIndex: number) => {
+    // Select the row
+    dispatch(selectRow(row));
+
+    // Update focused step index
+    setFocusedStepIndex(stepIndex);
+
+    // Update selected steps
+    dispatch(selectSteps([stepIndex]));
+
+    // Calculate position for the editor (centered on screen for now)
+    const position = {
+      top: window.innerHeight / 2 - 100,
+      left: window.innerWidth / 2 - 125,
+    };
+
+    setEditingStep({ row, stepIndex, position });
+  }, [dispatch]);
+
+  // Use keyboard navigation hook
+  usePatternEditorKeyboard({
+    editingStep,
+    selectedRow,
+    viewMode,
+    focusedStepIndex,
+    setFocusedStepIndex,
+    openPatternId,
+    pattern,
+    currentBarIndex,
+    handleStepClick,
+  });
+
+  // Handle value submit from editor
+  const handleValueSubmit = useCallback(
+    (value: number | string) => {
+      if (!openPatternId || !editingStep) {
+        return;
+      }
+
+      const { row, stepIndex } = editingStep;
+
+      if (row === 'note') {
+        // Update note value
+        dispatch(
+          updateStepNote({
+            patternId: openPatternId,
+            barIndex: currentBarIndex,
+            stepIndex,
+            note: String(value),
+          })
+        );
+      } else {
+        // Update numeric value
+        dispatch(
+          updateStepValue({
+            patternId: openPatternId,
+            barIndex: currentBarIndex,
+            stepIndex,
+            row,
+            value: Number(value),
+          })
+        );
+      }
+
+      // Close editor
+      setEditingStep(null);
+    },
+    [openPatternId, editingStep, currentBarIndex, dispatch]
+  );
+
+  // Handle cancel editing
+  const handleCancelEdit = useCallback(() => {
+    setEditingStep(null);
+  }, []);
+
+  // Handle gate toggle (Shift+Click on step)
+  const handleGateToggle = useCallback(
+    (stepIndex: number) => {
+      if (!openPatternId) {
+        return;
+      }
+
+      dispatch(
+        toggleGate({
+          patternId: openPatternId,
+          barIndex: currentBarIndex,
+          stepIndex,
+        })
+      );
+    },
+    [openPatternId, currentBarIndex, dispatch]
+  );
+
+  // Handle aux flag toggle (Alt+Shift+Click on step in aux row)
+  // Returns a handler for a specific aux row
+  const createAuxFlagToggleHandler = useCallback(
+    (auxRow: 'auxA' | 'auxB' | 'auxC' | 'auxD') => {
+      return (stepIndex: number) => {
+        if (!openPatternId) {
+          return;
+        }
+
+        dispatch(
+          toggleAuxFlag({
+            patternId: openPatternId,
+            barIndex: currentBarIndex,
+            stepIndex,
+            auxRow,
+          })
+        );
+      };
+    },
+    [openPatternId, currentBarIndex, dispatch]
+  );
+
+  // Create value change handler for a specific row (used for drag-to-adjust)
+  const createValueChangeHandler = useCallback(
+    (row: PatternRow) => {
+      return (stepIndex: number, value: number | string) => {
+        if (!openPatternId) {
+          return;
+        }
+
+        if (row === 'note') {
+          // For note row, dispatch note update with string value
+          dispatch(
+            updateStepNote({
+              patternId: openPatternId,
+              barIndex: currentBarIndex,
+              stepIndex,
+              note: String(value),
+            })
+          );
+        } else {
+          // For numeric rows, dispatch value update
+          dispatch(
+            updateStepValue({
+              patternId: openPatternId,
+              barIndex: currentBarIndex,
+              stepIndex,
+              row,
+              value: Number(value),
+            })
+          );
+        }
+      };
+    },
+    [openPatternId, currentBarIndex, dispatch]
+  );
+
+  // Initialize selection when pattern opens or row changes
+  useEffect(() => {
+    if (openPatternId && selectedSteps.length === 0) {
+      // Select first step by default
+      dispatch(selectSteps([0]));
+      setFocusedStepIndex(0);
+    }
+  }, [openPatternId, selectedRow, selectedSteps.length, dispatch]);
 
   // Don't render if no pattern is open
   if (!openPatternId) {
@@ -73,11 +282,6 @@ const PatternEditor = () => {
     dispatch(closePattern());
   };
 
-  // Handle row click
-  const handleRowClick = (row: PatternRow) => {
-    dispatch(selectRow(row));
-  };
-
   // Handle bar navigation
   const handleBarChange = (barIndex: number) => {
     dispatch(setCurrentBar(barIndex));
@@ -87,13 +291,6 @@ const PatternEditor = () => {
   const handleViewModeToggle = () => {
     dispatch(toggleViewMode());
   };
-
-  // Get rows for current view mode
-  const currentRows = viewMode === 'parameters' ? PARAMETER_ROWS : AUX_ROWS;
-
-  // Split rows into left and right columns (2 rows each)
-  const leftRows = currentRows.slice(0, 2);
-  const rightRows = currentRows.slice(2, 4);
 
   // Show message if pattern type cannot be edited
   if (!pattern.patternData) {
@@ -139,6 +336,13 @@ const PatternEditor = () => {
     );
   }
 
+  // Get rows for current view mode
+  const currentRows = viewMode === 'parameters' ? PARAMETER_ROWS : AUX_ROWS;
+
+  // Split rows into left and right columns (2 rows each)
+  const leftRows = currentRows.slice(0, 2);
+  const rightRows = currentRows.slice(2, 4);
+
   return (
     <div
       className={styles.editor}
@@ -146,63 +350,25 @@ const PatternEditor = () => {
       style={{ height: `${editorHeight}px` }}
     >
       {/* Header */}
-      <header className={styles.header} data-testid="pattern-editor-header">
-        <div className={styles.headerLeft}>
-          <h2 className={styles.title}>{patternLabel}</h2>
-          <div className={styles.metadata}>
-            <span className={styles.barCount}>
-              {barCount} {barCount === 1 ? 'bar' : 'bars'}
-            </span>
-            <span className={styles.timebase}>
-              tbase: {timebase}
-            </span>
-            <span className={styles.auxInfo}>
-              aux_A: {auxA}
-            </span>
-            <span className={styles.auxInfo}>
-              aux_B: {auxB}
-            </span>
-            <span className={styles.auxInfo}>
-              aux_C: {auxC}
-            </span>
-            <span className={styles.auxInfo}>
-              aux_D: {auxD}
-            </span>
-          </div>
-        </div>
-        <button
-          className={styles.closeButton}
-          onClick={handleClose}
-          aria-label="Close pattern editor"
-        >
-          Close
-        </button>
-      </header>
+      <PatternEditorHeader
+        patternLabel={patternLabel}
+        barCount={barCount}
+        timebase={timebase}
+        auxA={auxA}
+        auxB={auxB}
+        auxC={auxC}
+        auxD={auxD}
+        onClose={handleClose}
+      />
 
       {/* Content */}
       <div className={styles.content} data-testid="pattern-editor-content">
         {/* Bar navigation (if multiple bars) */}
-        {barCount > 1 && (
-          <div className={styles.barNavigation}>
-            <button
-              onClick={() => handleBarChange(currentBarIndex - 1)}
-              disabled={currentBarIndex === 0}
-              aria-label="Previous bar"
-            >
-              Previous
-            </button>
-            <span className={styles.barIndicator}>
-              Bar {currentBarIndex + 1} of {barCount}
-            </span>
-            <button
-              onClick={() => handleBarChange(currentBarIndex + 1)}
-              disabled={currentBarIndex === barCount - 1}
-              aria-label="Next bar"
-            >
-              Next
-            </button>
-          </div>
-        )}
+        <BarNavigation
+          currentBarIndex={currentBarIndex}
+          barCount={barCount}
+          onBarChange={handleBarChange}
+        />
 
         {/* Multi-row pattern display */}
         <div className={styles.multiRowContainer}>
@@ -215,6 +381,12 @@ const PatternEditor = () => {
           <div className={styles.column}>
             {leftRows.map((row) => {
               if (!pattern.patternData) return null;
+
+              // Create aux flag handler if this is an aux row
+              const auxFlagHandler = (row === 'auxA' || row === 'auxB' || row === 'auxC' || row === 'auxD')
+                ? createAuxFlagToggleHandler(row)
+                : undefined;
+
               return (
                 <div key={row} className={styles.rowWrapper}>
                   <div className={styles.rowLabel}>{getRowLabel(row, pattern.patternData)}</div>
@@ -223,10 +395,11 @@ const PatternEditor = () => {
                     row={row}
                     selectedSteps={selectedRow === row ? selectedSteps : []}
                     onStepClick={(stepIndex) => {
-                      handleRowClick(row);
-                      // TODO: Implement step editing in next phase
-                      console.log('Step clicked:', row, stepIndex);
+                      handleStepClick(row, stepIndex);
                     }}
+                    onGateToggle={handleGateToggle}
+                    onAuxFlagToggle={auxFlagHandler}
+                    onValueChange={createValueChangeHandler(row)}
                   />
                 </div>
               );
@@ -237,6 +410,12 @@ const PatternEditor = () => {
           <div className={styles.column}>
             {rightRows.map((row) => {
               if (!pattern.patternData) return null;
+
+              // Create aux flag handler if this is an aux row
+              const auxFlagHandler = (row === 'auxA' || row === 'auxB' || row === 'auxC' || row === 'auxD')
+                ? createAuxFlagToggleHandler(row)
+                : undefined;
+
               return (
                 <div key={row} className={styles.rowWrapper}>
                   <div className={styles.rowLabel}>{getRowLabel(row, pattern.patternData)}</div>
@@ -245,10 +424,11 @@ const PatternEditor = () => {
                     row={row}
                     selectedSteps={selectedRow === row ? selectedSteps : []}
                     onStepClick={(stepIndex) => {
-                      handleRowClick(row);
-                      // TODO: Implement step editing in next phase
-                      console.log('Step clicked:', row, stepIndex);
+                      handleStepClick(row, stepIndex);
                     }}
+                    onGateToggle={handleGateToggle}
+                    onAuxFlagToggle={auxFlagHandler}
+                    onValueChange={createValueChangeHandler(row)}
                   />
                 </div>
               );
@@ -256,6 +436,18 @@ const PatternEditor = () => {
           </div>
         </div>
       </div>
+
+      {/* Value Editor Modal */}
+      {editingStep && (
+        <StepValueEditor
+          row={editingStep.row}
+          currentValue={getCurrentEditingValue(editingStep, currentBar)}
+          stepIndex={editingStep.stepIndex}
+          onSubmit={handleValueSubmit}
+          onCancel={handleCancelEdit}
+          position={editingStep.position}
+        />
+      )}
     </div>
   );
 };

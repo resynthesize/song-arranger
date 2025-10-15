@@ -4,6 +4,12 @@
  */
 
 import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+
+// Ensure cleanup after each test
+afterEach(() => {
+  cleanup();
+});
 
 // Mock window.matchMedia for CRT effects and media query tests
 Object.defineProperty(window, 'matchMedia', {

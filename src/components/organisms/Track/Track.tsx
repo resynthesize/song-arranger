@@ -14,7 +14,7 @@ import { isRangeVisible } from '@/utils/viewport';
 import { useDragToCreatePattern } from '@/hooks/useDragToCreatePattern';
 import { TRACK_HEIGHT, DEFAULT_TRACK_COLOR } from '@/constants';
 import { logger } from '@/utils/debug';
-import './Track.css';
+import styles from './Track.module.css';
 
 interface TrackProps {
   id: ID;
@@ -86,7 +86,7 @@ const Track = ({
   }, [isMoving, id, name]);
 
   // Debug: log className when it changes
-  const trackClassName = `track ${isCurrent ? 'track--current' : ''} ${isMoving ? 'track--moving' : ''}`;
+  const trackClassName = `${styles.track} ${isCurrent ? styles.current : ''} ${isMoving ? styles.moving : ''}`;
   useEffect(() => {
     logger.log(`Track ${id}: className = "${trackClassName}", timestamp = ${Date.now()}`);
   }, [id, trackClassName]);
@@ -214,7 +214,7 @@ const Track = ({
       />
       <div
         ref={contentRef}
-        className="track__content"
+        className={styles.content}
         data-testid={`track-${id}-content`}
         onMouseDown={handleDragToCreate}
         onContextMenu={handleContextMenu}
@@ -258,7 +258,7 @@ const Track = ({
         })}
         {ghostPattern && (
           <div
-            className="track__ghost-pattern"
+            className={styles.ghostPattern}
             data-testid="ghost-pattern"
             style={{
               left: `${ghostPattern.leftPx}px`,

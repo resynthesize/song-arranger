@@ -3,7 +3,7 @@
  * Functions for calculating and formatting durations
  */
 
-import type { Clip, ID } from '@/types';
+import type { Pattern, ID } from '@/types';
 
 /**
  * Format duration in seconds to MM:SS format
@@ -30,21 +30,21 @@ export const formatDuration = (seconds: number): string => {
 };
 
 /**
- * Calculate global duration from start to rightmost clip
- * @param clips - Array of all clips
+ * Calculate global duration from start to rightmost pattern
+ * @param patterns - Array of all patterns
  * @param tempo - Current tempo in BPM
  * @returns Total duration in seconds
  */
-export const calculateGlobalDuration = (clips: Clip[], tempo: number): number => {
-  // Handle empty clips array
-  if (clips.length === 0) {
+export const calculateGlobalDuration = (patterns: Pattern[], tempo: number): number => {
+  // Handle empty patterns array
+  if (patterns.length === 0) {
     return 0;
   }
 
   // Find the rightmost position (position + duration)
   let rightmostBeat = 0;
-  clips.forEach((clip) => {
-    const endBeat = clip.position + clip.duration;
+  patterns.forEach((pattern) => {
+    const endBeat = pattern.position + pattern.duration;
     if (endBeat > rightmostBeat) {
       rightmostBeat = endBeat;
     }
@@ -58,30 +58,30 @@ export const calculateGlobalDuration = (clips: Clip[], tempo: number): number =>
 };
 
 /**
- * Calculate total duration of selected clips
- * @param clips - Array of all clips
- * @param selectedIds - Array of selected clip IDs
+ * Calculate total duration of selected patterns
+ * @param patterns - Array of all patterns
+ * @param selectedIds - Array of selected pattern IDs
  * @param tempo - Current tempo in BPM
- * @returns Total duration of selected clips in seconds
+ * @returns Total duration of selected patterns in seconds
  */
 export const calculateSelectedDuration = (
-  clips: Clip[],
+  patterns: Pattern[],
   selectedIds: ID[],
   tempo: number
 ): number => {
-  // Handle empty selection or no clips
-  if (selectedIds.length === 0 || clips.length === 0) {
+  // Handle empty selection or no patterns
+  if (selectedIds.length === 0 || patterns.length === 0) {
     return 0;
   }
 
   // Create a Set for faster lookup
   const selectedIdsSet = new Set(selectedIds);
 
-  // Sum durations of selected clips
+  // Sum durations of selected patterns
   let totalBeats = 0;
-  clips.forEach((clip) => {
-    if (selectedIdsSet.has(clip.id)) {
-      totalBeats += clip.duration;
+  patterns.forEach((pattern) => {
+    if (selectedIdsSet.has(pattern.id)) {
+      totalBeats += pattern.duration;
     }
   });
 

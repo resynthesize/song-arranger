@@ -11,13 +11,13 @@
   position: relative;
 }
 
-.timeline__lanes {
+.lanes {
   display: flex;
   flex-direction: column;
   min-height: 100%;
 }
 
-.timeline__empty {
+.empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,7 +26,7 @@
   text-align: center;
 }
 
-.timeline__empty p {
+.empty p {
   font-family: var(--font-primary);
   font-size: var(--font-size-md);
   color: var(--color-secondary);
@@ -57,7 +57,7 @@
 }
 
 /* Rectangle Selection Tool */
-.timeline__selection-rect {
+.selectionRect {
   position: absolute;
   border: 2px solid var(--color-primary);
   background: rgba(0, 255, 0, 0.1);

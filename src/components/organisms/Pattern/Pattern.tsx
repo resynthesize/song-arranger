@@ -3,14 +3,15 @@
  * Represents a pattern on the timeline with drag and resize functionality
  */
 
-import { useState, useRef, useEffect, MouseEvent, KeyboardEvent, memo } from 'react';
+import { useState, useRef, useEffect, useMemo, MouseEvent, KeyboardEvent, memo } from 'react';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
 import { PatternHandle } from '../../molecules/PatternHandle';
 import type { ID, Position, Duration, ViewportState } from '@/types';
 import { beatsToViewportPx } from '@/utils/viewport';
-import { snapToGrid } from '@/utils/snap';
 import { logger } from '@/utils/debug';
-import './Pattern.css';
+import { usePatternDrag } from '@/hooks/usePatternDrag';
+import { usePatternResize } from '@/hooks/usePatternResize';
+import styles from './Pattern.module.css';
 
 interface PatternProps {
   id: ID;
@@ -69,20 +70,33 @@ const Pattern = ({
   onLabelChange,
   onDelete,
 }: PatternProps) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState<'left' | 'right' | null>(null);
-  const [isCopying, setIsCopying] = useState(false);
-  const [verticalDragDeltaY, setVerticalDragDeltaY] = useState(0);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [isNew, setIsNew] = useState(true);
-  const dragStartX = useRef(0);
-  const dragStartY = useRef(0);
-  const dragStartPosition = useRef(0);
-  const dragStartDuration = useRef(0);
-  const dragStartTrackId = useRef<ID>('');
-  const verticalDragDeltaYRef = useRef(0); // Store actual value for mouseup handler
   const inputRef = useRef<HTMLInputElement>(null);
   const patternRef = useRef<HTMLDivElement>(null);
+
+  // Use custom hooks for drag and resize
+  const { isDragging, isCopying, verticalDragDeltaY, handleDragStart } = usePatternDrag({
+    id,
+    trackId,
+    position,
+    viewport,
+    snapValue,
+    onSelect,
+    onMove,
+    onVerticalDrag,
+    onVerticalDragUpdate,
+    onCopy,
+  });
+
+  const { isResizing, handleResizeStart } = usePatternResize({
+    id,
+    position,
+    duration,
+    viewport,
+    snapValue,
+    onResize,
+  });
 
   // Remove 'new' state after animation completes (400ms as defined in CSS)
   useEffect(() => {
@@ -92,18 +106,29 @@ const Pattern = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // Convert beats to viewport-relative pixels
-  const leftPx = beatsToViewportPx(position, viewport);
+  // Convert beats to viewport-relative pixels (memoized for performance)
+  const leftPx = useMemo(() => beatsToViewportPx(position, viewport), [position, viewport]);
 
   // Use sceneDuration for display width if available (for loop visualization)
-  // Otherwise use the actual pattern duration
-  const displayDuration = sceneDuration && sceneDuration > duration ? sceneDuration : duration;
-  const widthPx = displayDuration * viewport.zoom;
-  const originalWidthPx = duration * viewport.zoom;
+  // Otherwise use the actual pattern duration (memoized for performance)
+  const displayDuration = useMemo(
+    () => (sceneDuration && sceneDuration > duration ? sceneDuration : duration),
+    [sceneDuration, duration]
+  );
 
-  // Calculate if pattern loops (sceneDuration > duration)
-  const hasLoopVisualization = sceneDuration !== undefined && sceneDuration > duration;
-  const originalWidthPercentage = hasLoopVisualization ? (duration / sceneDuration) * 100 : 100;
+  const widthPx = useMemo(() => displayDuration * viewport.zoom, [displayDuration, viewport.zoom]);
+  const originalWidthPx = useMemo(() => duration * viewport.zoom, [duration, viewport.zoom]);
+
+  // Calculate if pattern loops (sceneDuration > duration) (memoized for performance)
+  const hasLoopVisualization = useMemo(
+    () => sceneDuration !== undefined && sceneDuration > duration,
+    [sceneDuration, duration]
+  );
+
+  const originalWidthPercentage = useMemo(
+    () => (hasLoopVisualization && sceneDuration ? (duration / sceneDuration) * 100 : 100),
+    [hasLoopVisualization, duration, sceneDuration]
+  );
 
   const handleMouseDown = (e: MouseEvent) => {
     if (e.button !== 0) return; // Only left click
@@ -120,27 +145,6 @@ const Pattern = ({
     }
   };
 
-  const handleDragStart = (e: MouseEvent) => {
-    if (e.button !== 0) return;
-    e.stopPropagation();
-
-    // Always select on mousedown (before starting potential drag)
-    const isMultiSelect = e.altKey;
-    onSelect(id, isMultiSelect);
-
-    // Check if Alt key is held (for copying)
-    if (e.altKey && onCopy) {
-      setIsCopying(true);
-      onCopy(id);
-    }
-
-    setIsDragging(true);
-    dragStartX.current = e.clientX;
-    dragStartY.current = e.clientY;
-    dragStartPosition.current = position;
-    dragStartTrackId.current = trackId; // Track starting track
-  };
-
   const handleDoubleClick = (e: MouseEvent) => {
     e.stopPropagation();
     // Prioritize onOpenEditor over onStartEditing
@@ -149,16 +153,6 @@ const Pattern = ({
     } else if (onStartEditing) {
       onStartEditing(id);
     }
-  };
-
-  const handleResizeStart = (edge: 'left' | 'right') => (e: MouseEvent) => {
-    if (e.button !== 0) return;
-    e.stopPropagation();
-
-    setIsResizing(edge);
-    dragStartX.current = e.clientX;
-    dragStartDuration.current = duration;
-    dragStartPosition.current = position;
   };
 
   const handleLabelInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -195,80 +189,6 @@ const Pattern = ({
     }
   }, [isEditing]);
 
-  useEffect(() => {
-    if (!isDragging && !isResizing) return;
-
-    const handleMouseMove = (e: globalThis.MouseEvent) => {
-      const deltaX = e.clientX - dragStartX.current;
-      const deltaY = e.clientY - dragStartY.current;
-      const deltaBeats = deltaX / viewport.zoom;
-
-      if (isDragging) {
-        // Calculate new position and snap it (same approach as resize)
-        const rawNewPosition = dragStartPosition.current + deltaBeats;
-        const snappedPosition = snapToGrid(rawNewPosition, snapValue);
-        const positionDelta = snappedPosition - dragStartPosition.current;
-        onMove(id, snappedPosition, positionDelta);
-
-        // Handle vertical track dragging - store deltaY for CSS transform
-        // Don't update Redux until mouseup to prevent unmount/remount
-        if (onVerticalDrag && Math.abs(deltaY) > 5) {
-          verticalDragDeltaYRef.current = deltaY;
-          setVerticalDragDeltaY(deltaY);
-
-          // Notify Timeline of drag state for other selected patterns
-          if (onVerticalDragUpdate) {
-            onVerticalDragUpdate(id, deltaY);
-          }
-        }
-      } else if (isResizing) {
-        if (isResizing === 'right') {
-          // Resize from right edge
-          const rawNewDuration = dragStartDuration.current + deltaBeats;
-          const snappedDuration = Math.max(
-            snapValue || 1,
-            snapToGrid(rawNewDuration, snapValue)
-          );
-          onResize(id, snappedDuration, 'right', dragStartDuration.current, dragStartPosition.current);
-        } else {
-          // Resize from left edge
-          const rawNewDuration = dragStartDuration.current - deltaBeats;
-          const snappedDuration = Math.max(
-            snapValue || 1,
-            snapToGrid(rawNewDuration, snapValue)
-          );
-          onResize(id, snappedDuration, 'left', dragStartDuration.current, dragStartPosition.current);
-        }
-      }
-    };
-
-    const handleMouseUp = () => {
-      const wasDraggingVertically = isDragging && verticalDragDeltaYRef.current !== 0;
-      const verticalDelta = verticalDragDeltaYRef.current;
-
-      // Clear states first, before calling Redux update
-      // This prevents the pattern from showing transform when it remounts in new track
-      setIsDragging(false);
-      setIsResizing(null);
-      setIsCopying(false);
-      setVerticalDragDeltaY(0);
-      verticalDragDeltaYRef.current = 0;
-
-      // Now update Redux (may cause unmount/remount in new track)
-      if (wasDraggingVertically && onVerticalDrag) {
-        onVerticalDrag(id, dragStartTrackId.current, verticalDelta);
-      }
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, isResizing, id, viewport.zoom, snapValue, onMove, onResize, onVerticalDrag, onVerticalDragUpdate]);
-
   const handleContextMenu = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -285,20 +205,26 @@ const Pattern = ({
     }
   };
 
-  const contextMenuItems: MenuItem[] = [
-    {
-      label: 'Delete Pattern',
-      action: handleDeletePattern,
-      disabled: !onDelete,
-    },
-  ];
+  const contextMenuItems: MenuItem[] = useMemo(
+    () => [
+      {
+        label: 'Delete Pattern',
+        action: handleDeletePattern,
+        disabled: !onDelete,
+      },
+    ],
+    [handleDeletePattern, onDelete]
+  );
 
-  // Display label: custom label > track name > nothing
-  const displayLabel = label || trackName;
+  // Display label: custom label > track name > nothing (memoized for performance)
+  const displayLabel = useMemo(() => label || trackName, [label, trackName]);
 
   // Use external vertical drag deltaY if provided (for multi-pattern drag),
   // otherwise use local vertical drag deltaY (for single pattern drag)
-  const effectiveVerticalDragDeltaY = externalVerticalDragDeltaY ?? verticalDragDeltaY;
+  const effectiveVerticalDragDeltaY = useMemo(
+    () => externalVerticalDragDeltaY ?? verticalDragDeltaY,
+    [externalVerticalDragDeltaY, verticalDragDeltaY]
+  );
 
   // Debug logging for vertical drag
   useEffect(() => {
@@ -321,20 +247,20 @@ const Pattern = ({
     }
   }, [effectiveVerticalDragDeltaY, isDragging, id]);
 
-  // Show type badge if pattern is wide enough (> 20px)
-  const showTypeBadge = widthPx > 20;
+  // Show type badge if pattern is wide enough (> 20px) (memoized for performance)
+  const showTypeBadge = useMemo(() => widthPx > 20, [widthPx]);
 
   return (
     <div
       ref={patternRef}
       data-testid={`pattern-${id}`}
-      className={`pattern ${isNew ? 'pattern--new' : ''} ${
-        isSelected ? 'pattern--selected' : ''
-      } ${isDragging ? 'pattern--dragging' : ''} ${
-        isResizing ? 'pattern--resizing' : ''
-      } ${isCopying ? 'pattern--copying' : ''} ${
-        muted ? 'pattern--muted' : ''
-      } ${hasLoopVisualization ? 'pattern--looping' : ''}`}
+      className={`${styles.pattern} ${isNew ? styles.new : ''} ${
+        isSelected ? styles.selected : ''
+      } ${isDragging ? styles.dragging : ''} ${
+        isResizing ? styles.resizing : ''
+      } ${isCopying ? styles.copying : ''} ${
+        muted ? styles.muted : ''
+      } ${hasLoopVisualization ? styles.looping : ''}`}
       style={{
         left: `${leftPx.toString()}px`,
         width: `${widthPx.toString()}px`,
@@ -348,7 +274,7 @@ const Pattern = ({
     >
       {hasLoopVisualization && (
         <div
-          className="pattern__loop-fill"
+          className={styles.loopFill}
           style={{
             left: `${originalWidthPx}px`,
             width: `${widthPx - originalWidthPx}px`
@@ -357,19 +283,19 @@ const Pattern = ({
       )}
       <PatternHandle patternId={id} edge="left" onResizeStart={handleResizeStart} />
       <div
-        className="pattern__content"
+        className={styles.content}
         onMouseDown={handleDragStart}
         onDoubleClick={handleDoubleClick}
       >
         {showTypeBadge && (
-          <div className="pattern__type-badge" data-testid={`pattern-${id}-type-badge`}>
+          <div className={styles.typeBadge} data-testid={`pattern-${id}-type-badge`}>
             {patternType}
           </div>
         )}
         {isEditing ? (
           <input
             ref={inputRef}
-            className="pattern__label-input terminal-input"
+            className={`${styles.labelInput} terminal-input`}
             defaultValue={label || ''}
             onKeyDown={handleLabelInputKeyDown}
             onBlur={handleLabelInputBlur}
@@ -380,7 +306,7 @@ const Pattern = ({
           />
         ) : (
           displayLabel && (
-            <div className="pattern__label" data-testid={`pattern-${id}-label`}>
+            <div className={styles.label} data-testid={`pattern-${id}-label`}>
               {displayLabel}
             </div>
           )

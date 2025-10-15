@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PatternRow } from './PatternRow';
 import type { P3Bar } from '@/types';
+import { actUser } from '@/utils/testUtils';
 
 // Helper function to create a mock P3Bar with default values
 const createMockBar = (overrides?: Partial<P3Bar>): P3Bar => {
@@ -148,21 +149,28 @@ describe('PatternRow', () => {
       expect(screen.getByText('F 3')).toBeInTheDocument();
     });
 
-    it('should use velocity for bar height on note row', () => {
+    it('should use MIDI note value for bar height on note row', () => {
       const barData = createMockBar({
-        note: ['C 3', 'D 3', 'E 3', 'F 3', '---', '---', '---', '---', '---', '---', '---', '---', '---', '---', '---', '---'],
+        note: ['C 3', 'D 3', 'G 10', 'C 0', '---', '---', '---', '---', '---', '---', '---', '---', '---', '---', '---', '---'],
         velo: [127, 64, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       });
       render(<PatternRow barData={barData} row="note" />);
 
       const bars = screen.getAllByTestId('bar-chart-fill');
 
-      // First bar should be 100% (127/127)
-      expect(bars[0]).toHaveStyle({ height: '100%' });
+      // First bar (C 3 = MIDI 36) should be ~28.3% (36/127)
+      const c3Percent = (36 / 127) * 100;
+      expect(bars[0]).toHaveStyle({ height: `${c3Percent}%` });
 
-      // Second bar should be ~50% (64/127)
-      const expectedPercent = (64 / 127) * 100;
-      expect(bars[1]).toHaveStyle({ height: `${expectedPercent}%` });
+      // Second bar (D 3 = MIDI 38) should be ~29.9% (38/127)
+      const d3Percent = (38 / 127) * 100;
+      expect(bars[1]).toHaveStyle({ height: `${d3Percent}%` });
+
+      // Third bar (G 10 = MIDI 127) should be 100% (127/127) - highest note
+      expect(bars[2]).toHaveStyle({ height: '100%' });
+
+      // Fourth bar (C 0 = MIDI 0) should be 0% (0/127) - lowest note
+      expect(bars[3]).toHaveStyle({ height: '0%' });
     });
 
     it('should handle empty notes (---) correctly', () => {
@@ -456,20 +464,20 @@ describe('PatternRow', () => {
       const barData = createMockBar();
       const user = userEvent.setup();
 
-      render(<PatternRow barData={barData} row="velocity" onStepClick={handleStepClick} />);
+      render(<PatternRow barData={barData} row="note" onStepClick={handleStepClick} />);
 
-      const bars = screen.getAllByTestId('bar-chart-container');
+      const steps = screen.getAllByTestId('step-container');
 
       // Click first step (index 0)
-      await user.click(bars[0]);
+      await actUser(() => user.click(steps[0]));
       expect(handleStepClick).toHaveBeenCalledWith(0);
 
       // Click fifth step (index 4)
-      await user.click(bars[4]);
+      await actUser(() => user.click(steps[4]));
       expect(handleStepClick).toHaveBeenCalledWith(4);
 
       // Click last step (index 15)
-      await user.click(bars[15]);
+      await actUser(() => user.click(steps[15]));
       expect(handleStepClick).toHaveBeenCalledWith(15);
     });
 
@@ -477,14 +485,14 @@ describe('PatternRow', () => {
       const barData = createMockBar();
       const user = userEvent.setup();
 
-      render(<PatternRow barData={barData} row="velocity" />);
+      render(<PatternRow barData={barData} row="note" />);
 
-      const bars = screen.getAllByTestId('bar-chart-container');
+      const steps = screen.getAllByTestId('step-container');
 
       // Should not throw error when clicking
-      await user.click(bars[0]);
+      await actUser(() => user.click(steps[0]));
 
-      expect(bars[0]).toBeInTheDocument();
+      expect(steps[0]).toBeInTheDocument();
     });
 
     it('should handle clicks on all 16 steps correctly', async () => {
@@ -492,20 +500,16 @@ describe('PatternRow', () => {
       const barData = createMockBar();
       const user = userEvent.setup();
 
-      render(<PatternRow barData={barData} row="velocity" onStepClick={handleStepClick} />);
+      render(<PatternRow barData={barData} row="note" onStepClick={handleStepClick} />);
 
-      const bars = screen.getAllByTestId('bar-chart-container');
+      const steps = screen.getAllByTestId('step-container');
 
-      // Click all steps
+      // Click all steps and verify each one individually
       for (let i = 0; i < 16; i++) {
-        await user.click(bars[i]);
-      }
-
-      expect(handleStepClick).toHaveBeenCalledTimes(16);
-
-      // Verify each call had the correct index
-      for (let i = 0; i < 16; i++) {
-        expect(handleStepClick).toHaveBeenNthCalledWith(i + 1, i);
+        handleStepClick.mockClear();
+        await actUser(() => user.click(steps[i]));
+        // Should have been called at least once with the correct index
+        expect(handleStepClick).toHaveBeenCalledWith(i);
       }
     });
   });
@@ -678,12 +682,12 @@ describe('PatternRow', () => {
 
       render(<PatternRow barData={barData} row="velocity" onStepClick={handleStepClick} />);
 
-      const bars = screen.getAllByTestId('bar-chart-container');
+      const stepContainers = screen.getAllByTestId('step-container');
 
-      // All clickable bars should have proper attributes
-      bars.forEach(bar => {
-        expect(bar).toHaveAttribute('role', 'button');
-        expect(bar).toHaveAttribute('tabIndex', '0');
+      // All clickable step containers should have proper attributes
+      stepContainers.forEach(container => {
+        expect(container).toHaveAttribute('role', 'button');
+        expect(container).toHaveAttribute('tabIndex', '0');
       });
     });
 

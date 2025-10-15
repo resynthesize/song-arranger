@@ -1,10 +1,9 @@
 /**
  * Cyclone - ProjectSelector Component
- * Retro terminal-styled project selection dialog
+ * Sleek, compact project selection dialog
  */
 
-import { useEffect, useState } from 'react';
-import { TerminalPanel } from '../../molecules/TerminalPanel';
+import { useEffect, useState, useRef } from 'react';
 import type { ProjectFile } from '@/utils/storage';
 import './ProjectSelector.css';
 
@@ -18,6 +17,7 @@ interface ProjectSelectorProps {
 
 const ProjectSelector = ({ projects, title, mode, onSelect, onClose }: ProjectSelectorProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,6 +44,14 @@ const ProjectSelector = ({ projects, title, mode, onSelect, onClose }: ProjectSe
     };
   }, [onClose, onSelect, projects, selectedIndex]);
 
+  // Auto-scroll selected item into view
+  useEffect(() => {
+    const selectedElement = dialogRef.current?.querySelector(`[data-index="${selectedIndex}"]`);
+    if (selectedElement) {
+      selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [selectedIndex]);
+
   const formatDate = (isoDate: string): string => {
     const date = new Date(isoDate);
     const now = new Date();
@@ -52,17 +60,16 @@ const ProjectSelector = ({ projects, title, mode, onSelect, onClose }: ProjectSe
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'JUST NOW';
-    if (diffMins < 60) return `${diffMins}M AGO`;
-    if (diffHours < 24) return `${diffHours}H AGO`;
-    if (diffDays === 1) return 'YESTERDAY';
-    if (diffDays < 7) return `${diffDays}D AGO`;
+    if (diffMins < 1) return 'now';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    if (diffDays === 1) return '1d';
+    if (diffDays < 7) return `${diffDays}d`;
 
-    // Format as MM/DD/YY for older dates
+    // Format as MM/DD for older dates
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    const year = String(date.getFullYear()).slice(-2);
-    return `${month}/${day}/${year}`;
+    return `${month}/${day}`;
   };
 
   const handleProjectClick = (project: ProjectFile, index: number) => {
@@ -70,54 +77,65 @@ const ProjectSelector = ({ projects, title, mode, onSelect, onClose }: ProjectSe
     onSelect(project);
   };
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="project-selector">
-      <TerminalPanel title={title} variant="elevated" padding="md">
-        <div className="project-selector__content">
-          {projects.length === 0 ? (
-            <div className="project-selector__empty">
-              <p>NO SAVED PROJECTS FOUND</p>
-            </div>
-          ) : (
-            <>
-              <div className="project-selector__list">
-                {projects.map((project, index) => (
-                  <button
-                    key={project.id}
-                    className={`project-selector__item ${
-                      index === selectedIndex ? 'project-selector__item--selected' : ''
-                    }`}
-                    onClick={() => handleProjectClick(project, index)}
-                    data-testid={`project-item-${project.id}`}
-                  >
-                    <span className="project-selector__item-indicator">
-                      {index === selectedIndex ? '>' : ' '}
-                    </span>
+    <div className="project-selector" onClick={handleBackdropClick}>
+      <div className="project-selector__dialog" ref={dialogRef}>
+        <div className="project-selector__header">
+          <h2 className="project-selector__title">{title}</h2>
+          <button className="project-selector__close" onClick={onClose} aria-label="Close">
+            ✕
+          </button>
+        </div>
+
+        {projects.length === 0 ? (
+          <div className="project-selector__empty">
+            No saved projects
+          </div>
+        ) : (
+          <>
+            <div className="project-selector__list">
+              {projects.map((project, index) => (
+                <button
+                  key={project.id}
+                  data-index={index}
+                  className={`project-selector__item ${
+                    index === selectedIndex ? 'project-selector__item--selected' : ''
+                  }`}
+                  onClick={() => handleProjectClick(project, index)}
+                  data-testid={`project-item-${project.id}`}
+                >
+                  <div className="project-selector__item-main">
                     <span className="project-selector__item-name">
                       {project.name}
-                      {project.isTemplate && (
-                        <span className="project-selector__item-badge"> [TEMPLATE]</span>
-                      )}
                     </span>
-                    <span className="project-selector__item-date">
-                      {formatDate(project.updatedAt)}
-                    </span>
-                  </button>
-                ))}
-              </div>
+                    {project.isTemplate && (
+                      <span className="project-selector__item-badge">TEMPLATE</span>
+                    )}
+                  </div>
+                  <span className="project-selector__item-date">
+                    {formatDate(project.updatedAt)}
+                  </span>
+                </button>
+              ))}
+            </div>
 
-              <div className="project-selector__footer">
-                <div className="project-selector__stats">
-                  PROJECT {selectedIndex + 1}/{projects.length}
-                </div>
-                <div className="project-selector__instructions">
-                  [↑↓] NAVIGATE [{mode === 'load' ? 'ENTER' : 'ENTER'}] {mode === 'load' ? 'LOAD' : 'DELETE'} [ESC] CANCEL
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </TerminalPanel>
+            <div className="project-selector__footer">
+              <span className="project-selector__hint">
+                ↑↓ Navigate · Enter {mode === 'load' ? 'Load' : 'Delete'} · Esc Cancel
+              </span>
+              <span className="project-selector__count">
+                {selectedIndex + 1}/{projects.length}
+              </span>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

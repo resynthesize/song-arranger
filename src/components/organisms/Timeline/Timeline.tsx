@@ -29,7 +29,7 @@ import { snapToGrid } from '@/utils/snap';
 import { LANE_HEIGHT } from '@/constants';
 import { logger } from '@/utils/debug';
 import type { ID, Position } from '@/types';
-import './Timeline.css';
+import styles from './Timeline.module.css';
 
 const Timeline = () => {
   const dispatch = useAppDispatch();
@@ -176,13 +176,13 @@ const Timeline = () => {
 
   return (
     <div
-      className="timeline"
+      className={styles.timeline}
       data-testid="timeline"
       ref={timelineRef}
       onMouseDown={handleRectangleSelectionMouseDown}
     >
       {lanes.length === 0 ? (
-        <div className="timeline__empty">
+        <div className={styles.empty}>
           <p>No lanes yet. Click &quot;Add Lane&quot; to get started.</p>
         </div>
       ) : (
@@ -192,7 +192,7 @@ const Timeline = () => {
             snapValue={effectiveSnapValue}
             onPositionClick={handleRulerClick}
           />
-          <div className="timeline__lanes">
+          <div className={styles.lanes}>
             {lanes.map((lane) => (
               <Track
                 key={lane.id}
@@ -231,7 +231,7 @@ const Timeline = () => {
       )}
       {selectionRect && (
         <div
-          className="timeline__selection-rect"
+          className={styles.selectionRect}
           style={{
             left: `${Math.min(selectionRect.startX, selectionRect.currentX)}px`,
             top: `${Math.min(selectionRect.startY, selectionRect.currentY)}px`,

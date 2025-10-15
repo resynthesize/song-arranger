@@ -27,7 +27,7 @@ import {
   clearTemplateProject,
   type ProjectFile,
 } from '@/utils/storage';
-import { parseCKSFile, importFromCirklon } from '@/utils/cirklon/import';
+import { parseCKSFile, importFromCirklon, importSongCollectionFromCirklon } from '@/utils/cirklon/import';
 import { exportToCirklon, type ExportOptions } from '@/utils/cirklon/export';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
 import ProjectSelector from '../ProjectSelector';
@@ -372,6 +372,76 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     input.click();
   }, [dispatch, isDirty]);
 
+  const handleImportCirklonCollection = useCallback(() => {
+    // Create file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.cks,.CKS,application/json';
+
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files) return;
+
+      const file = first(Array.from(files));
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const jsonString = event.target?.result as string;
+
+          // Parse CKS file
+          const cksData = parseCKSFile(jsonString);
+
+          // Count songs
+          const songCount = Object.keys(cksData.song_data).length;
+
+          if (songCount === 0) {
+            dispatch(setStatus({
+              message: 'No songs found in collection file',
+              type: 'error',
+            }));
+            return;
+          }
+
+          // Import collection and save each song to localStorage
+          const result = importSongCollectionFromCirklon(cksData, 4, saveProject);
+
+          // Show results in status bar
+          if (result.successCount > 0) {
+            if (result.failureCount > 0) {
+              const errorDetails = result.errors.map(e => `${e.songName}: ${e.error}`).join('; ');
+              dispatch(setStatus({
+                message: `Imported ${result.successCount} song${result.successCount > 1 ? 's' : ''}, failed ${result.failureCount}: ${errorDetails}`,
+                type: 'success',
+              }));
+            } else {
+              dispatch(setStatus({
+                message: `Successfully imported ${result.successCount} song${result.successCount > 1 ? 's' : ''}: ${result.songNames.join(', ')}`,
+                type: 'success',
+              }));
+            }
+          } else {
+            const errorDetails = result.errors.map(e => `${e.songName}: ${e.error}`).join('; ');
+            dispatch(setStatus({
+              message: `Failed to import all songs: ${errorDetails}`,
+              type: 'error',
+            }));
+          }
+        } catch (error) {
+          dispatch(setStatus({
+            message: `Failed to import Cirklon collection: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            type: 'error',
+          }));
+        }
+      };
+
+      reader.readAsText(file);
+    };
+
+    input.click();
+  }, [dispatch]);
+
   const handleExportCirklon = useCallback(() => {
     setShowExportCirklonDialog(true);
   }, []);
@@ -421,6 +491,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     { id: 'separator-1', separator: true },
     { id: 'import', label: 'Import JSON...' },
     { id: 'import-cirklon', label: 'Import Cirklon (.CKS)...' },
+    { id: 'import-cirklon-collection', label: 'Import Song Collection (.CKS)...' },
     { id: 'export', label: 'Export JSON...' },
     { id: 'export-cirklon', label: 'Export Cirklon (.CKS)...' },
     { id: 'separator-2', separator: true },
@@ -453,6 +524,9 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
         case 'import-cirklon':
           handleImportCirklon();
           break;
+        case 'import-cirklon-collection':
+          handleImportCirklonCollection();
+          break;
         case 'export':
           handleExport();
           break;
@@ -473,7 +547,7 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           break;
       }
     },
-    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleImportCirklon, handleExport, handleExportCirklon, handleSetAsTemplate, handleSetThemeModern, handleSetThemeRetro, handleDelete]
+    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleImportCirklon, handleImportCirklonCollection, handleExport, handleExportCirklon, handleSetAsTemplate, handleSetThemeModern, handleSetThemeRetro, handleDelete]
   );
 
   return (

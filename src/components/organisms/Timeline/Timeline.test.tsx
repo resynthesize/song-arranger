@@ -21,6 +21,7 @@ import statusReducer from '@/store/slices/statusSlice';
 import themeReducer from '@/store/slices/themeSlice';
 import patternEditorReducer from '@/store/slices/patternEditorSlice';
 import type { RootState } from '@/types';
+import patternStyles from '../Pattern/Pattern.module.css';
 
 const createMockStore = (initialState?: Partial<RootState>) => {
   return configureStore({
@@ -188,7 +189,7 @@ describe('Timeline', () => {
 
     // Find the pattern and double-click it
     const pattern = getByTestId('pattern-pattern-1');
-    const content = pattern.querySelector('.pattern__content');
+    const content = pattern.querySelector(`.${patternStyles.content}`);
 
     if (content) {
       await userEvent.dblClick(content);

@@ -57,15 +57,6 @@ export interface Scene {
   duration: Duration; // Length in beats
 }
 
-/**
- * @deprecated Use Pattern instead
- */
-export type Clip = Pattern;
-
-/**
- * @deprecated Use Track instead
- */
-export type Lane = Track;
 
 /**
  * Snap mode type
@@ -163,23 +154,7 @@ export interface PatternEditorState {
 }
 
 /**
- * @deprecated Use TracksState instead
+ * Application State Root - Re-exported from store for type safety
+ * The actual RootState type is inferred from the store configuration
  */
-export type LanesState = TracksState;
-
-/**
- * @deprecated Use PatternsState instead
- */
-export type ClipsState = PatternsState;
-
-/**
- * Application State Root
- */
-export interface RootState {
-  timeline: TimelineState;
-  tracks: TracksState;
-  patterns: PatternsState;
-  selection: SelectionState;
-  scenes: ScenesState;
-  patternEditor: PatternEditorState;
-}
+export type { RootState, AppDispatch } from '@/store/store';
