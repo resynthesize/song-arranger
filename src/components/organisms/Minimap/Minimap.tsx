@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { logger } from '@/utils/debug';
 import { useAppSelector } from '@/store/hooks';
 import type { ViewportState, Track, Pattern } from '@/types';
 import {
@@ -286,7 +287,7 @@ const Minimap = ({
     if (visible && containerRef.current && !embedded) {
       const rect = containerRef.current.getBoundingClientRect();
       const computedStyle = window.getComputedStyle(containerRef.current);
-      console.log('[Minimap] Positioning info:', {
+      logger.debug('[Minimap] Positioning info:', {
         bottom: computedStyle.bottom,
         right: computedStyle.right,
         position: computedStyle.position,
@@ -302,7 +303,7 @@ const Minimap = ({
   }, [visible, embedded, minimapHeight, minimapWidth]);
 
   if (!visible) {
-    console.log('[Minimap] Not rendering - not visible');
+    logger.debug('[Minimap] Not rendering - not visible');
     return null;
   }
 

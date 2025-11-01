@@ -7,3 +7,5 @@ export { TerminalInput } from './TerminalInput';
 export { default as TerminalNoise } from './TerminalNoise';
 export { default as CRTEffects } from './CRTEffects';
 export { DurationDisplay } from './DurationDisplay';
+export { RowVisibilityToolbar } from './RowVisibilityToolbar/RowVisibilityToolbar';
+export { default as ErrorBoundary } from './ErrorBoundary';

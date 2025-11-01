@@ -3,7 +3,8 @@
  * Terminal-styled right-click context menu
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { logger } from '@/utils/debug';
 import './ContextMenu.css';
 
 export interface MenuItem {
@@ -22,12 +23,41 @@ interface ContextMenuProps {
 }
 
 const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuElement, setMenuElement] = useState<HTMLDivElement | null>(null);
+  const [position, setPosition] = useState({ x, y, ready: false });
+
+  // Calculate adjusted position using ref callback to avoid flickering
+  const refCallback = useCallback((node: HTMLDivElement | null) => {
+    setMenuElement(node);
+    if (node && !position.ready) {
+      const rect = node.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let adjustedX = x;
+      let adjustedY = y;
+
+      if (x + rect.width > viewportWidth) {
+        adjustedX = Math.max(10, viewportWidth - rect.width - 10);
+      }
+
+      if (y + rect.height > viewportHeight) {
+        adjustedY = Math.max(10, viewportHeight - rect.height - 10);
+      }
+
+      setPosition({ x: adjustedX, y: adjustedY, ready: true });
+    }
+  }, [x, y, position.ready]);
+
+  // Debug: log when context menu renders
+  useEffect(() => {
+    logger.debug('[ContextMenu] Rendered', { x, y, itemCount: items.length, items });
+  }, [x, y, items]);
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (menuElement && !menuElement.contains(e.target as Node)) {
         onClose();
       }
     };
@@ -39,41 +69,17 @@ const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
     };
 
     // Add listeners after a small delay to prevent immediate close
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscape);
     }, 0);
 
     return () => {
+      clearTimeout(timeoutId);
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [onClose]);
-
-  // Adjust position if menu would go off-screen
-  useEffect(() => {
-    if (menuRef.current) {
-      const rect = menuRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      let adjustedX = x;
-      let adjustedY = y;
-
-      if (x + rect.width > viewportWidth) {
-        adjustedX = viewportWidth - rect.width - 10;
-      }
-
-      if (y + rect.height > viewportHeight) {
-        adjustedY = viewportHeight - rect.height - 10;
-      }
-
-      if (adjustedX !== x || adjustedY !== y) {
-        menuRef.current.style.left = `${adjustedX}px`;
-        menuRef.current.style.top = `${adjustedY}px`;
-      }
-    }
-  }, [x, y]);
+  }, [onClose, menuElement]);
 
   const handleItemClick = (item: MenuItem) => {
     if (!item.disabled && !item.submenu && item.action) {
@@ -84,9 +90,13 @@ const ContextMenu = ({ x, y, items, onClose }: ContextMenuProps) => {
 
   return (
     <div
-      ref={menuRef}
+      ref={refCallback}
       className="context-menu"
-      style={{ left: `${x}px`, top: `${y}px` }}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        opacity: position.ready ? 1 : 0,
+      }}
       data-testid="context-menu"
     >
       <div className="context-menu__border">

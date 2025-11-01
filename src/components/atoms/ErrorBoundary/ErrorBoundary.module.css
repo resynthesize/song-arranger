@@ -1,0 +1,89 @@
+/**
+ * Cyclone - Error Boundary Styles
+ */
+
+.errorBoundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-error);
+  font-family: var(--font-mono, 'Courier New', monospace);
+  padding: var(--spacing-lg);
+}
+
+.errorContent {
+  max-width: 800px;
+  width: 100%;
+  border: 2px solid var(--color-error);
+  padding: var(--spacing-xl);
+  background-color: rgba(255, 0, 0, 0.05);
+}
+
+.errorTitle {
+  font-size: var(--font-size-2xl, 32px);
+  font-weight: bold;
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-error);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.errorMessage {
+  font-size: var(--font-size-lg, 18px);
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-text-primary);
+}
+
+.errorDetails {
+  margin: var(--spacing-lg) 0;
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-md);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.errorDetails summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--color-text-secondary);
+  user-select: none;
+  margin-bottom: var(--spacing-sm);
+}
+
+.errorDetails summary:hover {
+  color: var(--color-text-primary);
+}
+
+.errorStack {
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: var(--font-size-sm, 14px);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: var(--spacing-sm) 0 0 0;
+  color: var(--color-text-secondary);
+}
+
+.reloadButton {
+  background-color: var(--color-error);
+  color: var(--color-bg);
+  border: 2px solid var(--color-error);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-md, 16px);
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+
+.reloadButton:hover {
+  background-color: transparent;
+  color: var(--color-error);
+}
+
+.reloadButton:active {
+  transform: scale(0.98);
+}

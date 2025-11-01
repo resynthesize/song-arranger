@@ -3,103 +3,62 @@
  * Tests for CRT visual effects overlay
  */
 
-import { render, screen } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import { screen } from '@testing-library/react';
+import { renderWithProviders } from '@/utils/testUtils';
 import CRTEffects from './CRTEffects';
-import timelineReducer from '@/store/slices/timelineSlice';
-import tracksReducer from '@/store/slices/tracksSlice';
-import patternsReducer from '@/store/slices/patternsSlice';
-import selectionReducer from '@/store/slices/selectionSlice';
-import scenesReducer from '@/store/slices/scenesSlice';
-import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
-import projectReducer from '@/store/slices/projectSlice';
-import quickInputReducer from '@/store/slices/quickInputSlice';
-import commandPaletteReducer from '@/store/slices/commandPaletteSlice';
-import statusReducer from '@/store/slices/statusSlice';
-import themeReducer from '@/store/slices/themeSlice';
-import patternEditorReducer from '@/store/slices/patternEditorSlice';
-
-// Helper to create a test store
-const createTestStore = (enabled: boolean) => {
-  return configureStore({
-    reducer: {
-      timeline: timelineReducer,
-      tracks: tracksReducer,
-      patterns: patternsReducer,
-      selection: selectionReducer,
-      scenes: scenesReducer,
-      crtEffects: crtEffectsReducer,
-      project: projectReducer,
-      quickInput: quickInputReducer,
-      commandPalette: commandPaletteReducer,
-      status: statusReducer,
-      theme: themeReducer,
-      patternEditor: patternEditorReducer,
-    },
-    preloadedState: {
-      crtEffects: { enabled },
-    },
-  });
-};
 
 describe('CRTEffects', () => {
   describe('when effects are enabled', () => {
     it('should render the CRT effects container', () => {
-      const store = createTestStore(true);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: true },
+        } as any,
+      });
 
       const container = screen.getByTestId('crt-effects');
       expect(container).toBeInTheDocument();
     });
 
     it('should have crt-enabled class', () => {
-      const store = createTestStore(true);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: true },
+        } as any,
+      });
 
       const container = screen.getByTestId('crt-effects');
       expect(container).toHaveClass('crt-enabled');
     });
 
     it('should render scanline overlay', () => {
-      const store = createTestStore(true);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: true },
+        } as any,
+      });
 
       const scanlines = screen.getByTestId('crt-scanlines');
       expect(scanlines).toBeInTheDocument();
     });
 
     it('should render flicker overlay', () => {
-      const store = createTestStore(true);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: true },
+        } as any,
+      });
 
       const flicker = screen.getByTestId('crt-flicker');
       expect(flicker).toBeInTheDocument();
     });
 
     it('should render curvature overlay', () => {
-      const store = createTestStore(true);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: true },
+        } as any,
+      });
 
       const curvature = screen.getByTestId('crt-curvature');
       expect(curvature).toBeInTheDocument();
@@ -108,36 +67,33 @@ describe('CRTEffects', () => {
 
   describe('when effects are disabled', () => {
     it('should render the CRT effects container', () => {
-      const store = createTestStore(false);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: false },
+        } as any,
+      });
 
       const container = screen.getByTestId('crt-effects');
       expect(container).toBeInTheDocument();
     });
 
     it('should have crt-disabled class', () => {
-      const store = createTestStore(false);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: false },
+        } as any,
+      });
 
       const container = screen.getByTestId('crt-effects');
       expect(container).toHaveClass('crt-disabled');
     });
 
     it('should not have crt-enabled class', () => {
-      const store = createTestStore(false);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: false },
+        } as any,
+      });
 
       const container = screen.getByTestId('crt-effects');
       expect(container).not.toHaveClass('crt-enabled');
@@ -146,24 +102,22 @@ describe('CRTEffects', () => {
 
   describe('accessibility', () => {
     it('should have crt-effects class for pointer-events: none', () => {
-      const store = createTestStore(true);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: true },
+        } as any,
+      });
 
       const container = screen.getByTestId('crt-effects');
       expect(container).toHaveClass('crt-effects');
     });
 
     it('should be aria-hidden', () => {
-      const store = createTestStore(true);
-      render(
-        <Provider store={store}>
-          <CRTEffects />
-        </Provider>
-      );
+      renderWithProviders(<CRTEffects />, {
+        preloadedState: {
+          crtEffects: { enabled: true },
+        } as any,
+      });
 
       const container = screen.getByTestId('crt-effects');
       expect(container).toHaveAttribute('aria-hidden', 'true');

@@ -1,0 +1,155 @@
+/**
+ * Cyclone - ConsoleAutocomplete Styles
+ * VSCode-style autocomplete dropdown
+ */
+
+.console-autocomplete {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: var(--spacing-xs)
+  min-width: 300px;
+  max-width: 500px;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.2);
+  font-family: var(--font-mono, 'VT323', monospace);
+  font-size: var(--font-size-xs, 14px);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.console-autocomplete__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--spacing-xs)0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.console-autocomplete__item {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: var(--color-primary);
+  transition: background-color 0.1s ease;
+  gap: var(--spacing-sm)
+}
+
+.console-autocomplete__item:hover {
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.console-autocomplete__item--selected {
+  background: rgba(0, 255, 0, 0.2);
+  color: var(--color-primary);
+}
+
+.console-autocomplete__icon {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  font-weight: bold;
+  opacity: 0.7;
+}
+
+.console-autocomplete__icon--method {
+  color: #ff00ff;
+}
+
+.console-autocomplete__icon--property {
+  color: #00ffff;
+}
+
+.console-autocomplete__icon--variable {
+  color: #ffff00;
+}
+
+.console-autocomplete__icon--keyword {
+  color: #ff8800;
+}
+
+.console-autocomplete__text {
+  flex-shrink: 0;
+  font-weight: bold;
+  min-width: 100px;
+}
+
+.console-autocomplete__description {
+  flex: 1;
+  color: var(--color-text-secondary);
+  font-size: 0.9em;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Custom scrollbar */
+.console-autocomplete__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.console-autocomplete__list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.console-autocomplete__list::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+.console-autocomplete__list::-webkit-scrollbar-thumb:hover {
+  background: var(--color-highlight);
+}
+
+/* Modern theme adjustments */
+.theme-modern .console-autocomplete {
+  border-color: var(--color-accent);
+  box-shadow: 0 4px 12px rgba(0, 170, 255, 0.3);
+  background: rgba(15, 20, 28, 0.98);
+}
+
+.theme-modern .console-autocomplete__item {
+  color: #b0b0b0;
+}
+
+.theme-modern .console-autocomplete__item:hover {
+  background: rgba(0, 170, 255, 0.15);
+  color: #e0e0e0;
+}
+
+.theme-modern .console-autocomplete__item--selected {
+  background: rgba(0, 170, 255, 0.25);
+  color: #ffffff;
+}
+
+.theme-modern .console-autocomplete__icon--method {
+  color: #bb86fc;
+}
+
+.theme-modern .console-autocomplete__icon--property {
+  color: #03dac6;
+}
+
+.theme-modern .console-autocomplete__icon--variable {
+  color: #ffb74d;
+}
+
+.theme-modern .console-autocomplete__icon--keyword {
+  color: #ff6b9d;
+}
+
+.theme-modern .console-autocomplete__description {
+  color: var(--color-text-secondary);
+}
+
+.theme-modern .console-autocomplete__list::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+}
+
+.theme-modern .console-autocomplete__list::-webkit-scrollbar-thumb:hover {
+  background: #33bbff;
+}

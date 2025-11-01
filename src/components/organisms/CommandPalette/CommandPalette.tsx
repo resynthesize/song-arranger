@@ -3,8 +3,10 @@
  * Searchable command palette for discovering and executing commands
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useAppDispatch } from '@/store/hooks';
+import { useStore } from 'react-redux';
+import type { RootState } from '@/store/store';
 import { TerminalPanel } from '@/components/molecules/TerminalPanel';
 import { TerminalInput } from '@/components/atoms/TerminalInput';
 import { searchCommands, addToRecentCommands, getRecentCommandObjects } from '@/utils/commands';
@@ -17,20 +19,26 @@ export interface CommandPaletteProps {
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose }) => {
   const dispatch = useAppDispatch();
-  // Get the full state for command functions
-  const state = useAppSelector(state => state);
+  const store = useStore<RootState>();
 
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Get commands to display
-  const recentCommands = getRecentCommandObjects(state, 5);
-  const searchResults = searchCommands(query, state);
-  const displayCommands = query.trim() ? searchResults : [
-    ...recentCommands,
-    ...searchResults.filter(cmd => !recentCommands.find(r => r.id === cmd.id))
-  ];
+  // Only compute when palette is open to avoid unnecessary work
+  const displayCommands = useMemo(() => {
+    if (!isOpen) return [];
+
+    const state = store.getState();
+    const recentCommands = getRecentCommandObjects(state, 5);
+    const searchResults = searchCommands(query, state);
+
+    return query.trim() ? searchResults : [
+      ...recentCommands,
+      ...searchResults.filter(cmd => !recentCommands.find(r => r.id === cmd.id))
+    ];
+  }, [isOpen, query, store]);
 
   // Reset selection when commands change
   useEffect(() => {
@@ -53,6 +61,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
     if (index < 0) return; // No selection
     const command = displayCommands[index];
     if (command) {
+      const state = store.getState();
       command.action(dispatch, state);
       addToRecentCommands(command.id);
       onClose();

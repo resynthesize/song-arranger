@@ -6,13 +6,13 @@
 import { useRef, useEffect, useMemo, useState, MouseEvent, memo } from 'react';
 import Pattern from '../Pattern';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
-import ColorPicker from '../ColorPicker';
 import GridCanvas from './GridCanvas';
 import { TrackHeader } from '../../molecules/TrackHeader';
+import { TrackResizeHandle } from '../../molecules/TrackResizeHandle/TrackResizeHandle';
 import type { ID, Pattern as PatternType, Position, Duration, ViewportState } from '@/types';
 import { isRangeVisible } from '@/utils/viewport';
 import { useDragToCreatePattern } from '@/hooks/useDragToCreatePattern';
-import { TRACK_HEIGHT, DEFAULT_TRACK_COLOR } from '@/constants';
+import { TRACK_HEIGHT, DEFAULT_TRACK_COLOR, TRACK_COLLAPSED_HEIGHT } from '@/constants';
 import { logger } from '@/utils/debug';
 import styles from './Track.module.css';
 
@@ -20,6 +20,9 @@ interface TrackProps {
   id: ID;
   name: string;
   color?: string;
+  height?: number; // Custom track height in pixels (if not set, uses default from verticalZoom)
+  collapsed?: boolean; // Whether track is collapsed to minimal height (Ableton-style)
+  headerWidth?: number; // Track header width in pixels (applies to all tracks)
   patterns: PatternType[];
   viewport: ViewportState;
   snapValue: number;
@@ -32,6 +35,13 @@ interface TrackProps {
   onTrackSelect?: (trackId: ID) => void; // Select this track (sets currentTrackId)
   onNameChange: (trackId: ID, newName: string) => void;
   onColorChange?: (trackId: ID, color: string) => void;
+  onTrackHeightChange?: (trackId: ID, height: number) => void; // Callback when track height is resized
+  onHeaderWidthChange?: (width: number) => void; // Callback when track header width is resized
+  onToggleCollapse?: (trackId: ID) => void; // Callback when collapse button is clicked
+  onOpenSettings?: (trackId: ID) => void; // Callback when settings button is clicked
+  onTrackDragStart?: (trackId: ID) => void; // Callback when track drag starts
+  onTrackDragEnd?: () => void; // Callback when track drag ends
+  onTrackDragOver?: (trackId: ID) => void; // Callback when track is dragged over
   onStartEditing: (trackId: ID) => void;
   onStopEditing: () => void;
   onRemove: (trackId: ID) => void;
@@ -51,6 +61,9 @@ const Track = ({
   id,
   name,
   color,
+  height: customHeight,
+  collapsed,
+  headerWidth,
   patterns,
   viewport,
   snapValue,
@@ -63,6 +76,13 @@ const Track = ({
   onTrackSelect,
   onNameChange,
   onColorChange,
+  onTrackHeightChange,
+  onHeaderWidthChange,
+  onToggleCollapse,
+  onOpenSettings,
+  onTrackDragStart,
+  onTrackDragEnd,
+  onTrackDragOver,
   onStartEditing,
   onStopEditing,
   onRemove: _onRemove, // Kept for Timeline compatibility, but no longer used (X button removed)
@@ -77,8 +97,8 @@ const Track = ({
   onPatternVerticalDragUpdate,
   onDoubleClick,
 }: TrackProps) => {
-  // Calculate track height from vertical zoom
-  const trackHeight = (TRACK_HEIGHT * verticalZoom) / 100;
+  // Calculate track height: if collapsed, use minimal height; otherwise use custom height or global zoom
+  const trackHeight = collapsed ? TRACK_COLLAPSED_HEIGHT : (customHeight ?? (TRACK_HEIGHT * verticalZoom) / 100);
 
   // Debug: log when isMoving changes
   useEffect(() => {
@@ -94,9 +114,19 @@ const Track = ({
   // Scale padding for track header based on zoom (base padding is 16px)
   const headerPadding = Math.max(2, (16 * verticalZoom) / 100);
 
+  // Debug: log when critical props are received
+  useEffect(() => {
+    logger.debug('[Track] Props received', {
+      id,
+      name,
+      hasOnOpenSettings: !!onOpenSettings,
+      hasOnColorChange: !!onColorChange,
+      hasOnTrackDragStart: !!onTrackDragStart,
+    });
+  }, [id, name, onOpenSettings, onColorChange, onTrackDragStart]);
+
   const contentRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; position: number } | null>(null);
-  const [showColorPicker, setShowColorPicker] = useState(false);
 
   // Use drag-to-create pattern hook
   const { handleMouseDown: handleDragToCreate, ghostPattern } = useDragToCreatePattern({
@@ -110,7 +140,8 @@ const Track = ({
   const trackPatterns = patterns.filter((pattern) => pattern.trackId === id);
 
   // Virtual rendering: only render patterns visible in the viewport
-  // Use a margin of 200px to render patterns slightly off-screen for smooth scrolling
+  // Use a large margin (800px) to render patterns well off-screen for smooth scrolling
+  // and to prevent flicker during rapid viewport changes (e.g., minimap dragging)
   const visiblePatterns = useMemo(() => {
     return trackPatterns.filter((pattern) => {
       const patternStart = pattern.position;
@@ -120,7 +151,7 @@ const Track = ({
         ? pattern.sceneDuration
         : pattern.duration;
       const patternEnd = pattern.position + displayDuration;
-      return isRangeVisible(patternStart, patternEnd, viewport, 200);
+      return isRangeVisible(patternStart, patternEnd, viewport, 800);
     });
   }, [trackPatterns, viewport]);
 
@@ -132,15 +163,22 @@ const Track = ({
       element.style.overflow = 'visible';
 
       logger.log('Track.tsx: Setting overflow to visible on mount');
-      logger.log('Track.tsx: Initial computed overflow:', getComputedStyle(element).overflow);
+
+      // Defer style read to avoid forced reflow
+      requestAnimationFrame(() => {
+        logger.log('Track.tsx: Initial computed overflow:', getComputedStyle(element).overflow);
+      });
 
       // Watch for changes
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-            logger.log('Track.tsx: Style attribute changed!', {
-              overflow: getComputedStyle(element).overflow,
-              overflowY: getComputedStyle(element).overflowY,
+            // Defer style reads to avoid forced reflow
+            requestAnimationFrame(() => {
+              logger.log('Track.tsx: Style attribute changed!', {
+                overflow: getComputedStyle(element).overflow,
+                overflowY: getComputedStyle(element).overflowY,
+              });
             });
           }
         });
@@ -153,11 +191,17 @@ const Track = ({
   }, []);
 
   const handleContextMenu = (e: MouseEvent<HTMLDivElement>) => {
-    // Don't show menu if clicking on a pattern
-    if ((e.target as HTMLElement).closest('.pattern')) {
+    logger.debug('[Track] Context menu triggered', { trackId: id, clientX: e.clientX, clientY: e.clientY });
+
+    // Don't show menu if clicking on a pattern (check for data-testid starting with "pattern-")
+    const target = e.target as HTMLElement;
+    const patternElement = target.closest('[data-testid^="pattern-"]');
+    if (patternElement) {
+      logger.debug('[Track] Context menu on pattern, ignoring');
       return;
     }
 
+    logger.debug('[Track] Preventing default and showing context menu');
     e.preventDefault();
 
     if (contentRef.current) {
@@ -174,16 +218,50 @@ const Track = ({
   };
 
   const handleInsertPattern = () => {
+    logger.debug('[Track] Insert pattern from context menu', { contextMenu });
     if (contextMenu) {
       onDoubleClick(id, contextMenu.position);
     }
   };
+
+  // Debug: log context menu state changes
+  useEffect(() => {
+    if (contextMenu) {
+      logger.debug('[Track] Context menu state set', { contextMenu });
+    }
+  }, [contextMenu]);
+
+  // Predefined color palette
+  const colorPalette = [
+    { name: 'Green', value: '#00ff00' },
+    { name: 'Cyan', value: '#00ffff' },
+    { name: 'Blue', value: '#6d8a9e' },
+    { name: 'Purple', value: '#9d4edd' },
+    { name: 'Pink', value: '#ff006e' },
+    { name: 'Red', value: '#ff0000' },
+    { name: 'Orange', value: '#ff7f00' },
+    { name: 'Yellow', value: '#ffff00' },
+  ];
 
   const contextMenuItems: MenuItem[] = [
     {
       label: 'Insert Pattern',
       action: handleInsertPattern,
     },
+    {
+      label: '──────────',
+      action: () => {}, // Separator
+    },
+    ...colorPalette.map((color) => ({
+      label: `Color: ${color.name}`,
+      action: () => {
+        logger.debug('[Track] Color menu item clicked', { color: color.name, value: color.value, hasCallback: !!onColorChange });
+        if (onColorChange) {
+          onColorChange(id, color.value);
+        }
+        setContextMenu(null);
+      },
+    })),
   ];
 
   // Ensure we always have a valid color for patterns
@@ -199,26 +277,31 @@ const Track = ({
       <TrackHeader
         id={id}
         name={name}
-        color={effectiveColor}
         isCurrent={isCurrent}
         isEditing={isEditing}
         headerPadding={headerPadding}
+        headerWidth={headerWidth}
+        collapsed={collapsed}
         onTrackSelect={onTrackSelect}
         onNameChange={onNameChange}
         onStartEditing={onStartEditing}
         onStopEditing={onStopEditing}
-        onColorSwatchClick={(e) => {
-          e.stopPropagation(); // Don't trigger track selection
-          setShowColorPicker(true);
-        }}
+        onToggleCollapse={onToggleCollapse}
+        onOpenSettings={onOpenSettings}
+        onHeaderWidthChange={onHeaderWidthChange}
+        onDragStart={onTrackDragStart}
+        onDragEnd={onTrackDragEnd}
+        onDragOver={onTrackDragOver}
       />
-      <div
-        ref={contentRef}
-        className={styles.content}
-        data-testid={`track-${id}-content`}
-        onMouseDown={handleDragToCreate}
-        onContextMenu={handleContextMenu}
-      >
+      {!collapsed && (
+        <div
+          ref={contentRef}
+          className={styles.content}
+          data-testid={`track-${id}-content`}
+          style={{ backgroundColor: `${effectiveColor}15` }}
+          onMouseDown={handleDragToCreate}
+          onContextMenu={handleContextMenu}
+        >
         <GridCanvas viewport={viewport} snapValue={snapValue} />
         {visiblePatterns.map((pattern) => {
           // Calculate deltaY for this pattern if it's selected during vertical drag
@@ -244,6 +327,7 @@ const Track = ({
               color={effectiveColor}
               muted={pattern.muted}
               patternType={pattern.patternType}
+              patternData={pattern.patternData}
               onSelect={onPatternSelect}
               onMove={onPatternMove}
               onResize={onPatternResize}
@@ -271,6 +355,7 @@ const Track = ({
           />
         )}
       </div>
+      )}
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
@@ -279,13 +364,11 @@ const Track = ({
           onClose={() => setContextMenu(null)}
         />
       )}
-      {showColorPicker && onColorChange && (
-        <ColorPicker
-          selectedColor={effectiveColor}
-          onSelectColor={(newColor) => {
-            onColorChange(id, newColor);
-          }}
-          onClose={() => setShowColorPicker(false)}
+      {onTrackHeightChange && (
+        <TrackResizeHandle
+          trackId={id}
+          currentHeight={trackHeight}
+          onHeightChange={onTrackHeightChange}
         />
       )}
     </div>

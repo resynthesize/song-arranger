@@ -33,7 +33,7 @@
 .command-footer__shortcut {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-xs)
   white-space: nowrap;
 }
 
@@ -91,7 +91,7 @@
 /* Responsive adjustments for smaller screens */
 @media (max-width: 1200px) {
   .command-footer__content {
-    gap: 4px;
+    gap: var(--spacing-xs)
     font-size: 10px;
   }
 }
@@ -99,7 +99,7 @@
 @media (max-width: 768px) {
   .command-footer__content {
     gap: 2px;
-    padding: 4px var(--spacing-sm);
+    padding: var(--spacing-xs)(--spacing-sm);
     font-size: 9px;
   }
 }

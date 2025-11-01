@@ -1,0 +1,177 @@
+/**
+ * Cyclone Design Tokens - Z-Index
+ * Layering system for managing stacking contexts
+ *
+ * Philosophy:
+ *   - Use semantic z-index tokens, never arbitrary numbers
+ *   - Elements in the same layer should NOT set z-index
+ *   - Higher layers should use next level token, not arbitrary increment
+ *
+ * Usage:
+ *   - Always use these tokens, never hard-code z-index values
+ *   - Document why an element needs a specific layer
+ */
+
+/* ============================================
+   Z-INDEX SCALE
+   Shared across both themes
+   ============================================ */
+
+:root {
+  /* Base Layer (0-9) - Normal content flow */
+  --z-base: 1;                /* Default content, no special stacking */
+  --z-raised: 5;              /* Slightly elevated (sticky headers) */
+
+  /* Controls Layer (10-49) - Interactive UI elements */
+  --z-controls: 10;           /* Buttons, inputs, interactive elements */
+  --z-controls-hover: 15;     /* Hovered/focused controls */
+  --z-hud: 20;                /* HUD overlays, status displays */
+  --z-floating: 25;           /* Floating action buttons, badges */
+
+  /* Dropdowns Layer (50-99) - Menus, popovers */
+  --z-dropdown: 50;           /* Dropdown menus */
+  --z-popover: 55;            /* Popovers, tooltips (inline) */
+  --z-context-menu: 60;       /* Context menus */
+
+  /* Overlays Layer (100-499) - Modals, dialogs */
+  --z-overlay: 100;           /* General overlays */
+  --z-drawer: 200;            /* Side drawers */
+  --z-modal: 300;             /* Modal dialogs */
+  --z-modal-backdrop: 299;    /* Modal backdrop (just below modal) */
+
+  /* Top Layer (500-999) - Critical UI */
+  --z-notification: 500;      /* Toast notifications */
+  --z-tooltip: 600;           /* Tooltips (always on top of modals) */
+
+  /* Debug Layer (1000+) - Development only */
+  --z-debug: 1000;            /* Debug overlays, dev tools */
+  --z-maximum: 9999;          /* Emergency override (use sparingly!) */
+}
+
+/* ============================================
+   COMPONENT-SPECIFIC Z-INDEX
+   Semantic tokens for specific components
+   ============================================ */
+
+:root {
+  /* Timeline Components */
+  --z-timeline-base: var(--z-base);
+  --z-timeline-track: var(--z-raised);
+  --z-timeline-pattern: calc(var(--z-raised) + 1);
+  --z-timeline-pattern-selected: calc(var(--z-raised) + 2);
+  --z-timeline-ruler: var(--z-controls);
+  --z-timeline-playhead: calc(var(--z-controls) + 1);
+
+  /* Pattern Editor */
+  --z-pattern-editor-base: var(--z-base);
+  --z-pattern-editor-grid: var(--z-base);
+  --z-pattern-editor-notes: var(--z-raised);
+  --z-pattern-editor-selection: calc(var(--z-raised) + 1);
+  --z-pattern-editor-cursor: calc(var(--z-raised) + 2);
+
+  /* Navigation */
+  --z-menu-bar: var(--z-controls);
+  --z-command-footer: var(--z-controls);
+  --z-sidebar: var(--z-controls);
+
+  /* Minimap */
+  --z-minimap: var(--z-floating);
+  --z-minimap-viewport: calc(var(--z-floating) + 1);
+
+  /* Dialogs */
+  --z-dialog-backdrop: var(--z-modal-backdrop);
+  --z-dialog: var(--z-modal);
+  --z-dialog-close: calc(var(--z-modal) + 1);
+
+  /* CRT Effects */
+  --z-crt-scanlines: calc(var(--z-maximum) - 1);  /* Always on top (but below debug) */
+  --z-crt-noise: calc(var(--z-maximum) - 2);      /* Below scanlines */
+}
+
+/* ============================================
+   USAGE GUIDELINES
+   ============================================
+
+   DO:
+   ✓ Use semantic tokens
+   ✓ Document why a component needs elevation
+   ✓ Use component-specific tokens when available
+   ✓ Keep components in appropriate layers
+
+   DON'T:
+   ✗ Use arbitrary z-index numbers (e.g., z-index: 999)
+   ✗ Increment z-index tokens (e.g., var(--z-modal) + 50)
+   ✗ Set z-index on every element (only when needed)
+   ✗ Fight the stacking context (if something won't layer, check parent)
+
+   ============================================ */
+
+/* ============================================
+   USAGE EXAMPLES
+   ============================================
+
+   Basic elevated content:
+   .card {
+     position: relative;
+     z-index: var(--z-base);
+   }
+
+   Sticky header:
+   .header {
+     position: sticky;
+     top: 0;
+     z-index: var(--z-raised);
+   }
+
+   Dropdown menu:
+   .dropdown-menu {
+     position: absolute;
+     z-index: var(--z-dropdown);
+   }
+
+   Modal dialog:
+   .modal-backdrop {
+     position: fixed;
+     z-index: var(--z-modal-backdrop);
+   }
+
+   .modal {
+     position: fixed;
+     z-index: var(--z-modal);
+   }
+
+   Tooltip (always on top):
+   .tooltip {
+     position: absolute;
+     z-index: var(--z-tooltip);
+   }
+
+   Pattern (selected):
+   .pattern {
+     position: absolute;
+     z-index: var(--z-timeline-pattern);
+   }
+
+   .pattern--selected {
+     z-index: var(--z-timeline-pattern-selected);
+   }
+
+   ============================================ */
+
+/* ============================================
+   STACKING CONTEXT REFERENCE
+   ============================================
+
+   Elements that create new stacking contexts:
+   - position: relative/absolute/fixed/sticky with z-index
+   - opacity < 1
+   - transform (any value except none)
+   - filter (any value except none)
+   - perspective (any value except none)
+   - will-change
+   - contain: layout/paint
+   - isolation: isolate
+
+   If z-index isn't working, check if parent creates stacking context!
+
+   ============================================ */

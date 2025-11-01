@@ -3,19 +3,23 @@
  * Custom hook for lane-related operations (rename, color change, remove, etc.)
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
-  renameTrack,
   setEditingTrack,
   clearEditingTrack,
-  removeTrack,
-  setTrackColor,
 } from '@/store/slices/tracksSlice';
-import { addPattern, removePatterns } from '@/store/slices/patternsSlice';
+import {
+  createPatternInTimeline,
+  renameTrackInTimeline,
+  setTrackColorInTimeline,
+  removeTrackInTimeline,
+  updateTrackSettings,
+} from '@/store/slices/songSlice/slice';
 import { setCurrentTrack, clearSelection } from '@/store/slices/selectionSlice';
 import { snapToGridFloor } from '@/utils/snap';
 import { DEFAULT_CLIP_DURATION } from '@/constants';
+import { getTrackKeyFromReactId } from '@/store/slices/songSlice/adapters';
 import type { ID, Position, Duration } from '@/types';
 
 interface UseTrackOperationsReturn {
@@ -26,6 +30,8 @@ interface UseTrackOperationsReturn {
   handleRemoveLane: (trackId: ID) => void;
   handleLaneSelect: (trackId: ID) => void;
   handleLaneDoubleClick: (trackId: ID, position: Position, duration?: Duration) => void;
+  handleTrackHeightChange: (trackId: ID, height: number) => void;
+  handleTrackCollapseToggle: (trackId: ID) => void;
 }
 
 /**
@@ -34,14 +40,15 @@ interface UseTrackOperationsReturn {
  */
 export function useTrackOperations(effectiveSnapValue: number): UseTrackOperationsReturn {
   const dispatch = useAppDispatch();
-  const patterns = useAppSelector((state) => state.patterns.patterns);
+  const songData = useAppSelector((state) => state.song.present);
 
   /**
    * Handle track name changes
+   * Updates track name in CKS metadata
    */
   const handleNameChange = useCallback(
     (trackId: ID, newName: string) => {
-      dispatch(renameTrack({ trackId, name: newName }));
+      dispatch(renameTrackInTimeline({ trackReactId: trackId, name: newName }));
     },
     [dispatch]
   );
@@ -65,33 +72,25 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
 
   /**
    * Handle track color changes
+   * Updates track color in CKS metadata
    */
   const handleColorChange = useCallback(
     (trackId: ID, color: string) => {
-      dispatch(setTrackColor({ trackId, color }));
+      dispatch(setTrackColorInTimeline({ trackReactId: trackId, color }));
     },
     [dispatch]
   );
 
   /**
    * Handle track removal
-   * Also removes all patterns in the track
+   * Removes track and all its patterns from CKS
    */
   const handleRemoveTrack = useCallback(
     (trackId: ID) => {
-      // Find all patterns in this track
-      const patternsToRemove = patterns.filter((clip) => clip.trackId === trackId);
-      const patternIdsToRemove = patternsToRemove.map((clip) => clip.id);
-
-      // Remove patterns first
-      if (patternIdsToRemove.length > 0) {
-        dispatch(removePatterns(patternIdsToRemove));
-      }
-
-      // Remove track
-      dispatch(removeTrack(trackId));
+      // Remove track (this will also remove all patterns in the track)
+      dispatch(removeTrackInTimeline({ trackReactId: trackId }));
     },
-    [dispatch, patterns]
+    [dispatch]
   );
 
   /**
@@ -115,35 +114,70 @@ export function useTrackOperations(effectiveSnapValue: number): UseTrackOperatio
       // Otherwise, snap position and use default duration
       if (duration !== undefined) {
         // Drag-to-create - position and duration already snapped in Track component
-        dispatch(
-          addPattern({
-            trackId,
-            position,
-            duration,
-          })
-        );
+        dispatch(createPatternInTimeline({
+          trackReactId: trackId,
+          position,
+          duration,
+        }));
       } else {
         // Traditional double-click - snap to left edge of grid cell (floor)
         const snappedPosition = snapToGridFloor(position, effectiveSnapValue);
-        dispatch(
-          addPattern({
-            trackId,
-            position: snappedPosition,
-            duration: DEFAULT_CLIP_DURATION,
-          })
-        );
+        dispatch(createPatternInTimeline({
+          trackReactId: trackId,
+          position: snappedPosition,
+          duration: DEFAULT_CLIP_DURATION,
+        }));
       }
     },
     [dispatch, effectiveSnapValue]
   );
 
-  return {
-    handleNameChange,
-    handleStartEditing,
-    handleStopEditing,
-    handleColorChange,
-    handleRemoveLane: handleRemoveTrack,
-    handleLaneSelect,
-    handleLaneDoubleClick,
-  };
+  /**
+   * Handle track height change
+   * Updates track height in CKS metadata
+   */
+  const handleTrackHeightChange = useCallback(
+    (trackId: ID, height: number) => {
+      const trackKey = getTrackKeyFromReactId(songData, trackId);
+      if (!trackKey) return;
+
+      dispatch(updateTrackSettings({ trackKey, settings: { height } }));
+    },
+    [dispatch, songData]
+  );
+
+  /**
+   * Handle track collapse toggle
+   * Toggles collapsed state in CKS metadata
+   */
+  const handleTrackCollapseToggle = useCallback(
+    (trackId: ID) => {
+      const trackKey = getTrackKeyFromReactId(songData, trackId);
+      if (!trackKey) return;
+
+      // Get current collapsed state
+      const currentCollapsed = songData._cyclone_metadata?.uiMappings.tracks[trackKey]?.collapsed || false;
+
+      dispatch(updateTrackSettings({
+        trackKey,
+        settings: { collapsed: !currentCollapsed }
+      }));
+    },
+    [dispatch, songData]
+  );
+
+  return useMemo(
+    () => ({
+      handleNameChange,
+      handleStartEditing,
+      handleStopEditing,
+      handleColorChange,
+      handleRemoveLane: handleRemoveTrack,
+      handleLaneSelect,
+      handleLaneDoubleClick,
+      handleTrackHeightChange,
+      handleTrackCollapseToggle,
+    }),
+    [handleNameChange, handleStartEditing, handleStopEditing, handleColorChange, handleRemoveTrack, handleLaneSelect, handleLaneDoubleClick, handleTrackHeightChange, handleTrackCollapseToggle]
+  );
 }

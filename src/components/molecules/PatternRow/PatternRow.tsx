@@ -11,6 +11,7 @@ export interface PatternRowProps {
   barData: P3Bar;
   row: PatternRowType;
   selectedSteps?: number[];
+  height?: number;
   onStepClick?: (stepIndex: number) => void;
   onGateToggle?: (stepIndex: number) => void;
   onAuxFlagToggle?: (stepIndex: number) => void;
@@ -79,12 +80,31 @@ export const PatternRow: React.FC<PatternRowProps> = ({
   barData,
   row,
   selectedSteps = [],
+  height = 60,
   onStepClick,
   onGateToggle,
   onAuxFlagToggle,
   onValueChange,
 }) => {
   const config = ROW_CONFIGS[row];
+
+  // Define colors for different row types
+  const getRowColor = (rowType: PatternRowType): string | undefined => {
+    switch (rowType) {
+      case 'note':
+        return '#4a9eff'; // Blue/Cyan
+      case 'velocity':
+        return '#00ff00'; // Green
+      case 'length':
+        return '#ffff00'; // Yellow
+      case 'delay':
+        return '#ff9900'; // Orange
+      default:
+        return undefined; // Use default for aux rows
+    }
+  };
+
+  const barColor = getRowColor(row);
 
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
@@ -251,6 +271,30 @@ export const PatternRow: React.FC<PatternRowProps> = ({
     };
   };
 
+  // Helper to check if this row should show gates
+  const shouldShowGates = (rowType: PatternRowType): boolean => {
+    // Delay row has no gates
+    if (rowType === 'delay') return false;
+    return true;
+  };
+
+  // Helper to get gate state for this row
+  const getGateState = (rowType: PatternRowType, stepIndex: number): boolean => {
+    // N/V/L share the main gate array
+    if (rowType === 'note' || rowType === 'velocity' || rowType === 'length') {
+      return barData.gate[stepIndex] === 1;
+    }
+
+    // Aux rows use their own flag arrays
+    if (rowType === 'auxA') return barData.aux_A_flag[stepIndex] === 1;
+    if (rowType === 'auxB') return barData.aux_B_flag[stepIndex] === 1;
+    if (rowType === 'auxC') return barData.aux_C_flag[stepIndex] === 1;
+    if (rowType === 'auxD') return barData.aux_D_flag[stepIndex] === 1;
+
+    // Delay row has no gates
+    return true; // Default to active for rows without gates
+  };
+
   // Render 16 BarChart components
   const renderSteps = () => {
     const steps: JSX.Element[] = [];
@@ -259,12 +303,13 @@ export const PatternRow: React.FC<PatternRowProps> = ({
     for (let i = 0; i < 16; i++) {
       const value = config.getValue(barData, i);
       const label = config.getLabel(barData, i);
-      const isActive = barData.gate[i] === 1;
+      const isActive = getGateState(row, i);
       const isTied = barData.tie[i] === 1;
       const isSkipped = barData.skip[i] === 1;
       const isSelected = isStepSelected(i);
       const isLastStep = i === lastStepIndex;
       const isBeyondLast = i > lastStepIndex;
+      const showGateSquare = shouldShowGates(row);
 
       const clickHandler = createStepClickHandler(i);
       const mouseDownHandler = createStepMouseDownHandler(i);
@@ -275,25 +320,51 @@ export const PatternRow: React.FC<PatternRowProps> = ({
           key={i}
           className={styles.stepContainer}
           data-testid="step-container"
-          onClick={clickHandler}
-          onMouseDown={mouseDownHandler}
-          role={hasInteraction ? 'button' : undefined}
-          tabIndex={hasInteraction ? 0 : undefined}
-          aria-label={hasInteraction ? `Step ${i + 1}` : undefined}
-          style={{ cursor: hasInteraction ? 'pointer' : 'default' }}
         >
-          <BarChart
-            value={value}
-            maxValue={config.maxValue}
-            label={label}
-            isActive={isActive}
-            isTied={isTied}
-            isSkipped={isSkipped}
-            isSelected={isSelected}
-            isLastStep={isLastStep}
-            isBeyondLast={isBeyondLast}
-          />
+          <div
+            onClick={clickHandler}
+            onMouseDown={mouseDownHandler}
+            role={hasInteraction ? 'button' : undefined}
+            tabIndex={hasInteraction ? 0 : undefined}
+            aria-label={hasInteraction ? `Step ${i + 1}` : undefined}
+            style={{ cursor: hasInteraction ? 'pointer' : 'default' }}
+          >
+            <BarChart
+              value={value}
+              maxValue={config.maxValue}
+              label={label}
+              height={height}
+              color={barColor}
+              isActive={isActive}
+              isTied={isTied}
+              isSkipped={isSkipped}
+              isSelected={isSelected}
+              isLastStep={isLastStep}
+              isBeyondLast={isBeyondLast}
+            />
+          </div>
           <div className={styles.stepNumber}>{i + 1}</div>
+          {showGateSquare && (
+            <div
+              className={`${styles.gateSquare} ${isActive ? styles.gateOn : styles.gateOff}`}
+              onClick={(e) => {
+                e.stopPropagation();
+
+                // For aux rows, use aux flag toggle
+                if (isAuxRow(row) && onAuxFlagToggle) {
+                  onAuxFlagToggle(i);
+                }
+                // For N/V/L rows, use gate toggle
+                else if (onGateToggle) {
+                  onGateToggle(i);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Gate ${isActive ? 'on' : 'off'} for step ${i + 1}`}
+              title={`Click to toggle gate ${isActive ? 'off' : 'on'}`}
+            />
+          )}
         </div>
       );
     }

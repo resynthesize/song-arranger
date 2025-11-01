@@ -9,6 +9,7 @@ import { useViewport } from '@/hooks/useViewport';
 import { usePatternOperations } from '@/hooks/usePatternOperations';
 import { useTrackOperations } from '@/hooks/useTrackOperations';
 import { useRectangleSelection } from '@/hooks/useRectangleSelection';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import Track from '../Track';
 import Ruler from '../Ruler';
 import {
@@ -25,19 +26,27 @@ import {
 } from '@/store/selectors';
 import { setPlayheadPosition, selectEffectiveSnapValue } from '@/store/slices/timelineSlice';
 import { openPattern } from '@/store/slices/patternEditorSlice';
+import { reorderTrack, setMovingTrack, clearMovingTrack } from '@/store/slices/tracksSlice';
 import { snapToGrid } from '@/utils/snap';
 import { LANE_HEIGHT } from '@/constants';
 import { logger } from '@/utils/debug';
 import type { ID, Position } from '@/types';
 import styles from './Timeline.module.css';
 
-const Timeline = () => {
+interface TimelineProps {
+  onOpenTrackSettings: (trackId: ID) => void;
+}
+
+const Timeline = ({ onOpenTrackSettings }: TimelineProps) => {
   const dispatch = useAppDispatch();
   const timelineRef = useRef<HTMLDivElement>(null);
   const [verticalDragState, setVerticalDragState] = useState<{
     deltaY: number;
     draggedPatternId: ID;
   } | null>(null);
+  const [draggedTrackId, setDraggedTrackId] = useState<ID | null>(null);
+  const [dropTargetTrackId, setDropTargetTrackId] = useState<ID | null>(null);
+  const [trackHeaderWidth, setTrackHeaderWidth] = useState(200); // Global track header width
 
   // Select data from Redux using centralized selectors
   const effectiveSnapValue = useAppSelector(selectEffectiveSnapValue);
@@ -82,19 +91,23 @@ const Timeline = () => {
   // Debug: log timeline container dimensions
   useEffect(() => {
     if (timelineRef.current) {
-      const rect = timelineRef.current.getBoundingClientRect();
-      const computedStyle = window.getComputedStyle(timelineRef.current);
-      console.log('[Timeline] Container dimensions:', {
-        rect: {
-          top: rect.top,
-          bottom: rect.bottom,
-          height: rect.height,
-          width: rect.width
-        },
-        position: computedStyle.position,
-        bottom: computedStyle.bottom,
-        windowHeight: window.innerHeight,
-        overflow: computedStyle.overflow
+      // Defer layout reads to avoid forced reflow
+      requestAnimationFrame(() => {
+        if (!timelineRef.current) return;
+        const rect = timelineRef.current.getBoundingClientRect();
+        const computedStyle = window.getComputedStyle(timelineRef.current);
+        logger.debug('[Timeline] Container dimensions:', {
+          rect: {
+            top: rect.top,
+            bottom: rect.bottom,
+            height: rect.height,
+            width: rect.width
+          },
+          position: computedStyle.position,
+          bottom: computedStyle.bottom,
+          windowHeight: window.innerHeight,
+          overflow: computedStyle.overflow
+        });
       });
     }
   }, [lanes.length, viewport.heightPx]);
@@ -132,13 +145,13 @@ const Timeline = () => {
     []
   );
 
-  // Wrapper for vertical drag that clears visual state and delegates to hook
+  // Wrapper for vertical drag that delegates to hook, then clears visual state
   const handleClipVerticalDrag = useCallback(
     (clipId: ID, startingLaneId: ID, deltaY: number) => {
-      // Clear visual drag state
-      setVerticalDragState(null);
-      // Delegate to hook
+      // Delegate to hook first
       clipOperations.handleClipVerticalDrag(clipId, startingLaneId, deltaY);
+      // Clear visual drag state after a short delay to allow Redux to update
+      setTimeout(() => setVerticalDragState(null), 100);
     },
     [clipOperations]
   );
@@ -151,6 +164,60 @@ const Timeline = () => {
     },
     [dispatch, effectiveSnapValue]
   );
+
+  // Track height and collapse handlers now come from laneOperations hook
+  const handleTrackHeightChange = laneOperations.handleTrackHeightChange;
+  const handleTrackCollapseToggle = laneOperations.handleTrackCollapseToggle;
+
+  // Handle track drag start
+  const handleTrackDragStart = useCallback(
+    (trackId: ID) => {
+      logger.debug('[Timeline] handleTrackDragStart called', { trackId });
+      setDraggedTrackId(trackId);
+      dispatch(setMovingTrack(trackId));
+    },
+    [dispatch]
+  );
+
+  // Handle track drag end
+  const handleTrackDragEnd = useCallback(() => {
+    // Perform reorder if we have both dragged track and drop target
+    if (draggedTrackId && dropTargetTrackId && draggedTrackId !== dropTargetTrackId) {
+      const targetIndex = lanes.findIndex(l => l.id === dropTargetTrackId);
+      if (targetIndex !== -1) {
+        dispatch(reorderTrack({ trackId: draggedTrackId, newIndex: targetIndex }));
+      }
+    }
+
+    // Clear drag state
+    setDraggedTrackId(null);
+    setDropTargetTrackId(null);
+    setTimeout(() => dispatch(clearMovingTrack()), 300); // Delay to allow animation
+  }, [draggedTrackId, dropTargetTrackId, lanes, dispatch]);
+
+  // Handle track drag over
+  const handleTrackDragOver = useCallback(
+    (trackId: ID) => {
+      if (draggedTrackId && trackId !== draggedTrackId) {
+        setDropTargetTrackId(trackId);
+      }
+    },
+    [draggedTrackId]
+  );
+
+  // Handle opening track settings - delegate to parent
+  const handleOpenTrackSettings = useCallback(
+    (trackId: ID) => {
+      logger.debug('[Timeline] handleOpenTrackSettings called, delegating to parent', { trackId });
+      onOpenTrackSettings(trackId);
+    },
+    [onOpenTrackSettings]
+  );
+
+  // Handle track header width change (applies to all tracks)
+  const handleTrackHeaderWidthChange = useCallback((width: number) => {
+    setTrackHeaderWidth(width);
+  }, []);
 
   // NOTE: Keyboard shortcuts are now handled by useKeyboardShortcuts hook
   // This effect only handles zoom shortcuts that use the viewport hook
@@ -199,6 +266,8 @@ const Timeline = () => {
                 id={lane.id}
                 name={lane.name}
                 color={lane.color}
+                height={lane.height}
+                collapsed={lane.collapsed}
                 patterns={clips}
                 viewport={viewport}
                 snapValue={effectiveSnapValue}
@@ -208,9 +277,17 @@ const Timeline = () => {
                 isCurrent={lane.id === currentLaneId}
                 isEditing={editingLaneId === lane.id}
                 isMoving={movingLaneId === lane.id}
+                headerWidth={trackHeaderWidth}
                 onTrackSelect={laneOperations.handleLaneSelect}
                 onNameChange={laneOperations.handleNameChange}
                 onColorChange={laneOperations.handleColorChange}
+                onTrackHeightChange={handleTrackHeightChange}
+                onToggleCollapse={handleTrackCollapseToggle}
+                onOpenSettings={handleOpenTrackSettings}
+                onHeaderWidthChange={handleTrackHeaderWidthChange}
+                onTrackDragStart={handleTrackDragStart}
+                onTrackDragEnd={handleTrackDragEnd}
+                onTrackDragOver={handleTrackDragOver}
                 onStartEditing={laneOperations.handleStartEditing}
                 onStopEditing={laneOperations.handleStopEditing}
                 onRemove={laneOperations.handleRemoveLane}

@@ -8,16 +8,16 @@
   justify-content: center;
   gap: 1rem;
   padding: 0.5rem;
-  background: var(--color-bg-tertiary, #2a2a2a);
-  border: 1px solid var(--color-border, #333);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
 }
 
 .barNavigation button {
   padding: 0.375rem 0.75rem;
-  background: var(--color-bg-primary, #0f0f0f);
-  color: var(--color-text, #e0e0e0);
-  border: 1px solid var(--color-border, #333);
+  background: var(--color-bg-primary);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.875rem;
@@ -26,12 +26,12 @@
 }
 
 .barNavigation button:hover:not(:disabled) {
-  background: var(--color-bg-hover, #3a3a3a);
-  border-color: var(--color-border-hover, #555);
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
 }
 
 .barNavigation button:active:not(:disabled) {
-  background: var(--color-bg-active, #4a4a4a);
+  background: var(--color-bg-active);
   transform: translateY(1px);
 }
 
@@ -41,14 +41,14 @@
 }
 
 .barNavigation button:focus-visible {
-  outline: 2px solid var(--color-accent, #00ff88);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
 .barIndicator {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-text, #e0e0e0);
+  color: var(--color-text);
   min-width: 8rem;
   text-align: center;
 }
@@ -56,22 +56,22 @@
 /* CRT theme overrides */
 :global(.theme-crt) .barNavigation {
   background: #001100;
-  border-color: var(--color-primary, #00ff00);
+  border-color: var(--color-primary);
 }
 
 :global(.theme-crt) .barNavigation button {
   background: transparent;
-  border-color: var(--color-primary, #00ff00);
-  color: var(--color-primary, #00ff00);
-  text-shadow: 0 0 2px var(--color-primary, #00ff00);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  text-shadow: 0 0 2px var(--color-primary);
 }
 
 :global(.theme-crt) .barNavigation button:hover:not(:disabled) {
   background: rgba(0, 255, 0, 0.1);
-  box-shadow: 0 0 4px var(--color-primary, #00ff00);
+  box-shadow: 0 0 4px var(--color-primary);
 }
 
 .barIndicator {
-  color: var(--color-highlight, #66ff66);
-  text-shadow: 0 0 2px var(--color-highlight, #66ff66);
+  color: var(--color-highlight);
+  text-shadow: 0 0 2px var(--color-highlight);
 }

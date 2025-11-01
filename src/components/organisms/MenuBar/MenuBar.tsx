@@ -6,7 +6,7 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { zoomIn, zoomOut, setViewportOffset } from '@/store/slices/timelineSlice';
-import { addTrack } from '@/store/slices/tracksSlice';
+import { addTrackInTimeline } from '@/store/slices/songSlice/slice';
 import { toggleCRTEffects } from '@/store/slices/crtEffectsSlice';
 import { selectAllPatterns, selectAllTracks, selectTimelineEndPosition } from '@/store/selectors';
 import { TerminalButton } from '../../atoms/TerminalButton';
@@ -14,7 +14,11 @@ import { FileMenu } from '../FileMenu';
 import Minimap from '../Minimap';
 import './MenuBar.css';
 
-const MenuBar = () => {
+interface MenuBarProps {
+  onToggleSongDataViewer?: () => void;
+}
+
+const MenuBar = ({ onToggleSongDataViewer }: MenuBarProps) => {
   const dispatch = useAppDispatch();
   const viewport = useAppSelector((state) => state.timeline.viewport);
   const lanes = useAppSelector(selectAllTracks);
@@ -25,7 +29,7 @@ const MenuBar = () => {
   const timelineLength = Math.max(64, timelineEndPosition); // Minimum 64 beats
 
   const handleAddTrack = useCallback(() => {
-    dispatch(addTrack({}));
+    dispatch(addTrackInTimeline({}));
   }, [dispatch]);
 
   const handleToggleCRT = useCallback(() => {
@@ -48,7 +52,7 @@ const MenuBar = () => {
     <div className="menu-bar" data-testid="menu-bar">
       {/* FILE menu on left */}
       <div className="menu-bar__left">
-        <FileMenu />
+        <FileMenu onToggleSongDataViewer={onToggleSongDataViewer} />
       </div>
 
       {/* Arrangement overview in center */}
@@ -88,6 +92,7 @@ const MenuBar = () => {
           size="sm"
           variant="secondary"
           title="Add track (i)"
+          data-testid="add-track-button"
         >
           +T
         </TerminalButton>

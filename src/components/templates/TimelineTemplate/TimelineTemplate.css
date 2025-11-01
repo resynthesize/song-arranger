@@ -12,6 +12,17 @@
 }
 
 /**
+ * Main area - horizontal split between timeline and sidebar
+ */
+.timeline-template__main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+/**
  * Main content area containing the timeline
  * Grows to fill available space when pattern editor is closed
  * Shrinks to make room for pattern editor when open
@@ -19,7 +30,22 @@
 .timeline-template__content {
   flex: 1;
   min-height: 0; /* Allow flex item to shrink below content size */
+  min-width: 0; /* Allow flex item to shrink horizontally */
   overflow: hidden; /* Timeline handles its own scrolling */
   display: flex;
   flex-direction: column;
+}
+
+/**
+ * Sidebar panel for Song Data Viewer
+ * Appears on the right side when toggled
+ */
+.timeline-template__sidebar {
+  width: 500px;
+  min-width: 300px;
+  max-width: 800px;
+  min-height: 0;
+  overflow: hidden;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-bg);
 }

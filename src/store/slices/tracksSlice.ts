@@ -84,6 +84,26 @@ const tracksSlice = createSlice({
       }
     },
 
+    setTrackHeight: (
+      state,
+      action: PayloadAction<{ trackId: ID; height: number }>
+    ) => {
+      const { trackId, height } = action.payload;
+      const track = state.tracks.find((t) => t.id === trackId);
+      if (track) {
+        // Enforce minimum height of 40px and maximum of 400px
+        track.height = Math.max(40, Math.min(400, height));
+      }
+    },
+
+    toggleTrackCollapse: (state, action: PayloadAction<ID>) => {
+      const trackId = action.payload;
+      const track = state.tracks.find((t) => t.id === trackId);
+      if (track) {
+        track.collapsed = !track.collapsed;
+      }
+    },
+
     moveTrackUp: (state, action: PayloadAction<ID>) => {
       const trackId = action.payload;
       const index = state.tracks.findIndex((t) => t.id === trackId);
@@ -127,6 +147,26 @@ const tracksSlice = createSlice({
     setTracks: (state, action: PayloadAction<import('@/types').Track[]>) => {
       state.tracks = action.payload;
     },
+
+    reorderTrack: (state, action: PayloadAction<{ trackId: ID; newIndex: number }>) => {
+      const { trackId, newIndex } = action.payload;
+      const currentIndex = state.tracks.findIndex((t) => t.id === trackId);
+
+      if (currentIndex === -1 || currentIndex === newIndex) {
+        return; // Track not found or already at target position
+      }
+
+      // Bounds check
+      const clampedNewIndex = Math.max(0, Math.min(newIndex, state.tracks.length - 1));
+
+      // Remove track from current position
+      const [track] = state.tracks.splice(currentIndex, 1);
+
+      // Insert at new position
+      if (track) {
+        state.tracks.splice(clampedNewIndex, 0, track);
+      }
+    },
   },
 });
 
@@ -137,11 +177,14 @@ export const {
   setEditingTrack,
   clearEditingTrack,
   setTrackColor,
+  setTrackHeight,
+  toggleTrackCollapse,
   moveTrackUp,
   moveTrackDown,
   setMovingTrack,
   clearMovingTrack,
   setTracks,
+  reorderTrack,
 } = tracksSlice.actions;
 
 export default tracksSlice.reducer;

@@ -73,7 +73,7 @@ describe('Cirklon Export', () => {
         const scene = song.scenes[sceneName];
         expect(scene).toBeDefined();
         if (!scene) return;
-        expect(scene.gbar).toBe(0);
+        expect(scene.gbar).toBe(16); // Standard 4/4 time
         expect(scene.length).toBe(8);
         expect(scene.advance).toBe('auto');
         expect(scene.pattern_assignments).toBeDefined();
@@ -489,7 +489,7 @@ describe('Cirklon Export', () => {
       expect(song.instrument_assignments).toBeUndefined();
     });
 
-    it('should create sequential scenes starting at gbar 0', () => {
+    it('should create sequential scenes with correct gbar and length', () => {
       const tracks: Track[] = [
         { id: 'track-1', name: 'Track 1', color: '#00ff00' },
       ];
@@ -508,11 +508,243 @@ describe('Cirklon Export', () => {
       if (!song) return;
 
       expect(Object.keys(song.scenes)).toHaveLength(3);
-      const scenes = Object.values(song.scenes).sort((a, b) => a.gbar - b.gbar);
 
-      expect(scenes[0]?.gbar).toBe(0);
-      expect(scenes[1]?.gbar).toBe(8);
-      expect(scenes[2]?.gbar).toBe(16);
+      // All scenes should have gbar = 16 (standard 4/4 time)
+      // and length = 8 bars (from defaultOptions.sceneLengthBars)
+      Object.values(song.scenes).forEach((scene) => {
+        expect(scene.gbar).toBe(16);
+        expect(scene.length).toBe(8);
+      });
+
+      // Verify scene names are sequential
+      expect(song.scenes['Scene 1']).toBeDefined();
+      expect(song.scenes['Scene 2']).toBeDefined();
+      expect(song.scenes['Scene 3']).toBeDefined();
+    });
+
+    it('should export P3 pattern with full pattern data', () => {
+      const tracks: Track[] = [
+        { id: 'track-1', name: 'Track 1', color: '#00ff00' },
+      ];
+      const patterns: Pattern[] = [
+        {
+          id: 'pattern-1',
+          trackId: 'track-1',
+          position: 0,
+          duration: 4, // 1 bar
+          label: 'Test P3',
+          patternType: 'P3',
+          patternData: {
+            loop_start: 1,
+            loop_end: 1,
+            aux_A: 'cc #1',
+            aux_B: 'cc #4',
+            aux_C: 'cc #6',
+            aux_D: 'cc #10',
+            accumulator_config: {
+              note: { limit: 127, mode: 'rtz', out: 'clip' },
+              RoPS: true,
+            },
+            bars: [
+              {
+                direction: 'forward',
+                tbase: '  4',
+                last_step: 16,
+                xpos: 0,
+                reps: 1,
+                gbar: false,
+                note: ['C 3', 'D 3', 'E 3', 'F 3', 'G 3', 'A 3', 'B 3', 'C 4', 'C 3', 'D 3', 'E 3', 'F 3', 'G 3', 'A 3', 'B 3', 'C 4'],
+                velo: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+                length: [24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24],
+                delay: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                gate: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                tie: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                skip: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                note_X: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                aux_A_value: [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64],
+                aux_A_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                aux_B_value: [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64],
+                aux_B_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                aux_C_value: [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64],
+                aux_C_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                aux_D_value: [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64],
+                aux_D_flag: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+              },
+            ],
+          },
+        },
+      ];
+
+      const result = exportToCirklon(tracks, patterns, defaultOptions, false);
+      const song = result.song_data['Test Song'];
+      expect(song).toBeDefined();
+      if (!song) return;
+
+      const patternName = Object.keys(song.patterns)[0];
+      expect(patternName).toBeDefined();
+      if (!patternName) return;
+      const pattern = song.patterns[patternName];
+      expect(pattern).toBeDefined();
+      if (!pattern) return;
+
+      // Verify pattern-level settings are exported
+      expect(pattern.loop_start).toBe(1);
+      expect(pattern.loop_end).toBe(1);
+      expect(pattern.aux_A).toBe('cc #1');
+      expect(pattern.aux_B).toBe('cc #4');
+      expect(pattern.aux_C).toBe('cc #6');
+      expect(pattern.aux_D).toBe('cc #10');
+      expect(pattern.accumulator_config).toEqual({
+        note: { limit: 127, mode: 'rtz', out: 'clip' },
+        RoPS: true,
+      });
+
+      // Verify bars array is exported
+      expect(pattern.bars).toBeDefined();
+      expect(Array.isArray(pattern.bars)).toBe(true);
+      if (!Array.isArray(pattern.bars)) return;
+      expect(pattern.bars).toHaveLength(1);
+
+      const bar = pattern.bars[0];
+      expect(bar).toBeDefined();
+      if (!bar || typeof bar !== 'object') return;
+
+      // Type assertion after validation
+      const typedBar = bar as Record<string, unknown>;
+      expect(typedBar.direction).toBe('forward');
+      expect(typedBar.tbase).toBe('  4');
+      expect(typedBar.last_step).toBe(16);
+      expect(typedBar.xpos).toBe(0);
+      expect(typedBar.reps).toBe(1);
+      expect(typedBar.gbar).toBe(false);
+
+      // Verify step arrays
+      expect(Array.isArray(typedBar.note)).toBe(true);
+      expect(Array.isArray(typedBar.velo)).toBe(true);
+      expect(Array.isArray(typedBar.gate)).toBe(true);
+      if (Array.isArray(typedBar.note)) {
+        expect(typedBar.note).toHaveLength(16);
+        expect(typedBar.note[0]).toBe('C 3');
+      }
+    });
+
+    it('should not export pattern data when includeMetadata is false', () => {
+      const tracks: Track[] = [
+        { id: 'track-1', name: 'Track 1', color: '#00ff00' },
+      ];
+      const patterns: Pattern[] = [
+        {
+          id: 'pattern-1',
+          trackId: 'track-1',
+          position: 0,
+          duration: 32,
+        },
+      ];
+
+      const result = exportToCirklon(tracks, patterns, defaultOptions, false);
+
+      expect(result._cyclone_metadata).toBeUndefined();
+    });
+
+    it('should include metadata when includeMetadata is true', () => {
+      const tracks: Track[] = [
+        { id: 'track-1', name: 'Track 1', color: '#00ff00' },
+      ];
+      const patterns: Pattern[] = [
+        {
+          id: 'pattern-1',
+          trackId: 'track-1',
+          position: 0,
+          duration: 32,
+        },
+      ];
+
+      const result = exportToCirklon(tracks, patterns, defaultOptions, true);
+
+      expect(result._cyclone_metadata).toBeDefined();
+      expect(result._cyclone_metadata?.version).toBe('2.0.0');
+      expect(result._cyclone_metadata?.exportedFrom).toBe('Cyclone');
+      expect(result._cyclone_metadata?.exportedAt).toBeDefined();
+    });
+
+    it('should include timeline state in metadata', () => {
+      const tracks: Track[] = [
+        { id: 'track-1', name: 'Track 1', color: '#00ff00' },
+      ];
+      const patterns: Pattern[] = [
+        {
+          id: 'pattern-1',
+          trackId: 'track-1',
+          position: 0,
+          duration: 32,
+        },
+      ];
+
+      const timelineState = {
+        viewport: { offsetBeats: 0, zoom: 5, widthPx: 1600, heightPx: 600 },
+        verticalZoom: 100,
+        playheadPosition: 0,
+        isPlaying: false,
+        tempo: 128,
+        snapValue: 1,
+        snapMode: 'grid' as const,
+        minimapVisible: false,
+      };
+
+      const result = exportToCirklon(tracks, patterns, defaultOptions, true, [], timelineState);
+
+      expect(result._cyclone_metadata).toBeDefined();
+      expect(result._cyclone_metadata?.viewport).toEqual(timelineState.viewport);
+      expect(result._cyclone_metadata?.timeline).toBeDefined();
+      expect(result._cyclone_metadata?.timeline?.tempo).toBe(128);
+      expect(result._cyclone_metadata?.timeline?.snapValue).toBe(1);
+      expect(result._cyclone_metadata?.timeline?.snapMode).toBe('grid');
+    });
+
+    it('should include track mappings in metadata', () => {
+      const tracks: Track[] = [
+        { id: 'track-1', name: 'Track 1', color: '#00ff00' },
+        { id: 'track-2', name: 'Track 2', color: '#ff0000' },
+      ];
+      const patterns: Pattern[] = [
+        {
+          id: 'pattern-1',
+          trackId: 'track-1',
+          position: 0,
+          duration: 32,
+        },
+      ];
+
+      const result = exportToCirklon(tracks, patterns, defaultOptions, true);
+
+      expect(result._cyclone_metadata).toBeDefined();
+      expect(result._cyclone_metadata?.uiMappings).toBeDefined();
+      expect(result._cyclone_metadata?.uiMappings.tracks).toBeDefined();
+      // Legacy exportToCirklon generates minimal metadata - just verify structure exists
+      expect(typeof result._cyclone_metadata?.uiMappings.tracks).toBe('object');
+    });
+
+    it('should include pattern mappings in metadata', () => {
+      const tracks: Track[] = [
+        { id: 'track-1', name: 'Track 1', color: '#00ff00' },
+      ];
+      const patterns: Pattern[] = [
+        {
+          id: 'pattern-1',
+          trackId: 'track-1',
+          position: 0,
+          duration: 32,
+          label: 'My Pattern',
+        },
+      ];
+
+      const result = exportToCirklon(tracks, patterns, defaultOptions, true);
+
+      expect(result._cyclone_metadata).toBeDefined();
+      expect(result._cyclone_metadata?.uiMappings).toBeDefined();
+      expect(result._cyclone_metadata?.uiMappings.patterns).toBeDefined();
+      // Legacy exportToCirklon generates minimal metadata - just verify structure exists
+      expect(typeof result._cyclone_metadata?.uiMappings.patterns).toBe('object');
     });
   });
 });

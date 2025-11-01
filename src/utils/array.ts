@@ -14,7 +14,7 @@
  * const arr = [1, 2, 3];
  * const firstItem = first(arr);
  * if (firstItem !== undefined) {
- *   console.log(firstItem); // 1
+ *   logger.debug(firstItem); // 1
  * }
  */
 export function first<T>(array: readonly T[]): T | undefined {
@@ -32,7 +32,7 @@ export function first<T>(array: readonly T[]): T | undefined {
  * const arr = [1, 2, 3];
  * const lastItem = last(arr);
  * if (lastItem !== undefined) {
- *   console.log(lastItem); // 3
+ *   logger.debug(lastItem); // 3
  * }
  */
 export function last<T>(array: readonly T[]): T | undefined {

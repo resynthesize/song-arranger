@@ -27,7 +27,7 @@
 .duration-display__content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--spacing-xs);
   padding: 0 var(--spacing-xs);
   border-left: var(--border-width-base) solid var(--color-secondary);
   border-right: var(--border-width-base) solid var(--color-secondary);
@@ -48,7 +48,7 @@
   font-size: var(--font-size-sm);
   color: var(--color-secondary);
   text-shadow: var(--phosphor-glow-sm);
-  letter-spacing: 1px;
+  letter-spacing: 0.0625rem; /* 1px @ 16px base */
 }
 
 /* Duration values (MM:SS) */
@@ -57,7 +57,7 @@
   color: var(--color-primary);
   font-weight: var(--font-weight-bold);
   text-shadow: var(--phosphor-glow-md);
-  letter-spacing: 2px;
+  letter-spacing: 0.125rem; /* 2px @ 16px base */
   transition: text-shadow var(--transition-fast);
 }
 

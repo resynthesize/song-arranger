@@ -3,40 +3,10 @@
  * Tests for the searchable command palette
  */
 
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import { renderWithProviders } from '@/utils/testUtils';
 import { CommandPalette } from './CommandPalette';
-import timelineReducer from '@/store/slices/timelineSlice';
-import tracksReducer from '@/store/slices/tracksSlice';
-import patternsReducer from '@/store/slices/patternsSlice';
-import selectionReducer from '@/store/slices/selectionSlice';
-import scenesReducer from '@/store/slices/scenesSlice';
-import crtEffectsReducer from '@/store/slices/crtEffectsSlice';
-import projectReducer from '@/store/slices/projectSlice';
-import quickInputReducer from '@/store/slices/quickInputSlice';
-import commandPaletteReducer from '@/store/slices/commandPaletteSlice';
-import statusReducer from '@/store/slices/statusSlice';
-import themeReducer from '@/store/slices/themeSlice';
-import patternEditorReducer from '@/store/slices/patternEditorSlice';
-
-const createMockStore = () => configureStore({
-  reducer: {
-    timeline: timelineReducer,
-    tracks: tracksReducer,
-    patterns: patternsReducer,
-    selection: selectionReducer,
-    scenes: scenesReducer,
-    crtEffects: crtEffectsReducer,
-    project: projectReducer,
-    quickInput: quickInputReducer,
-    commandPalette: commandPaletteReducer,
-    status: statusReducer,
-    theme: themeReducer,
-    patternEditor: patternEditorReducer,
-  },
-});
 
 describe('CommandPalette', () => {
   const mockOnClose = jest.fn();
@@ -46,25 +16,20 @@ describe('CommandPalette', () => {
     localStorage.clear();
   });
 
-  const renderWithStore = (component: React.ReactElement) => {
-    const store = createMockStore();
-    return render(<Provider store={store}>{component}</Provider>);
-  };
-
   it('should render with search input', () => {
-    renderWithStore(<CommandPalette isOpen={true} onClose={mockOnClose} />);
+    renderWithProviders(<CommandPalette isOpen={true} onClose={mockOnClose} />);
     expect(screen.getByPlaceholderText(/search commands/i)).toBeInTheDocument();
   });
 
   it('should display all commands initially', () => {
-    renderWithStore(<CommandPalette isOpen={true} onClose={mockOnClose} />);
+    renderWithProviders(<CommandPalette isOpen={true} onClose={mockOnClose} />);
     expect(screen.getByText('Set Tempo...')).toBeInTheDocument();
     expect(screen.getByText('Zoom In')).toBeInTheDocument();
   });
 
   it('should filter commands by search query', async () => {
     const user = userEvent.setup();
-    renderWithStore(<CommandPalette isOpen={true} onClose={mockOnClose} />);
+    renderWithProviders(<CommandPalette isOpen={true} onClose={mockOnClose} />);
 
     const input = screen.getByPlaceholderText(/search commands/i);
     await user.type(input, 'zoom');
@@ -76,7 +41,7 @@ describe('CommandPalette', () => {
 
   it('should close on Escape key', async () => {
     const user = userEvent.setup();
-    renderWithStore(<CommandPalette isOpen={true} onClose={mockOnClose} />);
+    renderWithProviders(<CommandPalette isOpen={true} onClose={mockOnClose} />);
 
     await user.keyboard('{Escape}');
     expect(mockOnClose).toHaveBeenCalledTimes(1);
@@ -84,7 +49,7 @@ describe('CommandPalette', () => {
 
   it('should navigate with arrow keys', async () => {
     const user = userEvent.setup();
-    renderWithStore(<CommandPalette isOpen={true} onClose={mockOnClose} />);
+    renderWithProviders(<CommandPalette isOpen={true} onClose={mockOnClose} />);
 
     await user.keyboard('{ArrowDown}');
     // First command should be highlighted
@@ -94,7 +59,7 @@ describe('CommandPalette', () => {
 
   it('should execute command on Enter', async () => {
     const user = userEvent.setup();
-    renderWithStore(<CommandPalette isOpen={true} onClose={mockOnClose} />);
+    renderWithProviders(<CommandPalette isOpen={true} onClose={mockOnClose} />);
 
     // Select first command and press Enter
     await user.keyboard('{ArrowDown}');
@@ -104,13 +69,13 @@ describe('CommandPalette', () => {
   });
 
   it('should show keyboard shortcuts', () => {
-    renderWithStore(<CommandPalette isOpen={true} onClose={mockOnClose} />);
+    renderWithProviders(<CommandPalette isOpen={true} onClose={mockOnClose} />);
     expect(screen.getByText('T')).toBeInTheDocument();
     expect(screen.getByText('Space')).toBeInTheDocument();
   });
 
   it('should have proper ARIA attributes', () => {
-    renderWithStore(<CommandPalette isOpen={true} onClose={mockOnClose} />);
+    renderWithProviders(<CommandPalette isOpen={true} onClose={mockOnClose} />);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/search commands/i)).toHaveAttribute('aria-label');
   });

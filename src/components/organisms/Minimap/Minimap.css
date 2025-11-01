@@ -9,7 +9,7 @@
   right: var(--spacing-lg);
   background: var(--color-bg);
   border: var(--border-width-base) solid var(--color-secondary);
-  box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+  box-shadow: var(--phosphor-glow-md);
   z-index: var(--z-modal);
   font-family: var(--font-primary);
   color: var(--color-primary);
@@ -57,8 +57,8 @@
 }
 
 .minimap__close:focus {
-  outline: 1px solid var(--color-primary);
-  outline-offset: 2px;
+  outline: var(--border-width-thin) solid var(--color-primary);
+  outline-offset: var(--spacing-xs);
 }
 
 .minimap__content {
@@ -91,38 +91,38 @@
 
 .minimap--embedded .minimap__canvas {
   border: var(--border-width-thin) solid var(--color-secondary);
-  box-shadow: inset 0 0 4px rgba(0, 255, 0, 0.2);
+  box-shadow: inset 0 0 var(--glow-intensity-sm) color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
 .minimap--embedded .minimap__canvas:hover {
   border-color: var(--color-primary);
-  box-shadow: inset 0 0 6px rgba(0, 255, 0, 0.3);
+  box-shadow: inset 0 0 var(--glow-intensity-sm) color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
 .minimap__viewport {
   position: absolute;
-  top: 4px;
-  border: 2px solid var(--color-primary);
-  background: rgba(0, 255, 0, 0.1);
+  top: var(--spacing-xs);
+  border: var(--border-width-thick) solid var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
   cursor: move;
   pointer-events: auto;
-  box-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
+  box-shadow: var(--phosphor-glow-sm);
   transition: background var(--transition-fast);
 }
 
 .minimap--embedded .minimap__viewport {
-  top: 2px;
-  border: 1px solid var(--color-primary);
-  box-shadow: 0 0 2px rgba(0, 255, 0, 0.5);
+  top: var(--spacing-xs);
+  border: var(--border-width-thin) solid var(--color-primary);
+  box-shadow: var(--phosphor-glow-xs);
 }
 
 .minimap__viewport:hover {
-  background: rgba(0, 255, 0, 0.15);
-  box-shadow: 0 0 6px rgba(0, 255, 0, 0.7);
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  box-shadow: var(--phosphor-glow-md);
 }
 
 .minimap__viewport:active {
-  background: rgba(0, 255, 0, 0.2);
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
   cursor: grabbing;
 }
 

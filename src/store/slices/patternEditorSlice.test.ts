@@ -15,6 +15,10 @@ import reducer, {
   copySteps,
   clearClipboard,
   toggleViewMode,
+  toggleRowVisibility,
+  setRowVisibility,
+  toggleRowCollapsed,
+  setRowCollapsed,
 } from './patternEditorSlice';
 import type { PatternEditorState, PatternRow } from '@/types';
 
@@ -27,6 +31,26 @@ describe('patternEditorSlice', () => {
     editorHeight: 400,
     clipboardSteps: null,
     viewMode: 'parameters',
+    visibleRows: {
+      note: true,
+      velocity: true,
+      length: true,
+      delay: true,
+      auxA: true,
+      auxB: true,
+      auxC: true,
+      auxD: true,
+    },
+    collapsedRows: {
+      note: false,
+      velocity: false,
+      length: false,
+      delay: false,
+      auxA: false,
+      auxB: false,
+      auxC: false,
+      auxD: false,
+    },
   };
 
   it('should return the initial state', () => {
@@ -754,17 +778,28 @@ describe('patternEditorSlice', () => {
       expect(newState.viewMode).toBe('aux');
     });
 
-    it('should toggle from aux to parameters view', () => {
+    it('should toggle from aux to bar view', () => {
       const state: PatternEditorState = {
         ...initialState,
         viewMode: 'aux',
       };
 
       const newState = reducer(state, toggleViewMode());
-      expect(newState.viewMode).toBe('parameters');
+      expect(newState.viewMode).toBe('bar');
     });
 
-    it('should reset selectedRow to note when switching to parameters view', () => {
+    it('should toggle from bar to parameters view', () => {
+      const state: PatternEditorState = {
+        ...initialState,
+        viewMode: 'bar',
+      };
+
+      const newState = reducer(state, toggleViewMode());
+      expect(newState.viewMode).toBe('parameters');
+      expect(newState.selectedRow).toBe('note');
+    });
+
+    it('should reset selectedRow to note when switching to bar view', () => {
       const state: PatternEditorState = {
         ...initialState,
         viewMode: 'aux',
@@ -772,7 +807,7 @@ describe('patternEditorSlice', () => {
       };
 
       const newState = reducer(state, toggleViewMode());
-      expect(newState.viewMode).toBe('parameters');
+      expect(newState.viewMode).toBe('bar');
       expect(newState.selectedRow).toBe('note');
     });
 
@@ -842,6 +877,120 @@ describe('patternEditorSlice', () => {
       const newState = reducer(state, closePattern());
       expect(newState.viewMode).toBe('parameters');
       expect(newState.selectedRow).toBe('note');
+    });
+  });
+
+  describe('toggleRowVisibility', () => {
+    it('should toggle row from visible to hidden', () => {
+      const newState = reducer(initialState, toggleRowVisibility('note'));
+      expect(newState.visibleRows.note).toBe(false);
+    });
+
+    it('should toggle row from hidden to visible', () => {
+      const state: PatternEditorState = {
+        ...initialState,
+        visibleRows: {
+          ...initialState.visibleRows,
+          velocity: false,
+        },
+      };
+
+      const newState = reducer(state, toggleRowVisibility('velocity'));
+      expect(newState.visibleRows.velocity).toBe(true);
+    });
+
+    it('should only affect the specified row', () => {
+      const newState = reducer(initialState, toggleRowVisibility('note'));
+      expect(newState.visibleRows.note).toBe(false);
+      expect(newState.visibleRows.velocity).toBe(true);
+      expect(newState.visibleRows.length).toBe(true);
+      expect(newState.visibleRows.delay).toBe(true);
+    });
+  });
+
+  describe('setRowVisibility', () => {
+    it('should set row to visible', () => {
+      const state: PatternEditorState = {
+        ...initialState,
+        visibleRows: {
+          ...initialState.visibleRows,
+          note: false,
+        },
+      };
+
+      const newState = reducer(state, setRowVisibility({ row: 'note', visible: true }));
+      expect(newState.visibleRows.note).toBe(true);
+    });
+
+    it('should set row to hidden', () => {
+      const newState = reducer(initialState, setRowVisibility({ row: 'velocity', visible: false }));
+      expect(newState.visibleRows.velocity).toBe(false);
+    });
+
+    it('should handle all row types', () => {
+      const rows: PatternRow[] = ['note', 'velocity', 'length', 'delay', 'auxA', 'auxB', 'auxC', 'auxD'];
+
+      rows.forEach((row) => {
+        const newState = reducer(initialState, setRowVisibility({ row, visible: false }));
+        expect(newState.visibleRows[row]).toBe(false);
+      });
+    });
+  });
+
+  describe('toggleRowCollapsed', () => {
+    it('should toggle row from expanded to collapsed', () => {
+      const newState = reducer(initialState, toggleRowCollapsed('note'));
+      expect(newState.collapsedRows.note).toBe(true);
+    });
+
+    it('should toggle row from collapsed to expanded', () => {
+      const state: PatternEditorState = {
+        ...initialState,
+        collapsedRows: {
+          ...initialState.collapsedRows,
+          velocity: true,
+        },
+      };
+
+      const newState = reducer(state, toggleRowCollapsed('velocity'));
+      expect(newState.collapsedRows.velocity).toBe(false);
+    });
+
+    it('should only affect the specified row', () => {
+      const newState = reducer(initialState, toggleRowCollapsed('note'));
+      expect(newState.collapsedRows.note).toBe(true);
+      expect(newState.collapsedRows.velocity).toBe(false);
+      expect(newState.collapsedRows.length).toBe(false);
+      expect(newState.collapsedRows.delay).toBe(false);
+    });
+  });
+
+  describe('setRowCollapsed', () => {
+    it('should set row to collapsed', () => {
+      const newState = reducer(initialState, setRowCollapsed({ row: 'note', collapsed: true }));
+      expect(newState.collapsedRows.note).toBe(true);
+    });
+
+    it('should set row to expanded', () => {
+      const state: PatternEditorState = {
+        ...initialState,
+        collapsedRows: {
+          ...initialState.collapsedRows,
+          velocity: true,
+        },
+      };
+
+      const newState = reducer(state, setRowCollapsed({ row: 'velocity', collapsed: false }));
+      expect(newState.collapsedRows.velocity).toBe(false);
+    });
+
+    it('should handle all row types', () => {
+      const rows: PatternRow[] = ['note', 'velocity', 'length', 'delay', 'auxA', 'auxB', 'auxC', 'auxD'];
+
+      rows.forEach((row) => {
+        const newState = reducer(initialState, setRowCollapsed({ row, collapsed: true }));
+        expect(newState.collapsedRows[row]).toBe(true);
+      });
     });
   });
 });

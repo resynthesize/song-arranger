@@ -34,8 +34,8 @@
 
 /* Scrollbar styling for terminal aesthetic */
 .timeline::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: var(--spacing-md);
+  height: var(--spacing-md);
 }
 
 .timeline::-webkit-scrollbar-track {
@@ -59,9 +59,9 @@
 /* Rectangle Selection Tool */
 .selectionRect {
   position: absolute;
-  border: 2px solid var(--color-primary);
-  background: rgba(0, 255, 0, 0.1);
+  border: var(--border-width-thick) solid var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
   pointer-events: none;
-  z-index: 1000;
+  z-index: var(--z-overlay);
   box-shadow: var(--phosphor-glow-sm);
 }

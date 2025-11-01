@@ -23,6 +23,10 @@ export interface KeyboardShortcutsState {
   setShowQuickInput: (show: boolean) => void;
   quickInputCommand: 'tempo' | 'zoom' | 'snap' | 'length' | 'position' | null;
   setQuickInputCommand: (command: 'tempo' | 'zoom' | 'snap' | 'length' | 'position' | null) => void;
+  showTrackSettings: boolean;
+  setShowTrackSettings: (show: boolean) => void;
+  showSongDataViewer: boolean;
+  setShowSongDataViewer: (show: boolean) => void;
 }
 
 /**
@@ -31,12 +35,15 @@ export interface KeyboardShortcutsState {
 export const useKeyboardShortcuts = (): KeyboardShortcutsState => {
   const selectedClipIds = useAppSelector((state) => state.selection.selectedPatternIds);
   const isEditingLane = useAppSelector((state) => state.tracks.editingTrackId !== null);
+  const keyboardContextState = useAppSelector((state) => state.keyboardContext.context);
 
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showQuickInput, setShowQuickInput] = useState(false);
   const [quickInputCommand, setQuickInputCommand] = useState<'tempo' | 'zoom' | 'snap' | 'length' | 'position' | null>(null);
+  const [showTrackSettings, setShowTrackSettings] = useState(false);
+  const [showSongDataViewer, setShowSongDataViewer] = useState(false);
 
   // Initialize domain-specific shortcut hooks
   const clipShortcuts = usePatternShortcuts();
@@ -47,12 +54,22 @@ export const useKeyboardShortcuts = (): KeyboardShortcutsState => {
     setShowSettings,
     showCommandPalette,
     setShowCommandPalette,
+    showSongDataViewer,
+    setShowSongDataViewer,
   });
-  const laneShortcuts = useTrackShortcuts();
+  const laneShortcuts = useTrackShortcuts({
+    setShowTrackSettings,
+  });
   const navigationShortcuts = useNavigationShortcuts();
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Block all shortcuts when editing text (except Escape and Enter which are handled by inputs)
+      if (keyboardContextState === 'editing') {
+        // Don't process any shortcuts when in editing mode
+        return;
+      }
+
       // Build current context
       const context: KeyboardContext = {
         hasSelection: selectedClipIds.length > 0,
@@ -104,6 +121,7 @@ export const useKeyboardShortcuts = (): KeyboardShortcutsState => {
   }, [
     selectedClipIds,
     isEditingLane,
+    keyboardContextState,
     clipShortcuts,
     viewShortcuts,
     laneShortcuts,
@@ -121,5 +139,9 @@ export const useKeyboardShortcuts = (): KeyboardShortcutsState => {
     setShowQuickInput,
     quickInputCommand,
     setQuickInputCommand,
+    showTrackSettings,
+    setShowTrackSettings,
+    showSongDataViewer,
+    setShowSongDataViewer,
   };
 };

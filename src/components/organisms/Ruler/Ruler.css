@@ -6,13 +6,13 @@
 .ruler {
   position: sticky;
   top: 0;
-  height: 50px;
   background: var(--color-bg);
   border-bottom: var(--border-width-base) solid var(--color-secondary);
   z-index: var(--z-controls);
-  overflow: hidden;
+  overflow: visible;
   user-select: none;
   display: flex;
+  min-height: var(--spacing-3xl);
 }
 
 /* Ruler header space to align with lane headers */
@@ -23,18 +23,37 @@
   border-right: var(--border-width-base) solid var(--color-secondary);
 }
 
-/* Ruler content area where bar numbers and beats are positioned */
+/* Ruler content area - split into two rows */
 .ruler__content {
   flex: 1;
-  position: relative;
-  overflow: hidden;
-  cursor: move; /* Move cursor indicates both zoom (vertical) and scroll (horizontal) */
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
 }
 
-/* Dragging state - show grabbing cursor */
-.ruler__content--dragging {
+/* Bar row - contains bar numbers, timestamps, grid */
+.ruler__bar-row {
+  height: 40px;
+  position: relative;
+  flex-shrink: 0;
+  cursor: move; /* Move cursor indicates both zoom (vertical) and scroll (horizontal) */
+  overflow: hidden; /* Clip content that extends past left edge */
+}
+
+/* Dragging state for bar row */
+.ruler__bar-row--dragging {
   cursor: grabbing;
   user-select: none;
+}
+
+/* Scene row - contains scene marker blocks */
+.ruler__scene-row {
+  height: 32px;
+  position: relative;
+  flex-shrink: 0;
+  border-top: var(--border-width-base) solid var(--color-grid);
+  background: color-mix(in srgb, var(--color-bg) 95%, var(--color-grid));
+  overflow: hidden; /* Clip content that extends past left edge */
 }
 
 /* Bar container - holds bar number and time marker vertically */
@@ -44,21 +63,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: var(--spacing-xs);
   pointer-events: auto;
 }
 
 /* Bar Numbers - Reduced size to fit time markers */
 .ruler__bar-number {
-  padding: 2px 4px;
+  padding: var(--spacing-xs) var(--spacing-xs);
   font-family: var(--font-primary);
   font-size: var(--font-size-base); /* Reduced from lg */
   font-weight: bold;
-  color: #00ff00; /* Brightest green */
+  color: var(--color-primary); /* Brightest green */
   cursor: pointer;
   transition: color var(--transition-fast);
   line-height: 1;
-  text-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
+  text-shadow: var(--phosphor-glow-sm);
 }
 
 .ruler__bar-number:hover {
@@ -70,7 +89,7 @@
 .ruler__time-marker {
   font-family: var(--font-primary);
   font-size: var(--font-size-xs); /* Very small */
-  color: #008800; /* Medium green */
+  color: var(--color-secondary); /* Medium green */
   cursor: pointer;
   transition: color var(--transition-fast);
   line-height: 1;
@@ -79,7 +98,7 @@
 
 .ruler__time-marker:hover {
   color: var(--color-secondary);
-  opacity: 1;
+  opacity: var(--opacity-full);
 }
 
 /* Beat Tick Markers - Medium brightness */
@@ -92,7 +111,7 @@
   padding-bottom: var(--spacing-xs);
   font-family: var(--font-primary);
   font-size: var(--font-size-md);
-  color: #008800; /* Medium green */
+  color: var(--color-secondary); /* Medium green */
   opacity: 0.8;
   cursor: pointer;
   transition: opacity var(--transition-fast), color var(--transition-fast);
@@ -101,7 +120,7 @@
 }
 
 .ruler__beat-tick:hover {
-  opacity: 1;
+  opacity: var(--opacity-full);
   color: var(--color-secondary);
 }
 
@@ -115,8 +134,8 @@
   padding-bottom: var(--spacing-xs);
   font-family: var(--font-primary);
   font-size: var(--font-size-sm);
-  color: #004400; /* Dim green */
-  opacity: 0.4;
+  color: var(--primitive-green-800); /* Dim green */
+  opacity: var(--opacity-muted);
   cursor: pointer;
   transition: opacity var(--transition-fast), color var(--transition-fast);
   pointer-events: auto;
@@ -124,7 +143,7 @@
 }
 
 .ruler__subbeat-tick:hover {
-  opacity: 0.6;
+  opacity: var(--opacity-semi);
   color: var(--color-grid);
 }
 
@@ -133,10 +152,10 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: rgba(0, 255, 0, 0.15);
+  width: var(--border-width-thick);
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
   pointer-events: none;
-  box-shadow: 0 0 4px rgba(0, 255, 0, 0.2);
+  box-shadow: var(--phosphor-glow-sm);
 }
 
 /* Legacy grid tick - keep for backwards compatibility */
@@ -150,7 +169,7 @@
   font-family: var(--font-primary);
   font-size: var(--font-size-base);
   color: var(--color-grid);
-  opacity: 0.6;
+  opacity: var(--opacity-semi);
   cursor: pointer;
   transition: opacity var(--transition-fast), color var(--transition-fast);
   pointer-events: auto;
@@ -158,7 +177,7 @@
 }
 
 .ruler__grid-tick:hover {
-  opacity: 1;
+  opacity: var(--opacity-full);
   color: var(--color-secondary);
 }
 
@@ -171,7 +190,7 @@
   right: 0;
   height: var(--border-width-thin);
   background: var(--color-primary);
-  opacity: 0.3;
+  opacity: var(--opacity-muted);
 }
 
 /* Respect reduced motion preference */

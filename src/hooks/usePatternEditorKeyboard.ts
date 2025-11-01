@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import type { Pattern, PatternRow } from '@/types';
 import type { P3Bar } from '@/types/patternData';
 import { selectRow, selectSteps } from '@/store/slices/patternEditorSlice';
-import { updateStepValue, updateStepNote } from '@/store/slices/patternsSlice';
+import { updateStepValueInTimeline, updateStepNoteInTimeline } from '@/store/slices/songSlice/slice';
 
 const PARAMETER_ROWS: PatternRow[] = ['note', 'velocity', 'length', 'delay'];
 const AUX_ROWS: PatternRow[] = ['auxA', 'auxB', 'auxC', 'auxD'];
@@ -84,8 +84,8 @@ export const usePatternEditorKeyboard = ({
       if (row === 'note') {
         // For note row, dispatch note update with string value
         dispatch(
-          updateStepNote({
-            patternId: openPatternId,
+          updateStepNoteInTimeline({
+            patternReactId: openPatternId,
             barIndex: currentBarIndex,
             stepIndex,
             note: String(value),
@@ -94,8 +94,8 @@ export const usePatternEditorKeyboard = ({
       } else {
         // For numeric rows, dispatch value update
         dispatch(
-          updateStepValue({
-            patternId: openPatternId,
+          updateStepValueInTimeline({
+            patternReactId: openPatternId,
             barIndex: currentBarIndex,
             stepIndex,
             row,

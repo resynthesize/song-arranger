@@ -10,6 +10,8 @@ import reducer, {
   setEditingTrack,
   clearEditingTrack,
   setTrackColor,
+  setTrackHeight,
+  toggleTrackCollapse,
 } from './tracksSlice';
 import type { TracksState } from '@/types';
 
@@ -168,6 +170,97 @@ describe('tracksSlice', () => {
     it('should add a new track with default color', () => {
       const newState = reducer(initialState, addTrack({ name: 'Bass' }));
       expect(newState.tracks[0]?.color).toBe('#6d8a9e'); // Muted blue default
+    });
+  });
+
+  describe('setTrackHeight', () => {
+    it('should set track height by id', () => {
+      const newState = reducer(
+        stateWithTracks,
+        setTrackHeight({ trackId: 'track-1', height: 120 })
+      );
+      expect(newState.tracks[0]?.height).toBe(120);
+    });
+
+    it('should enforce minimum height of 40px', () => {
+      const newState = reducer(
+        stateWithTracks,
+        setTrackHeight({ trackId: 'track-1', height: 20 })
+      );
+      expect(newState.tracks[0]?.height).toBe(40);
+    });
+
+    it('should enforce maximum height of 400px', () => {
+      const newState = reducer(
+        stateWithTracks,
+        setTrackHeight({ trackId: 'track-1', height: 500 })
+      );
+      expect(newState.tracks[0]?.height).toBe(400);
+    });
+
+    it('should update existing track height', () => {
+      const stateWithHeight: TracksState = {
+        tracks: [
+          { id: 'track-1', name: 'Kick', height: 100 },
+          { id: 'track-2', name: 'Snare' },
+        ],
+        editingTrackId: null,
+        movingTrackId: null,
+      };
+      const newState = reducer(
+        stateWithHeight,
+        setTrackHeight({ trackId: 'track-1', height: 150 })
+      );
+      expect(newState.tracks[0]?.height).toBe(150);
+    });
+
+    it('should do nothing if track not found', () => {
+      const newState = reducer(
+        stateWithTracks,
+        setTrackHeight({ trackId: 'non-existent', height: 100 })
+      );
+      expect(newState.tracks).toEqual(stateWithTracks.tracks);
+    });
+  });
+
+  describe('toggleTrackCollapse', () => {
+    it('should collapse an expanded track', () => {
+      const newState = reducer(stateWithTracks, toggleTrackCollapse('track-1'));
+      expect(newState.tracks[0]?.collapsed).toBe(true);
+    });
+
+    it('should expand a collapsed track', () => {
+      const collapsedState: TracksState = {
+        tracks: [
+          { id: 'track-1', name: 'Kick', collapsed: true },
+          { id: 'track-2', name: 'Snare' },
+        ],
+        editingTrackId: null,
+        movingTrackId: null,
+      };
+      const newState = reducer(collapsedState, toggleTrackCollapse('track-1'));
+      expect(newState.tracks[0]?.collapsed).toBe(false);
+    });
+
+    it('should toggle from undefined to true', () => {
+      const newState = reducer(stateWithTracks, toggleTrackCollapse('track-2'));
+      expect(newState.tracks[1]?.collapsed).toBe(true);
+    });
+
+    it('should do nothing if track not found', () => {
+      const newState = reducer(stateWithTracks, toggleTrackCollapse('non-existent'));
+      expect(newState.tracks).toEqual(stateWithTracks.tracks);
+    });
+
+    it('should handle multiple toggles', () => {
+      let state = reducer(stateWithTracks, toggleTrackCollapse('track-1'));
+      expect(state.tracks[0]?.collapsed).toBe(true);
+
+      state = reducer(state, toggleTrackCollapse('track-1'));
+      expect(state.tracks[0]?.collapsed).toBe(false);
+
+      state = reducer(state, toggleTrackCollapse('track-1'));
+      expect(state.tracks[0]?.collapsed).toBe(true);
     });
   });
 });

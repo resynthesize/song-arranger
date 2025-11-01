@@ -5,6 +5,7 @@ export interface BarChartProps {
   value: number;
   maxValue?: number;
   height?: number;
+  color?: string;
   isActive?: boolean;
   isTied?: boolean;
   isSkipped?: boolean;
@@ -19,6 +20,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   value,
   maxValue = 127,
   height = 150,
+  color,
   isActive = true,
   isTied = false,
   isSkipped = false,
@@ -88,7 +90,10 @@ export const BarChart: React.FC<BarChartProps> = ({
   return (
     <div
       className={containerClasses}
-      style={{ height: `${height}px` }}
+      style={{
+        height: `${height}px`,
+        ...(color ? { '--bar-color': color } as React.CSSProperties : {})
+      }}
       data-testid="bar-chart-container"
       aria-label={buildAriaLabel()}
       role={onClick ? 'button' : undefined}

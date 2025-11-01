@@ -75,3 +75,9 @@ export const MINIMAP_LANE_HEIGHT = 8;
 
 /** Minimap padding in pixels */
 export const MINIMAP_PADDING = 8;
+
+/** Track collapsed height in pixels (minimal height when track is folded) */
+export const TRACK_COLLAPSED_HEIGHT = 30;
+
+/** Minimum track height in pixels (cannot resize smaller than this) */
+export const MIN_TRACK_HEIGHT = TRACK_COLLAPSED_HEIGHT;

@@ -38,3 +38,15 @@ export type { PatternEditorHeaderProps } from './PatternEditorHeader/PatternEdit
 
 export { BarNavigation } from './BarNavigation/BarNavigation';
 export type { BarNavigationProps } from './BarNavigation/BarNavigation';
+
+export { TrackResizeHandle } from './TrackResizeHandle/TrackResizeHandle';
+export type { TrackResizeHandleProps } from './TrackResizeHandle/TrackResizeHandle';
+
+export { TrackHeaderResizeHandle } from './TrackHeaderResizeHandle/TrackHeaderResizeHandle';
+export type { TrackHeaderResizeHandleProps } from './TrackHeaderResizeHandle/TrackHeaderResizeHandle';
+
+export { ConsoleHistory } from './ConsoleHistory/ConsoleHistory';
+export type { ConsoleHistoryProps } from './ConsoleHistory/ConsoleHistory';
+
+export { ConsoleAutocomplete } from './ConsoleAutocomplete/ConsoleAutocomplete';
+export type { ConsoleAutocompleteProps } from './ConsoleAutocomplete/ConsoleAutocomplete';

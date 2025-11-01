@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { logger } from '@/utils/debug';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearStatus } from '@/store/slices/statusSlice';
 import './StatusLine.css';
@@ -28,7 +29,7 @@ const StatusLine = () => {
   useEffect(() => {
     if (currentMessage && statusLineRef.current) {
       const rect = statusLineRef.current.getBoundingClientRect();
-      console.log('[StatusLine] Rendered with dimensions:', {
+      logger.debug('[StatusLine] Rendered with dimensions:', {
         height: rect.height,
         bottom: rect.bottom,
         top: rect.top,
@@ -39,7 +40,7 @@ const StatusLine = () => {
   }, [currentMessage]);
 
   if (!currentMessage) {
-    console.log('[StatusLine] Not rendering - no message');
+    logger.debug('[StatusLine] Not rendering - no message');
     return null;
   }
 

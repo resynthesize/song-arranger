@@ -18,11 +18,24 @@ export const PatternHandle: React.FC<PatternHandleProps> = ({
   edge,
   onResizeStart,
 }) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
+    console.log(`[PatternHandle] MouseDown on ${edge} handle`, {
+      patternId,
+      edge,
+      target: e.target,
+      currentTarget: e.currentTarget,
+      clientX: e.clientX,
+      clientY: e.clientY,
+      button: e.button
+    });
+    onResizeStart(edge)(e);
+  };
+
   return (
     <div
       className={`pattern__handle pattern__handle--${edge}`}
       data-testid={`pattern-${patternId}-handle-${edge}`}
-      onMouseDown={onResizeStart(edge)}
+      onMouseDown={handleMouseDown}
     />
   );
 };

@@ -1,0 +1,291 @@
+/**
+ * Cyclone Design Tokens - Typography
+ * Font families, sizes, weights, and line heights for both themes
+ *
+ * Note: VT323 requires larger sizes due to lighter weight and low x-height
+ *       JetBrains Mono is optimized for readability at smaller sizes
+ */
+
+/* ============================================
+   FONT FAMILIES - RETRO THEME (DEFAULT)
+   ============================================ */
+
+:root {
+  /* Primary Fonts */
+  --font-primary: 'VT323', monospace;
+  --font-secondary: 'Share Tech Mono', monospace;
+  --font-fallback: 'Courier', monospace;
+  --font-mono: 'VT323', 'Courier New', monospace;
+
+  /* Font Family Stack (with fallbacks) */
+  --font-family-primary: var(--font-primary), var(--font-fallback);
+  --font-family-secondary: var(--font-secondary), var(--font-fallback);
+  --font-family-mono: var(--font-mono);
+}
+
+/* ============================================
+   FONT FAMILIES - MODERN THEME
+   ============================================ */
+
+.app.theme-modern {
+  --font-primary: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-secondary: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-fallback: 'Consolas', 'Monaco', monospace;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  --font-family-primary: var(--font-primary), var(--font-fallback);
+  --font-family-secondary: var(--font-secondary), var(--font-fallback);
+  --font-family-mono: var(--font-mono);
+}
+
+/* ============================================
+   FONT SIZES - RETRO THEME (DEFAULT)
+   Larger sizes for VT323 readability
+   ============================================ */
+
+:root {
+  /* Type Scale */
+  --font-size-xs: 14px;    /* 0.7rem - Metadata, tiny labels */
+  --font-size-sm: 16px;    /* 0.8rem - Small UI text, captions */
+  --font-size-base: 20px;  /* 1rem - Body text, DEFAULT */
+  --font-size-md: 24px;    /* 1.2rem - Subheadings */
+  --font-size-lg: 28px;    /* 1.4rem - Headings */
+  --font-size-xl: 32px;    /* 1.6rem - Large headings */
+  --font-size-2xl: 40px;   /* 2rem - Display text */
+  --font-size-3xl: 48px;   /* 2.4rem - Hero text */
+
+  /* Alias tokens for common use cases */
+  --font-size-caption: var(--font-size-xs);
+  --font-size-label: var(--font-size-sm);
+  --font-size-body: var(--font-size-base);
+  --font-size-heading: var(--font-size-lg);
+  --font-size-display: var(--font-size-2xl);
+}
+
+/* ============================================
+   FONT SIZES - MODERN THEME
+   Smaller sizes for JetBrains Mono (better readability)
+   ============================================ */
+
+.app.theme-modern {
+  /* Type Scale */
+  --font-size-xs: 10px;    /* 0.625rem - Tiny labels, metadata */
+  --font-size-sm: 12px;    /* 0.75rem - Small UI text */
+  --font-size-base: 14px;  /* 0.875rem - Body text, DEFAULT */
+  --font-size-md: 16px;    /* 1rem - Subheadings */
+  --font-size-lg: 18px;    /* 1.125rem - Headings */
+  --font-size-xl: 20px;    /* 1.25rem - Large headings */
+  --font-size-2xl: 24px;   /* 1.5rem - Display text */
+  --font-size-3xl: 28px;   /* 1.75rem - Hero text */
+
+  /* Aliases remain the same */
+  --font-size-caption: var(--font-size-xs);
+  --font-size-label: var(--font-size-sm);
+  --font-size-body: var(--font-size-base);
+  --font-size-heading: var(--font-size-lg);
+  --font-size-display: var(--font-size-2xl);
+}
+
+/* ============================================
+   FONT WEIGHTS - RETRO THEME (DEFAULT)
+   ============================================ */
+
+:root {
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;   /* Not typically available in VT323 */
+  --font-weight-semibold: 600; /* Not typically available in VT323 */
+  --font-weight-bold: 700;
+
+  /* Aliases */
+  --font-weight-regular: var(--font-weight-normal);
+  --font-weight-emphasis: var(--font-weight-bold);
+}
+
+/* ============================================
+   FONT WEIGHTS - MODERN THEME
+   ============================================ */
+
+.app.theme-modern {
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 600;  /* Modern uses semibold instead of bold */
+
+  --font-weight-regular: var(--font-weight-normal);
+  --font-weight-emphasis: var(--font-weight-semibold);
+}
+
+/* ============================================
+   LINE HEIGHTS - RETRO THEME (DEFAULT)
+   ============================================ */
+
+:root {
+  --line-height-tight: 1.2;    /* Headings, displays */
+  --line-height-base: 1.5;     /* Body text, DEFAULT */
+  --line-height-relaxed: 1.8;  /* Long-form content */
+
+  /* Aliases */
+  --line-height-heading: var(--line-height-tight);
+  --line-height-body: var(--line-height-base);
+  --line-height-prose: var(--line-height-relaxed);
+}
+
+/* ============================================
+   LINE HEIGHTS - MODERN THEME
+   Slightly adjusted for better readability
+   ============================================ */
+
+.app.theme-modern {
+  --line-height-tight: 1.3;    /* Headings (slightly more open) */
+  --line-height-base: 1.6;     /* Body text (more spacious) */
+  --line-height-relaxed: 1.8;  /* Long-form content (same) */
+
+  --line-height-heading: var(--line-height-tight);
+  --line-height-body: var(--line-height-base);
+  --line-height-prose: var(--line-height-relaxed);
+}
+
+/* ============================================
+   LETTER SPACING
+   ============================================ */
+
+:root {
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.05em;
+  --letter-spacing-wider: 0.1em;
+
+  /* Default letter spacing for retro theme */
+  --letter-spacing-base: var(--letter-spacing-wide);  /* Retro: slightly wide for terminal feel */
+}
+
+.app.theme-modern {
+  --letter-spacing-base: var(--letter-spacing-normal);  /* Modern: normal spacing */
+}
+
+/* ============================================
+   FONT FAMILIES - MINIMALIST THEME
+   System font stack for maximum readability
+   ============================================ */
+
+.app.theme-minimalist {
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Helvetica Neue', sans-serif;
+  --font-secondary: 'SF Mono', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+  --font-fallback: system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
+
+  --font-family-primary: var(--font-primary);
+  --font-family-secondary: var(--font-secondary);
+  --font-family-mono: var(--font-mono);
+}
+
+/* ============================================
+   FONT SIZES - MINIMALIST THEME
+   Standard web sizes for system fonts
+   ============================================ */
+
+.app.theme-minimalist {
+  /* Type Scale */
+  --font-size-xs: 11px;    /* 0.6875rem - Tiny labels */
+  --font-size-sm: 13px;    /* 0.8125rem - Small text */
+  --font-size-base: 15px;  /* 0.9375rem - Body text */
+  --font-size-md: 17px;    /* 1.0625rem - Subheadings */
+  --font-size-lg: 19px;    /* 1.1875rem - Headings */
+  --font-size-xl: 22px;    /* 1.375rem - Large headings */
+  --font-size-2xl: 26px;   /* 1.625rem - Display */
+  --font-size-3xl: 32px;   /* 2rem - Hero */
+
+  /* Aliases */
+  --font-size-caption: var(--font-size-xs);
+  --font-size-label: var(--font-size-sm);
+  --font-size-body: var(--font-size-base);
+  --font-size-heading: var(--font-size-lg);
+  --font-size-display: var(--font-size-2xl);
+}
+
+/* ============================================
+   FONT WEIGHTS - MINIMALIST THEME
+   ============================================ */
+
+.app.theme-minimalist {
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 500;  /* Minimalist uses medium weight, not bold */
+
+  --font-weight-regular: var(--font-weight-normal);
+  --font-weight-emphasis: var(--font-weight-medium);
+}
+
+/* ============================================
+   LINE HEIGHTS - MINIMALIST THEME
+   Generous line heights for maximum readability
+   ============================================ */
+
+.app.theme-minimalist {
+  --line-height-tight: 1.4;    /* Headings */
+  --line-height-base: 1.6;     /* Body text */
+  --line-height-relaxed: 1.8;  /* Long-form */
+
+  --line-height-heading: var(--line-height-tight);
+  --line-height-body: var(--line-height-base);
+  --line-height-prose: var(--line-height-relaxed);
+}
+
+/* ============================================
+   LETTER SPACING - MINIMALIST THEME
+   ============================================ */
+
+.app.theme-minimalist {
+  --letter-spacing-base: var(--letter-spacing-normal);  /* Normal spacing */
+}
+
+/* ============================================
+   TEXT TRANSFORM UTILITIES
+   ============================================ */
+
+:root {
+  /* Not tokenized as these are typically applied directly via utility classes */
+  /* But defined here for reference */
+  /*
+  .uppercase { text-transform: uppercase; }
+  .lowercase { text-transform: lowercase; }
+  .capitalize { text-transform: capitalize; }
+  */
+}
+
+/* ============================================
+   USAGE EXAMPLES
+   ============================================
+
+   Basic text:
+   .my-component {
+     font-family: var(--font-family-primary);
+     font-size: var(--font-size-base);
+     line-height: var(--line-height-base);
+     font-weight: var(--font-weight-normal);
+   }
+
+   Heading:
+   .heading {
+     font-family: var(--font-family-primary);
+     font-size: var(--font-size-lg);
+     line-height: var(--line-height-tight);
+     font-weight: var(--font-weight-bold);
+   }
+
+   Caption/label:
+   .caption {
+     font-family: var(--font-family-secondary);
+     font-size: var(--font-size-caption);
+     line-height: var(--line-height-base);
+   }
+
+   Terminal text (with letter spacing):
+   .terminal-text {
+     font-family: var(--font-family-mono);
+     font-size: var(--font-size-base);
+     letter-spacing: var(--letter-spacing-base);
+   }
+
+   ============================================ */

@@ -1,0 +1,383 @@
+/**
+ * Cyclone Design Tokens - Effects
+ * Shadows, glows, animations, transitions, and visual effects
+ *
+ * CRT Effects (Retro Only):
+ *   - Phosphor glow (multi-layer text/box shadows)
+ *   - Scanlines (horizontal line overlay)
+ *   - Phosphor persistence (glow fade-in on state changes)
+ *
+ * Modern Effects:
+ *   - Subtle shadows for depth
+ *   - No glow or CRT effects
+ */
+
+/* ============================================
+   CRT EFFECTS - RETRO THEME (DEFAULT)
+   Phosphor glow system for authentic terminal feel
+   ============================================ */
+
+:root {
+  /* Scanline Overlay */
+  --scanline-opacity: 0.04;      /* Subtle 4% scanlines */
+
+  /* Phosphor Glow Intensities */
+  --glow-intensity-sm: 1px;      /* Subtle text glow */
+  --glow-intensity-md: 2px;      /* Standard UI element glow */
+  --glow-intensity-lg: 4px;      /* Emphasized elements */
+  --glow-intensity-xl: 6px;      /* Active/selected states */
+
+  /* Phosphor Persistence Duration */
+  --phosphor-persistence: 150ms; /* Afterglow fade-in duration */
+
+  /* Multi-layer Phosphor Glows (Text/Box Shadows) */
+  --phosphor-glow-sm:
+    0 0 var(--glow-intensity-sm) var(--color-primary);
+
+  --phosphor-glow-md:
+    0 0 var(--glow-intensity-sm) var(--color-primary),
+    0 0 var(--glow-intensity-md) var(--color-primary);
+
+  --phosphor-glow-lg:
+    0 0 var(--glow-intensity-sm) var(--color-primary),
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary);
+
+  --phosphor-glow-xl:
+    0 0 var(--glow-intensity-sm) var(--color-primary),
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary),
+    0 0 var(--glow-intensity-xl) var(--color-highlight);
+
+  /* Default glow for text */
+  --phosphor-glow: var(--phosphor-glow-sm);
+
+  /* Box Glows for Interactive Elements */
+  --box-glow-sm: 0 0 var(--glow-intensity-sm) var(--color-primary);
+
+  --box-glow-md:
+    0 0 var(--glow-intensity-md) var(--color-primary);
+
+  --box-glow-lg:
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary);
+
+  --box-glow-xl:
+    0 0 var(--glow-intensity-md) var(--color-primary),
+    0 0 var(--glow-intensity-lg) var(--color-primary),
+    0 0 var(--glow-intensity-xl) var(--color-highlight);
+
+  /* Highlight Glows (for selected/focused states) */
+  --glow-highlight:
+    0 0 var(--glow-intensity-md) var(--color-highlight),
+    0 0 var(--glow-intensity-lg) var(--color-highlight);
+
+  --glow-error:
+    0 0 var(--glow-intensity-sm) var(--color-error);
+
+  --glow-success:
+    0 0 var(--glow-intensity-sm) var(--color-success);
+}
+
+/* ============================================
+   EFFECTS - MODERN THEME
+   No CRT effects, subtle shadows instead
+   ============================================ */
+
+.app.theme-modern {
+  /* Disable all CRT effects */
+  --scanline-opacity: 0;
+  --glow-intensity-sm: 0px;
+  --glow-intensity-md: 0px;
+  --glow-intensity-lg: 0px;
+  --glow-intensity-xl: 0px;
+  --phosphor-persistence: 0ms;
+
+  /* Disable phosphor glows */
+  --phosphor-glow-sm: none;
+  --phosphor-glow-md: none;
+  --phosphor-glow-lg: none;
+  --phosphor-glow-xl: none;
+  --phosphor-glow: none;
+
+  /* Modern box shadows (subtle highlights instead of glows) */
+  --box-glow-sm: 0 0 2px rgba(79, 195, 247, 0.2);
+  --box-glow-md: 0 0 4px rgba(79, 195, 247, 0.3);
+  --box-glow-lg: 0 0 6px rgba(79, 195, 247, 0.4);
+  --box-glow-xl: 0 0 8px rgba(79, 195, 247, 0.5);
+
+  /* Modern state glows */
+  --glow-highlight: 0 0 4px rgba(74, 158, 255, 0.4);
+  --glow-error: 0 0 2px rgba(255, 107, 107, 0.3);
+  --glow-success: 0 0 2px rgba(74, 158, 255, 0.3);
+}
+
+/* ============================================
+   SHADOWS - RETRO THEME (DEFAULT)
+   Green-tinted shadows
+   ============================================ */
+
+:root {
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 255, 0, 0.1);
+  --shadow-md: 0 2px 4px rgba(0, 255, 0, 0.15);
+  --shadow-lg: 0 4px 8px rgba(0, 255, 0, 0.2);
+  --shadow-xl: 0 8px 16px rgba(0, 255, 0, 0.25);
+  --shadow-2xl: 0 16px 32px rgba(0, 255, 0, 0.3);
+
+  /* Inset Shadows */
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 255, 0, 0.1);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 255, 0, 0.15);
+
+  /* Combined Shadow + Glow */
+  --shadow-glow: var(--phosphor-glow-md);
+  --shadow-glow-lg: var(--phosphor-glow-lg);
+
+  /* Focus Shadow */
+  --shadow-focus:
+    inset 0 0 0 2px var(--color-focus),
+    0 0 var(--glow-intensity-md) var(--color-focus);
+}
+
+/* ============================================
+   SHADOWS - MODERN THEME
+   Black/gray shadows for depth
+   ============================================ */
+
+.app.theme-modern {
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.45);
+  --shadow-2xl: 0 16px 32px rgba(0, 0, 0, 0.5);
+
+  /* Inset Shadows */
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-inset-md: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  /* Modern glow instead of phosphor */
+  --shadow-glow: 0 0 2px rgba(79, 195, 247, 0.3);
+  --shadow-glow-lg: 0 0 4px rgba(79, 195, 247, 0.4);
+
+  /* Focus Shadow */
+  --shadow-focus:
+    inset 0 0 0 2px var(--color-focus),
+    0 0 4px rgba(74, 158, 255, 0.4);
+}
+
+/* ============================================
+   ANIMATION DURATIONS - RETRO THEME (DEFAULT)
+   Slightly slower for nostalgic feel
+   ============================================ */
+
+:root {
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+  --duration-slowest: 750ms;
+
+  /* Aliases */
+  --duration-quick: var(--duration-fast);
+  --duration-normal: var(--duration-base);
+}
+
+/* ============================================
+   ANIMATION DURATIONS - MODERN THEME
+   Snappier for responsive feel
+   ============================================ */
+
+.app.theme-modern {
+  --duration-instant: 0ms;
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+  --duration-slowest: 600ms;
+
+  --duration-quick: var(--duration-fast);
+  --duration-normal: var(--duration-base);
+}
+
+/* ============================================
+   EASING FUNCTIONS
+   Shared across both themes
+   ============================================ */
+
+:root {
+  /* Standard Easing */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Specialized Easing */
+  --ease-in-back: cubic-bezier(0.6, -0.28, 0.735, 0.045);
+  --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Elastic (for playful animations) */
+  --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+
+  /* Default easing */
+  --ease-default: var(--ease-in-out);
+}
+
+/* ============================================
+   TRANSITION PRESETS
+   Pre-composed transition values
+   ============================================ */
+
+:root {
+  /* Basic Transitions */
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-base: var(--duration-base) var(--ease-in-out);
+  --transition-slow: var(--duration-slow) var(--ease-in-out);
+
+  /* Property-Specific Transitions */
+  --transition-color: color var(--transition-base);
+  --transition-background: background-color var(--transition-base);
+  --transition-border: border-color var(--transition-base);
+  --transition-opacity: opacity var(--transition-fast);
+  --transition-transform: transform var(--transition-base);
+  --transition-shadow: box-shadow var(--transition-base);
+
+  /* Combined Transitions */
+  --transition-all: all var(--transition-base);
+  --transition-colors:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.app.theme-modern {
+  /* Modern uses ease-out for more responsive feel */
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-base: var(--duration-base) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-out);
+
+  /* Update property transitions */
+  --transition-color: color var(--transition-base);
+  --transition-background: background-color var(--transition-base);
+  --transition-border: border-color var(--transition-base);
+  --transition-opacity: opacity var(--transition-fast);
+  --transition-transform: transform var(--transition-base);
+  --transition-shadow: box-shadow var(--transition-base);
+
+  --transition-all: all var(--transition-base);
+  --transition-colors:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+/* ============================================
+   OPACITY LEVELS
+   ============================================ */
+
+:root {
+  --opacity-disabled: 0.4;       /* Retro: more dimmed */
+  --opacity-muted: 0.6;
+  --opacity-hover: 0.8;
+  --opacity-full: 1;
+  --opacity-semi: 0.5;
+  --opacity-faint: 0.2;
+}
+
+.app.theme-modern {
+  --opacity-disabled: 0.5;       /* Modern: less dimmed */
+  --opacity-muted: 0.7;
+  --opacity-hover: 0.9;
+  /* Others remain the same */
+}
+
+/* ============================================
+   CURSOR ANIMATIONS
+   ============================================ */
+
+:root {
+  --cursor-blink-duration: 1000ms;  /* Retro: blinking cursor */
+}
+
+.app.theme-modern {
+  --cursor-blink-duration: 0ms;     /* Modern: no cursor blink */
+}
+
+/* ============================================
+   BACKDROP FILTERS (Modern only)
+   ============================================ */
+
+.app.theme-modern {
+  --backdrop-blur-sm: blur(4px);
+  --backdrop-blur-md: blur(8px);
+  --backdrop-blur-lg: blur(16px);
+  --backdrop-saturate: saturate(180%);
+}
+
+/* ============================================
+   ACCESSIBILITY - REDUCED MOTION
+   Disable all animations for users who prefer reduced motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-slower: 0ms;
+    --duration-slowest: 0ms;
+    --cursor-blink-duration: 0ms;
+    --phosphor-persistence: 0ms;
+
+    --transition-fast: 0ms;
+    --transition-base: 0ms;
+    --transition-slow: 0ms;
+    --transition-all: 0ms;
+    --transition-colors: 0ms;
+  }
+}
+
+/* ============================================
+   USAGE EXAMPLES
+   ============================================
+
+   Text with phosphor glow (Retro):
+   .terminal-text {
+     color: var(--color-primary);
+     text-shadow: var(--phosphor-glow);
+   }
+
+   Button with hover effect:
+   .button {
+     transition: var(--transition-colors);
+     box-shadow: var(--shadow-sm);
+   }
+
+   .button:hover {
+     box-shadow: var(--box-glow-md);
+   }
+
+   Selected state with glow:
+   .selected {
+     box-shadow: var(--glow-highlight);
+     transition: box-shadow var(--phosphor-persistence);
+   }
+
+   Focus state:
+   .input:focus {
+     box-shadow: var(--shadow-focus);
+   }
+
+   Disabled state:
+   .disabled {
+     opacity: var(--opacity-disabled);
+   }
+
+   Modal backdrop (Modern):
+   .modal-backdrop {
+     backdrop-filter: var(--backdrop-blur-md) var(--backdrop-saturate);
+   }
+
+   ============================================ */

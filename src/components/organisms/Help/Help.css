@@ -28,7 +28,7 @@
   max-height: 500px;
   overflow-y: auto;
   font-family: 'VT323', 'Courier New', monospace;
-  color: var(--color-primary, #00ff00);
+  color: var(--color-primary);
 }
 
 .help-section {
@@ -37,7 +37,7 @@
 
 .help-section-title {
   font-size: 20px;
-  color: var(--color-highlight, #66ff66);
+  color: var(--color-highlight);
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -49,8 +49,8 @@
 
 .help-category-title {
   font-size: 16px;
-  color: var(--color-secondary, #008800);
-  margin-bottom: 8px;
+  color: var(--color-secondary);
+  margin-bottom: var(--spacing-sm)
   margin-left: 10px;
 }
 
@@ -66,13 +66,13 @@
 
 .help-shortcut-key {
   width: 200px;
-  color: var(--color-highlight, #66ff66);
+  color: var(--color-highlight);
   padding-right: 20px;
   font-weight: bold;
 }
 
 .help-shortcut-desc {
-  color: var(--color-primary, #00ff00);
+  color: var(--color-primary);
 }
 
 .help-list {
@@ -82,20 +82,20 @@
 }
 
 .help-list li {
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-sm)
   line-height: 1.6;
 }
 
 .help-list li::before {
   content: '▸ ';
-  color: var(--color-secondary, #008800);
-  margin-right: 8px;
+  color: var(--color-secondary);
+  margin-right: var(--spacing-sm)
 }
 
 .help-text {
   margin-left: 20px;
   line-height: 1.8;
-  color: var(--color-primary, #00ff00);
+  color: var(--color-primary);
 }
 
 .help-actions {
@@ -103,7 +103,7 @@
   justify-content: center;
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid var(--color-grid, #003300);
+  border-top: 1px solid var(--color-grid);
 }
 
 /* Scrollbar styling for terminal theme */
@@ -112,15 +112,15 @@
 }
 
 .help-content::-webkit-scrollbar-track {
-  background: var(--color-bg, #000000);
-  border: 1px solid var(--color-grid, #003300);
+  background: var(--color-bg);
+  border: 1px solid var(--color-grid);
 }
 
 .help-content::-webkit-scrollbar-thumb {
-  background: var(--color-secondary, #008800);
-  border: 1px solid var(--color-primary, #00ff00);
+  background: var(--color-secondary);
+  border: 1px solid var(--color-primary);
 }
 
 .help-content::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary, #00ff00);
+  background: var(--color-primary);
 }

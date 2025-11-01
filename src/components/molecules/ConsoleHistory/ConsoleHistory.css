@@ -1,0 +1,97 @@
+/**
+ * Cyclone - ConsoleHistory Styles
+ * Terminal-style command history display
+ */
+
+.console-history {
+  font-family: var(--font-mono, 'VT323', monospace);
+  font-size: var(--font-size-xs, 14px);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg);
+  overflow-y: auto;
+  max-height: 150px; /* Collapsed state */
+  transition: max-height 0.3s ease;
+}
+
+.console-history--expanded {
+  max-height: 400px; /* Expanded state */
+}
+
+.console-history__entry {
+  margin-bottom: var(--spacing-sm);
+}
+
+.console-history__entry:last-child {
+  margin-bottom: 0;
+}
+
+.console-history__input {
+  display: flex;
+  gap: var(--spacing-sm);
+  color: var(--color-text-dim);
+}
+
+.console-history__prompt {
+  color: var(--color-primary);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.console-history__command {
+  color: var(--color-text-dim);
+  word-break: break-all;
+}
+
+.console-history__output {
+  padding-left: calc(var(--spacing-sm) + 1ch); /* Indent to align with command */
+  color: var(--color-info);
+  margin-top: 2px;
+  word-break: break-word;
+}
+
+.console-history__error {
+  padding-left: calc(var(--spacing-sm) + 1ch);
+  color: var(--color-error);
+  margin-top: 2px;
+  word-break: break-word;
+}
+
+/* Custom scrollbar for terminal aesthetic */
+.console-history::-webkit-scrollbar {
+  width: 8px;
+}
+
+.console-history::-webkit-scrollbar-track {
+  background: var(--color-bg-dark);
+}
+
+.console-history::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.console-history::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Modern theme overrides */
+.theme-modern .console-history__input {
+  color: #888;
+}
+
+.theme-modern .console-history__prompt {
+  color: var(--color-accent);
+  opacity: 0.6;
+}
+
+.theme-modern .console-history__command {
+  color: #c0c0c0;
+}
+
+.theme-modern .console-history__output {
+  color: var(--color-info);
+}
+
+.theme-modern .console-history::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}

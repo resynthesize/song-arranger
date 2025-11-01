@@ -1,0 +1,91 @@
+/**
+ * Cyclone - BarParametersRow Styles
+ */
+
+.barParametersRow {
+  display: flex;
+  width: 100%;
+  border: 1px solid var(--grid-line-color, #003300);
+  background: var(--bg-primary, #000000);
+  position: relative;
+}
+
+.barCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--grid-line-color, #003300);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+  position: relative;
+}
+
+.barCell:last-child {
+  border-right: none;
+}
+
+.barCell:hover {
+  background: var(--hover-bg, #001100);
+}
+
+.barCell.currentBar {
+  background: var(--selection-bg, #002200);
+  box-shadow: inset 0 0 0 2px var(--primary-color, #00ff00);
+}
+
+.barCell.active .valueDisplay {
+  color: var(--primary-color, #00ff00);
+  font-weight: bold;
+}
+
+.valueDisplay {
+  font-family: var(--font-mono, 'VT323', 'Courier New', monospace);
+  font-size: var(--font-size-lg, 24px);
+  color: var(--text-secondary, #00ff0088);
+  user-select: none;
+  padding: 4px 8px;
+  border-radius: 2px;
+  transition: all 0.1s ease;
+}
+
+.valueDisplay:hover {
+  background: var(--hover-bg, #001100);
+  color: var(--primary-color, #00ff00);
+  transform: scale(1.1);
+}
+
+/* CRT phosphor glow effect */
+.valueDisplay {
+  text-shadow: 0 0 4px var(--primary-color-alpha, rgba(0, 255, 0, 0.3));
+}
+
+/* Inline input for editing */
+.valueInput {
+  font-family: var(--font-mono, 'VT323', 'Courier New', monospace);
+  font-size: var(--font-size-lg, 24px);
+  color: var(--primary-color, #00ff00);
+  background: var(--bg-primary, #000000);
+  border: 2px solid var(--primary-color, #00ff00);
+  border-radius: 2px;
+  padding: 4px 8px;
+  width: 80%;
+  text-align: center;
+  outline: none;
+  box-shadow: 0 0 8px var(--primary-color-alpha, rgba(0, 255, 0, 0.5));
+  text-shadow: 0 0 4px var(--primary-color-alpha, rgba(0, 255, 0, 0.3));
+}
+
+.valueInput:focus {
+  box-shadow: 0 0 12px var(--primary-color-alpha, rgba(0, 255, 0, 0.8));
+}
+
+/* Remove spinner buttons from number input */
+.valueInput::-webkit-inner-spin-button,
+.valueInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.valueInput[type='number'] {
+  -moz-appearance: textfield;
+}

@@ -5,6 +5,7 @@
  */
 
 import { useMemo, useRef, useEffect } from 'react';
+import { logger } from '@/utils/debug';
 import type { KeyboardContext } from '@/utils/keyboard';
 import { getShortcutsForContext, formatShortcut } from '@/utils/keyboard';
 import './CommandFooter.css';
@@ -53,7 +54,7 @@ const CommandFooter = ({ hasSelection, selectionCount, isEditing }: CommandFoote
     if (footerRef.current) {
       const rect = footerRef.current.getBoundingClientRect();
       const computedStyle = window.getComputedStyle(footerRef.current);
-      console.log('[CommandFooter] Dimensions:', {
+      logger.debug('[CommandFooter] Dimensions:', {
         rect: {
           top: rect.top,
           bottom: rect.bottom,

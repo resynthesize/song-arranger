@@ -1,0 +1,305 @@
+/**
+ * TrackSettingsDialog Styles
+ * Retro terminal aesthetic with CRT effects
+ */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dialog {
+  background: var(--color-bg);
+  border: 2px solid var(--color-primary);
+  box-shadow:
+    0 0 20px rgba(0, 255, 0, 0.3),
+    inset 0 0 40px rgba(0, 255, 0, 0.05);
+  width: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Share Tech Mono', 'VT323', monospace;
+  color: var(--color-primary);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-grid);
+  background: rgba(0, 255, 0, 0.05);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: normal;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  opacity: 1;
+}
+
+.content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section {
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--color-grid);
+  padding: var(--spacing-md);
+  background: rgba(0, 255, 0, 0.02);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionHeader {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  opacity: 0.8;
+  border-bottom: 1px solid var(--color-grid);
+  padding-bottom: var(--spacing-xs);
+}
+
+.field {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field label {
+  min-width: 140px;
+  font-size: 13px;
+}
+
+.field input[type="checkbox"] {
+  margin-right: var(--spacing-sm);
+}
+
+.input,
+.inputSmall {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--color-grid);
+  color: var(--color-primary);
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input {
+  flex: 1;
+}
+
+.inputSmall {
+  width: 60px;
+  text-align: center;
+}
+
+.input:focus,
+.inputSmall:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+}
+
+.autocompleteWrapper {
+  position: relative;
+  flex: 1;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid var(--color-primary);
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 10;
+  margin-top: var(--spacing-xs);
+  box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
+}
+
+.suggestion {
+  padding: var(--spacing-sm) 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.suggestion:hover {
+  background: rgba(0, 255, 0, 0.1);
+}
+
+.slider {
+  flex: 1;
+  height: 4px;
+  background: rgba(0, 255, 0, 0.2);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--color-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--color-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
+}
+
+.slider:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.colorInput {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.colorInput input[type="color"] {
+  width: 60px;
+  height: 36px;
+  border: 1px solid var(--color-grid);
+  background: transparent;
+  cursor: pointer;
+}
+
+.colorPreview {
+  width: 60px;
+  height: 36px;
+  border: 1px solid var(--color-grid);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--color-grid);
+  background: rgba(0, 255, 0, 0.05);
+}
+
+.buttonCancel,
+.buttonSave {
+  padding: var(--spacing-sm) 20px;
+  font-family: inherit;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-grid);
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--color-primary);
+}
+
+.buttonCancel:hover,
+.buttonSave:hover {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.3);
+}
+
+.buttonSave {
+  background: rgba(0, 255, 0, 0.15);
+}
+
+.buttonSave:hover {
+  background: rgba(0, 255, 0, 0.25);
+}
+
+/* CRT theme enhancements */
+:global(.theme-crt) .dialog {
+  box-shadow:
+    0 0 30px rgba(0, 255, 0, 0.5),
+    inset 0 0 60px rgba(0, 255, 0, 0.1);
+}
+
+:global(.theme-crt) .input:focus,
+:global(.theme-crt) .inputSmall:focus {
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.5);
+}
+
+:global(.theme-crt) .buttonSave:hover {
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.5);
+}

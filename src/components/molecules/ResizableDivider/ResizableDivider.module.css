@@ -1,8 +1,8 @@
 .divider {
   height: 6px;
-  background-color: var(--color-bg-secondary, #1a1a1a);
-  border-top: 1px solid var(--color-border, #333);
-  border-bottom: 1px solid var(--color-border, #333);
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,18 +13,18 @@
 }
 
 .divider:focus {
-  outline: 2px solid var(--color-primary, #00ff00);
+  outline: 2px solid var(--color-primary);
   outline-offset: -2px;
 }
 
 .divider.hover {
   cursor: ns-resize;
-  background-color: var(--color-bg-hover, #2a2a2a);
+  background-color: var(--color-bg-hover);
 }
 
 .divider.dragging {
   cursor: ns-resize;
-  background-color: var(--color-primary-dark, #006600);
+  background-color: var(--color-primary-dark);
 }
 
 .handle {
@@ -37,7 +37,7 @@
 
 .dots {
   display: flex;
-  gap: 4px;
+  gap: var(--spacing-xs);
   align-items: center;
 }
 
@@ -45,16 +45,16 @@
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background-color: var(--color-text-secondary, #666);
+  background-color: var(--color-text-secondary);
   transition: background-color 0.2s ease;
 }
 
 .hover .dot {
-  background-color: var(--color-text, #999);
+  background-color: var(--color-text);
 }
 
 .dragging .dot {
-  background-color: var(--color-primary, #00ff00);
+  background-color: var(--color-primary);
 }
 
 /* Smooth transition for visual feedback */
@@ -68,7 +68,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--color-border, #333) 50%,
+    var(--color-border) 50%,
     transparent
   );
   opacity: 0.5;
@@ -84,7 +84,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--color-border, #333) 50%,
+    var(--color-border) 50%,
     transparent
   );
   opacity: 0.5;
@@ -100,7 +100,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--color-primary, #00ff00) 50%,
+    var(--color-primary) 50%,
     transparent
   );
   opacity: 1;

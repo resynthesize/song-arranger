@@ -4,11 +4,12 @@
  */
 
 import type { Pattern, Track, TimelineState } from '@/types';
+import type { CirklonSongData } from './cirklon/types';
 import { logger } from './debug';
 import { generateId } from './id';
 
-// Current data version - v2.0.0 is a breaking change (Lane→Track, Clip→Pattern)
-const DATA_VERSION = '2.0.0';
+// Current data version - v3.0.0 uses CKS format for storage
+const DATA_VERSION = '3.0.0';
 
 // localStorage key prefixes
 const PROJECT_KEY_PREFIX = 'project:';
@@ -16,6 +17,7 @@ const TEMPLATE_ID_KEY = 'template-id';
 
 /**
  * Project file structure stored in localStorage
+ * Supports both v3 (CKS) and legacy v2 formats
  */
 export interface ProjectFile {
   id: string;
@@ -24,8 +26,11 @@ export interface ProjectFile {
   updatedAt: string;
   isTemplate: boolean;
   data: {
-    patterns: Pattern[];
-    tracks: Track[];
+    // v3 format (CKS)
+    songData?: CirklonSongData;
+    // Legacy v2 format
+    patterns?: Pattern[];
+    tracks?: Track[];
     timeline: TimelineState;
     version: string;
   };
@@ -33,12 +38,16 @@ export interface ProjectFile {
 
 /**
  * Input parameters for saving a project
+ * Supports both v3 (CKS) and legacy v2 formats
  */
 export interface SaveProjectParams {
   id?: string;
   name: string;
-  patterns: Pattern[];
-  tracks: Track[];
+  // v3 format (CKS)
+  songData?: CirklonSongData;
+  // Legacy v2 format
+  patterns?: Pattern[];
+  tracks?: Track[];
   timeline: TimelineState;
   isTemplate?: boolean;
 }
@@ -62,6 +71,7 @@ export const saveProject = (params: SaveProjectParams): string => {
   const {
     id: existingId,
     name,
+    songData,
     patterns,
     tracks,
     timeline,
@@ -95,8 +105,9 @@ export const saveProject = (params: SaveProjectParams): string => {
     updatedAt: now,
     isTemplate: templateStatus,
     data: {
-      patterns,
-      tracks,
+      songData, // v3 CKS format
+      patterns, // Legacy v2 format
+      tracks, // Legacy v2 format
       timeline,
       version: DATA_VERSION,
     },
@@ -214,6 +225,7 @@ export const setTemplateProject = (projectId: string): void => {
       saveProject({
         id: oldTemplate.id,
         name: oldTemplate.name,
+        songData: oldTemplate.data.songData,
         patterns: oldTemplate.data.patterns,
         tracks: oldTemplate.data.tracks,
         timeline: oldTemplate.data.timeline,
@@ -231,6 +243,7 @@ export const setTemplateProject = (projectId: string): void => {
     saveProject({
       id: project.id,
       name: project.name,
+      songData: project.data.songData,
       patterns: project.data.patterns,
       tracks: project.data.tracks,
       timeline: project.data.timeline,

@@ -11,7 +11,7 @@ import themeReducer, {
 
 describe('themeSlice', () => {
   const initialState: ThemeState = {
-    current: 'modern',
+    current: 'retro',
   };
 
   describe('initial state', () => {
@@ -23,40 +23,58 @@ describe('themeSlice', () => {
 
   describe('setTheme', () => {
     it('should set theme to retro', () => {
-      const state = themeReducer(initialState, setTheme('retro'));
+      const modernState: ThemeState = { current: 'modern' };
+      const state = themeReducer(modernState, setTheme('retro'));
       expect(state.current).toBe('retro');
     });
 
     it('should set theme to modern', () => {
-      const retroState: ThemeState = { current: 'retro' };
-      const state = themeReducer(retroState, setTheme('modern'));
+      const state = themeReducer(initialState, setTheme('modern'));
       expect(state.current).toBe('modern');
+    });
+
+    it('should set theme to minimalist', () => {
+      const state = themeReducer(initialState, setTheme('minimalist'));
+      expect(state.current).toBe('minimalist');
     });
   });
 
   describe('toggleTheme', () => {
-    it('should toggle from modern to retro', () => {
-      const state = themeReducer(initialState, toggleTheme());
-      expect(state.current).toBe('retro');
-    });
-
     it('should toggle from retro to modern', () => {
-      const retroState: ThemeState = { current: 'retro' };
-      const state = themeReducer(retroState, toggleTheme());
+      const state = themeReducer(initialState, toggleTheme());
       expect(state.current).toBe('modern');
     });
 
-    it('should toggle back and forth multiple times', () => {
+    it('should toggle from modern to minimalist', () => {
+      const modernState: ThemeState = { current: 'modern' };
+      const state = themeReducer(modernState, toggleTheme());
+      expect(state.current).toBe('minimalist');
+    });
+
+    it('should toggle from minimalist to retro', () => {
+      const minimalistState: ThemeState = { current: 'minimalist' };
+      const state = themeReducer(minimalistState, toggleTheme());
+      expect(state.current).toBe('retro');
+    });
+
+    it('should cycle through all themes', () => {
       let state = initialState;
 
-      state = themeReducer(state, toggleTheme());
-      expect(state.current).toBe('retro');
-
+      // retro -> modern
       state = themeReducer(state, toggleTheme());
       expect(state.current).toBe('modern');
 
+      // modern -> minimalist
+      state = themeReducer(state, toggleTheme());
+      expect(state.current).toBe('minimalist');
+
+      // minimalist -> retro
       state = themeReducer(state, toggleTheme());
       expect(state.current).toBe('retro');
+
+      // retro -> modern (cycle complete)
+      state = themeReducer(state, toggleTheme());
+      expect(state.current).toBe('modern');
     });
   });
 });

@@ -1,0 +1,210 @@
+/**
+ * Cyclone - Song Data Viewer Styles
+ * Right-side panel with JSON display
+ */
+
+.viewer {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-secondary, var(--color-bg-elevated));
+  border-left: var(--border-width-thin) solid var(--color-border, var(--color-grid));
+  color: var(--color-text, var(--color-text-primary));
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-tertiary, var(--color-bg-hover));
+  border-bottom: var(--border-width-thin) solid var(--color-border, var(--color-grid));
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text, var(--color-text-primary));
+}
+
+.metadata {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary, var(--color-secondary));
+}
+
+.shortcut {
+  font-family: var(--font-primary);
+  font-weight: 500;
+  color: var(--color-accent, var(--color-highlight));
+}
+
+.closeButton {
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--color-bg-primary, var(--color-bg));
+  color: var(--color-text, var(--color-text-primary));
+  border: var(--border-width-thin) solid var(--color-border, var(--color-grid));
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.closeButton:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover, var(--color-secondary));
+}
+
+.closeButton:active {
+  background: var(--color-bg-active);
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--spacing-md);
+}
+
+/* Tree view */
+.tree {
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--color-text, var(--color-primary));
+  user-select: text;
+}
+
+.treeNode {
+  margin: 0;
+  padding: 2px 0;
+}
+
+.expandable {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: background-color var(--transition-fast);
+  padding: 2px var(--spacing-xs);
+  margin-left: -4px;
+  border-radius: 2px;
+}
+
+.expandable:hover {
+  background-color: var(--color-bg-hover, rgba(0, 255, 0, 0.1));
+}
+
+.arrow {
+  display: inline-block;
+  width: 12px;
+  color: var(--color-secondary, var(--color-text-secondary));
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.key {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.string {
+  color: var(--color-accent);
+}
+
+.number {
+  color: var(--color-highlight);
+}
+
+.boolean {
+  color: var(--color-warning);
+}
+
+.null,
+.undefined {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+.preview {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+.bracket {
+  color: var(--color-text, var(--color-primary));
+}
+
+.comma {
+  color: var(--color-muted);
+}
+
+/* Change highlights with fadeout animations */
+.highlight-added {
+  animation: fadeout-green 2s ease-out forwards;
+  background-color: rgba(0, 255, 0, 0.3);
+}
+
+.highlight-modified {
+  animation: fadeout-yellow 2s ease-out forwards;
+  background-color: rgba(255, 255, 0, 0.3);
+}
+
+.highlight-removed {
+  animation: fadeout-red 2s ease-out forwards;
+  background-color: rgba(255, 0, 0, 0.3);
+}
+
+@keyframes fadeout-green {
+  0% {
+    background-color: rgba(0, 255, 0, 0.4);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes fadeout-yellow {
+  0% {
+    background-color: rgba(255, 255, 0, 0.4);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes fadeout-red {
+  0% {
+    background-color: rgba(255, 0, 0, 0.4);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .closeButton {
+    transition: none;
+  }
+
+  .highlight-added,
+  .highlight-modified,
+  .highlight-removed {
+    animation: none;
+    background-color: transparent;
+  }
+}

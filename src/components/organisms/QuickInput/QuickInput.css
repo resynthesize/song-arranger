@@ -23,33 +23,33 @@
 .quick-input-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md, 16px);
+  gap: var(--spacing-md);
 }
 
 .quick-input-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-sm, 8px);
+  padding: var(--spacing-sm);
   background-color: rgba(0, 255, 0, 0.05);
-  border: 1px solid var(--color-secondary, #008800);
+  border: 1px solid var(--color-secondary);
   font-family: var(--font-mono, 'VT323', monospace);
 }
 
 .quick-input-label {
-  color: var(--color-secondary, #008800);
+  color: var(--color-secondary);
   font-size: 1rem;
 }
 
 .quick-input-current {
-  color: var(--color-primary, #00ff00);
+  color: var(--color-primary);
   font-size: 1.2rem;
   font-weight: bold;
 }
 
 .quick-input-actions {
   display: flex;
-  gap: var(--spacing-sm, 8px);
+  gap: var(--spacing-sm);
   justify-content: flex-end;
 }
 

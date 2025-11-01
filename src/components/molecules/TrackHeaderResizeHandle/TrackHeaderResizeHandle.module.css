@@ -1,0 +1,56 @@
+/**
+ * TrackHeaderResizeHandle Styles
+ * Draggable divider for resizing track header width
+ */
+
+.handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 4px;
+  cursor: ew-resize;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.handle:hover {
+  width: 6px;
+}
+
+.handleLine {
+  height: 100%;
+  width: 1px;
+  background: var(--color-border);
+  opacity: 0.3;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.handle:hover .handleLine {
+  opacity: 0.7;
+  background: var(--color-accent);
+}
+
+.handle.dragging .handleLine {
+  opacity: 1;
+  background: var(--color-accent);
+  width: 2px;
+}
+
+/* Global cursor override when dragging */
+:global(body.resizing-horizontal) {
+  cursor: ew-resize !important;
+}
+
+:global(body.resizing-horizontal) * {
+  cursor: ew-resize !important;
+}
+
+/* CRT theme overrides */
+:global(.theme-crt) .handle:hover .handleLine,
+:global(.theme-crt) .handle.dragging .handleLine {
+  box-shadow: 0 0 4px var(--color-accent);
+}

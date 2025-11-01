@@ -3,19 +3,20 @@
  * Custom hook for clip-related operations (move, resize, delete, duplicate, etc.)
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
-  movePattern,
-  movePatterns,
-  resizePattern,
-  resizePatterns,
-  removePatterns,
-  updatePattern,
-  duplicatePattern,
-  duplicatePatterns,
-  updatePatternTrack,
-} from '@/store/slices/patternsSlice';
+  movePatternInTimeline,
+  movePatternsInTimeline,
+  resizePatternInTimeline,
+  resizePatternsInTimeline,
+  deletePatternsInTimeline,
+  updatePatternLabel,
+  duplicatePatternInTimeline,
+  duplicatePatternsInTimeline,
+  movePatternToTrack,
+  movePatternsToTrack,
+} from '@/store/slices/songSlice/slice';
 import {
   selectPattern,
   clearSelection,
@@ -81,12 +82,18 @@ export function usePatternOperations(
 
         // Only dispatch if there's actual movement
         if (incrementalDelta !== 0) {
-          dispatch(movePatterns({ patternIds: selectedClipIds, delta: incrementalDelta }));
+          dispatch(movePatternsInTimeline({
+            patternReactIds: selectedClipIds,
+            deltaBeats: incrementalDelta
+          }));
         }
       } else {
         // Single pattern move
         const clampedPosition = Math.max(0, newPosition);
-        dispatch(movePattern({ patternId, position: clampedPosition }));
+        dispatch(movePatternInTimeline({
+          patternReactId: patternId,
+          newPosition: clampedPosition
+        }));
         lastPositionRef.current.delete(patternId); // Clear tracking
       }
     },
@@ -99,7 +106,18 @@ export function usePatternOperations(
    */
   const handleClipResize = useCallback(
     (patternId: ID, newDuration: Duration, edge: 'left' | 'right', startDuration: Duration, startPosition: Position) => {
+      console.log('[handleClipResize] Called', {
+        patternId,
+        newDuration,
+        edge,
+        startDuration,
+        startPosition,
+        selectedClipIds,
+        isMultiSelect: selectedClipIds.includes(patternId) && selectedClipIds.length > 1
+      });
+
       if (selectedClipIds.includes(patternId) && selectedClipIds.length > 1) {
+        console.log('[handleClipResize] MULTI-SELECT PATH - ganged resize');
         // Ganged resize: calculate incremental factor from last duration
         // If this is the first resize, get the current duration from Redux
         let lastDuration = lastDurationRef.current.get(patternId);
@@ -111,9 +129,17 @@ export function usePatternOperations(
         const incrementalFactor = newDuration / lastDuration;
         lastDurationRef.current.set(patternId, newDuration);
 
+        console.log('[handleClipResize] Ganged resize factor', { lastDuration, newDuration, incrementalFactor });
+
         // Only dispatch if there's actual change
         if (incrementalFactor !== 1) {
-          dispatch(resizePatterns({ patternIds: selectedClipIds, factor: incrementalFactor }));
+          console.log('[handleClipResize] Dispatching ganged resize');
+          dispatch(resizePatternsInTimeline({
+            patternReactIds: selectedClipIds,
+            factor: incrementalFactor
+          }));
+        } else {
+          console.log('[handleClipResize] Skipping dispatch - no change in factor');
         }
 
         // If resizing from left, calculate incremental position delta
@@ -129,18 +155,39 @@ export function usePatternOperations(
           lastPositionRef.current.set(patternId, newPosition);
 
           if (incrementalPositionDelta !== 0) {
-            dispatch(movePatterns({ patternIds: selectedClipIds, delta: incrementalPositionDelta }));
+            dispatch(movePatternsInTimeline({
+              patternReactIds: selectedClipIds,
+              deltaBeats: incrementalPositionDelta
+            }));
           }
         }
       } else {
         // Single pattern resize
-        dispatch(resizePattern({ patternId, duration: newDuration }));
+        console.log('[handleClipResize] SINGLE PATTERN PATH');
+        console.log('[handleClipResize] Dispatching resizePatternInTimeline', {
+          patternReactId: patternId,
+          newDuration
+        });
+        dispatch(resizePatternInTimeline({
+          patternReactId: patternId,
+          newDuration
+        }));
 
         // If resizing from left edge, adjust position using start position
         if (edge === 'left') {
           const positionDelta = startDuration - newDuration;
           const newPosition = Math.max(0, startPosition + positionDelta);
-          dispatch(movePattern({ patternId, position: newPosition }));
+          console.log('[handleClipResize] Left edge resize - moving pattern', {
+            positionDelta,
+            newPosition,
+            startPosition,
+            startDuration,
+            newDuration
+          });
+          dispatch(movePatternInTimeline({
+            patternReactId: patternId,
+            newPosition
+          }));
         }
 
         // Clear tracking
@@ -156,7 +203,10 @@ export function usePatternOperations(
    */
   const handleClipLabelChange = useCallback(
     (patternId: ID, label: string) => {
-      dispatch(updatePattern({ patternId, updates: { label } }));
+      dispatch(updatePatternLabel({
+        patternReactId: patternId,
+        label
+      }));
     },
     [dispatch]
   );
@@ -169,10 +219,14 @@ export function usePatternOperations(
     (patternId: ID) => {
       if (selectedClipIds.includes(patternId) && selectedClipIds.length > 1) {
         // Duplicate all selected patterns
-        dispatch(duplicatePatterns(selectedClipIds));
+        dispatch(duplicatePatternsInTimeline({
+          patternReactIds: selectedClipIds
+        }));
       } else {
         // Duplicate single clip
-        dispatch(duplicatePattern(patternId));
+        dispatch(duplicatePatternInTimeline({
+          patternReactId: patternId
+        }));
       }
     },
     [dispatch, selectedClipIds]
@@ -203,7 +257,9 @@ export function usePatternOperations(
           remainingCount: remainingPatterns.length
         });
 
-        dispatch(removePatterns(selectedClipIds));
+        dispatch(deletePatternsInTimeline({
+          patternReactIds: selectedClipIds
+        }));
 
         // Try to select nearest neighbor if one exists
         if (firstDeletedPattern) {
@@ -230,7 +286,9 @@ export function usePatternOperations(
           remainingCount: remainingPatterns.length
         });
 
-        dispatch(removePatterns([patternId]));
+        dispatch(deletePatternsInTimeline({
+          patternReactIds: [patternId]
+        }));
 
         // Try to select nearest neighbor if one exists
         if (deletedPattern) {
@@ -287,14 +345,13 @@ export function usePatternOperations(
           )
         );
 
-        // Move each pattern by the constrained delta
-        clipLaneIndices.forEach(({ patternId: cId, laneIndex }) => {
-          const newLaneIndex = laneIndex + constrainedDelta;
-          const newTrack = tracks[newLaneIndex];
-          if (newTrack) {
-            dispatch(updatePatternTrack({ patternId: cId, trackId: newTrack.id }));
-          }
-        });
+        // Move all selected patterns by the constrained delta
+        if (constrainedDelta !== 0) {
+          dispatch(movePatternsToTrack({
+            patternReactIds: selectedClipIds,
+            deltaTrackIndex: constrainedDelta
+          }));
+        }
       } else {
         // Single pattern move
         const targetLaneIndex = Math.max(
@@ -303,19 +360,25 @@ export function usePatternOperations(
         );
         const targetTrack = tracks[targetLaneIndex];
         if (targetTrack) {
-          dispatch(updatePatternTrack({ patternId, trackId: targetTrack.id }));
+          dispatch(movePatternToTrack({
+            patternReactId: patternId,
+            targetTrackReactId: targetTrack.id
+          }));
         }
       }
     },
     [dispatch, tracks, selectedClipIds]
   );
 
-  return {
-    handleClipMove,
-    handleClipResize,
-    handleClipLabelChange,
-    handleClipCopy,
-    handleClipDelete,
-    handleClipVerticalDrag,
-  };
+  return useMemo(
+    () => ({
+      handleClipMove,
+      handleClipResize,
+      handleClipLabelChange,
+      handleClipCopy,
+      handleClipDelete,
+      handleClipVerticalDrag,
+    }),
+    [handleClipMove, handleClipResize, handleClipLabelChange, handleClipCopy, handleClipDelete, handleClipVerticalDrag]
+  );
 }

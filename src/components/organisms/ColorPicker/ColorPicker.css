@@ -11,38 +11,38 @@
   z-index: 10000;
   max-width: 90vw;
   max-height: 90vh;
-  border: 2px solid var(--color-primary, #00ff00);
-  box-shadow: 0 0 8px var(--color-primary, #00ff00);
-  background: var(--color-bg-elevated, #001a00);
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 8px var(--color-primary);
+  background: var(--color-bg-elevated);
 }
 
 .color-picker__content {
-  padding: 16px;
+  padding: var(--spacing-md)
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-md)
 }
 
 .color-picker__palette {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-xs)
 }
 
 .color-picker__row {
   display: flex;
-  gap: 4px;
+  gap: var(--spacing-xs)
 }
 
 .color-picker__swatch {
   width: 32px;
   height: 32px;
-  border: 1px solid var(--color-secondary, #008800);
+  border: 1px solid var(--color-secondary);
   background: transparent;
   cursor: pointer;
   font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
   font-size: 20px;
-  color: var(--color-primary, #00ff00);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,31 +51,31 @@
 }
 
 .color-picker__swatch:hover {
-  border-color: var(--color-primary, #00ff00);
-  box-shadow: 0 0 4px var(--color-primary, #00ff00);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 4px var(--color-primary);
 }
 
 .color-picker__swatch:focus {
   outline: none;
-  border-color: var(--color-highlight, #66ff66);
-  box-shadow: 0 0 6px var(--color-highlight, #66ff66);
+  border-color: var(--color-highlight);
+  box-shadow: 0 0 6px var(--color-highlight);
 }
 
 .color-picker__swatch--selected {
-  border-color: var(--color-primary, #00ff00);
+  border-color: var(--color-primary);
   border-width: 2px;
-  box-shadow: 0 0 6px var(--color-primary, #00ff00);
+  box-shadow: 0 0 6px var(--color-primary);
 }
 
 .color-picker__preview {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-top: 1px solid var(--color-grid, #003300);
+  gap: var(--spacing-sm)
+  padding: var(--spacing-sm)
+  border-top: 1px solid var(--color-grid);
   font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
   font-size: 20px;
-  color: var(--color-primary, #00ff00);
+  color: var(--color-primary);
 }
 
 .color-picker__preview-label {
@@ -97,8 +97,8 @@
   text-align: center;
   font-family: 'VT323', 'Share Tech Mono', 'Courier New', monospace;
   font-size: 18px;
-  color: var(--color-primary, #00ff00);
+  color: var(--color-primary);
   opacity: 0.7;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-grid, #003300);
+  padding-top: var(--spacing-sm)
+  border-top: 1px solid var(--color-grid);
 }

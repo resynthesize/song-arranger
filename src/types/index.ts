@@ -45,6 +45,8 @@ export interface Track {
   id: ID;
   name: string;
   color?: string;
+  height?: number; // Custom track height in pixels (if not set, uses default from global verticalZoom)
+  collapsed?: boolean; // Whether track is collapsed to minimal height (Ableton-style)
 }
 
 /**
@@ -53,8 +55,12 @@ export interface Track {
 export interface Scene {
   id: ID;
   name: string;
-  position: Position; // Start position in beats
-  duration: Duration; // Length in beats
+  position: Position; // Start position in beats (calculated for timeline display)
+  duration: Duration; // Length in beats (calculated from length × (gbar / 4) for timeline display)
+  gbar: number; // Global bar length in 16th note steps (Cirklon native - typically 16 for 4/4)
+  length: number; // Scene length in bars (of gbar steps) - (Cirklon native - editable, 1-200)
+  advance: 'auto' | 'manual'; // Scene advance mode (auto = advance automatically, manual = wait for trigger)
+  initialMutes?: ID[]; // Track IDs to mute when scene starts
 }
 
 
@@ -122,13 +128,23 @@ export interface ScenesState {
 
 /**
  * Pattern row type - represents the different editable rows in pattern editor
+ * Includes both step-based rows and bar-based rows
  */
 export type PatternRow = 'note' | 'velocity' | 'length' | 'delay' | 'auxA' | 'auxB' | 'auxC' | 'auxD';
 
 /**
- * View mode for pattern editor - switches between parameter and aux rows
+ * Bar parameter type - represents bar-level parameters
+ * These are edited per-bar rather than per-step
  */
-export type ViewMode = 'parameters' | 'aux';
+export type BarParameter = 'xpose' | 'reps' | 'gbar';
+
+/**
+ * View mode for pattern editor - switches between different row groups
+ * - parameters: Note, velocity, length, delay (step-based)
+ * - aux: Aux A-D parameters (step-based)
+ * - bar: Transpose, repetitions, global bar sync (bar-based)
+ */
+export type ViewMode = 'parameters' | 'aux' | 'bar';
 
 /**
  * Clipboard data for copy/paste operations in pattern editor
@@ -151,6 +167,8 @@ export interface PatternEditorState {
   editorHeight: number; // Editor pane height in pixels (for resize persistence)
   clipboardSteps: ClipboardData | null; // Copy/paste clipboard
   viewMode: ViewMode; // Current view mode (parameters or aux rows)
+  visibleRows: Record<PatternRow, boolean>; // Which rows are visible
+  collapsedRows: Record<PatternRow, boolean>; // Which rows are collapsed
 }
 
 /**

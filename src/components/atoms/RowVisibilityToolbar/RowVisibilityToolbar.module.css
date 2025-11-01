@@ -1,0 +1,78 @@
+/**
+ * Cyclone - RowVisibilityToolbar Styles
+ * Compact vertical toolbar for row visibility toggles
+ */
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: 0;
+}
+
+.button {
+  width: 1.25rem; /* 20px @ 16px base */
+  height: 1.25rem; /* 20px @ 16px base */
+  padding: 0;
+  background: transparent;
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--border-radius-xs);
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.button:focus-visible {
+  outline: var(--border-width-base) solid var(--color-accent);
+  outline-offset: var(--spacing-xs);
+}
+
+/* Visible row - full opacity with accent color */
+.button.visible {
+  opacity: 1;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Hidden row - dimmed appearance */
+.button.hidden {
+  opacity: var(--opacity-muted);
+  color: var(--color-text-secondary);
+}
+
+.button.hidden:hover {
+  opacity: var(--opacity-semi);
+}
+
+/* CRT theme overrides */
+:global(.theme-crt) .button {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+:global(.theme-crt) .button:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  box-shadow: var(--phosphor-glow-sm);
+}
+
+:global(.theme-crt) .button.visible {
+  color: var(--color-highlight);
+  border-color: var(--color-highlight);
+  text-shadow: var(--phosphor-glow-xs);
+}
+
+:global(.theme-crt) .button.hidden {
+  color: var(--color-secondary);
+  opacity: var(--opacity-muted);
+}

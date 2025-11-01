@@ -1,0 +1,265 @@
+/**
+ * Cyclone Theme - Minimalist
+ * Ultra-clean, distraction-free interface for maximum content focus
+ *
+ * Token values are defined in ../tokens/*.css under .app.theme-minimalist
+ * This file contains theme-specific component overrides and global styles
+ */
+
+/* ============================================
+   MINIMALIST THEME GLOBAL STYLES
+   Applied when .app.theme-minimalist class is present
+   ============================================ */
+
+.app.theme-minimalist {
+  /* Ensure system font stack is used */
+  font-family: var(--font-family-primary) !important;
+  font-weight: var(--font-weight-normal);
+
+  /* Base colors - pure white bg with dark gray text */
+  background-color: var(--color-bg);
+  color: var(--color-primary);
+
+  /* Default cursor */
+  cursor: auto !important;
+}
+
+/* Force minimalist font on all elements */
+.app.theme-minimalist *,
+.app.theme-minimalist button,
+.app.theme-minimalist input,
+.app.theme-minimalist select,
+.app.theme-minimalist textarea {
+  font-family: var(--font-family-primary) !important;
+}
+
+/* ============================================
+   DISABLE ALL EFFECTS IN MINIMALIST THEME
+   ============================================ */
+
+/* No text shadows */
+.app.theme-minimalist h1,
+.app.theme-minimalist h2,
+.app.theme-minimalist h3,
+.app.theme-minimalist h4,
+.app.theme-minimalist h5,
+.app.theme-minimalist h6,
+.app.theme-minimalist a,
+.app.theme-minimalist button,
+.app.theme-minimalist span,
+.app.theme-minimalist div,
+.app.theme-minimalist p {
+  text-shadow: none !important;
+}
+
+/* No box shadows */
+.app.theme-minimalist button,
+.app.theme-minimalist input,
+.app.theme-minimalist select,
+.app.theme-minimalist .panel,
+.app.theme-minimalist .card {
+  box-shadow: none !important;
+}
+
+/* ============================================
+   MINIMALIST TYPOGRAPHY
+   ============================================ */
+
+.app.theme-minimalist h1,
+.app.theme-minimalist h2,
+.app.theme-minimalist h3,
+.app.theme-minimalist h4,
+.app.theme-minimalist h5,
+.app.theme-minimalist h6 {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-primary);
+}
+
+/* ============================================
+   MINIMALIST LINK STYLES
+   ============================================ */
+
+.app.theme-minimalist a {
+  color: var(--color-primary);
+  text-shadow: none;
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-subtle);
+  text-underline-offset: 2px;
+  transition: text-decoration-color var(--transition-fast);
+}
+
+.app.theme-minimalist a:hover,
+.app.theme-minimalist a:focus {
+  text-decoration-color: var(--color-primary);
+}
+
+/* ============================================
+   MINIMALIST SELECTION COLOR
+   ============================================ */
+
+.app.theme-minimalist ::selection {
+  background-color: var(--color-border);
+  color: var(--color-bg);
+}
+
+/* ============================================
+   MINIMALIST SCROLLBAR STYLING
+   ============================================ */
+
+.app.theme-minimalist ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.app.theme-minimalist ::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+.app.theme-minimalist ::-webkit-scrollbar-thumb {
+  background: var(--color-border-subtle);
+  border-radius: 0;
+}
+
+.app.theme-minimalist ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border);
+}
+
+/* ============================================
+   MINIMALIST FOCUS STYLES
+   ============================================ */
+
+.app.theme-minimalist :focus-visible {
+  outline: 1px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+/* ============================================
+   MINIMALIST BUTTON STYLING
+   ============================================ */
+
+.app.theme-minimalist button {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  padding: var(--button-padding-y) var(--button-padding-x);
+  transition: border-color var(--transition-fast);
+}
+
+.app.theme-minimalist button:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.app.theme-minimalist button:active:not(:disabled) {
+  background: var(--color-bg-elevated);
+}
+
+.app.theme-minimalist button:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* ============================================
+   MINIMALIST INPUT STYLING
+   ============================================ */
+
+.app.theme-minimalist input,
+.app.theme-minimalist textarea,
+.app.theme-minimalist select {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  padding: var(--input-padding-y) var(--input-padding-x);
+  color: var(--color-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.app.theme-minimalist input:focus,
+.app.theme-minimalist textarea:focus,
+.app.theme-minimalist select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.app.theme-minimalist input:disabled,
+.app.theme-minimalist textarea:disabled,
+.app.theme-minimalist select:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* ============================================
+   HIDE ALL EFFECTS IN MINIMALIST THEME
+   ============================================ */
+
+.app.theme-minimalist .crt-effects,
+.app.theme-minimalist .terminal-noise,
+.app.theme-minimalist .scanlines,
+.app.theme-minimalist .modern-effects {
+  display: none !important;
+}
+
+/* ============================================
+   MINIMALIST PANEL/CARD STYLING
+   ============================================ */
+
+.app.theme-minimalist .panel,
+.app.theme-minimalist .card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0;
+  padding: var(--spacing-lg);
+}
+
+/* ============================================
+   MINIMALIST MENU/DROPDOWN STYLING
+   ============================================ */
+
+.app.theme-minimalist .menu,
+.app.theme-minimalist .dropdown {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+}
+
+/* ============================================
+   MINIMALIST DIVIDER STYLING
+   ============================================ */
+
+.app.theme-minimalist hr,
+.app.theme-minimalist .divider {
+  border: none;
+  border-top: 1px solid var(--color-border-subtle);
+  margin: var(--spacing-md) 0;
+}
+
+/* ============================================
+   NOTES ON MINIMALIST THEME
+   ============================================
+
+   The minimalist theme is designed for:
+     - Maximum content focus
+     - Zero distractions
+     - Pure functionality
+     - Maximum whitespace
+     - Monochromatic palette
+
+   Key characteristics:
+     - White/light gray background
+     - Dark gray text
+     - No colors except critical states
+     - No shadows or glows
+     - No border radius (sharp corners)
+     - Thin, subtle borders
+     - System font stack
+     - Maximum contrast
+     - Clean, sparse aesthetic
+
+   This theme is ideal for:
+     - Long editing sessions
+     - Distraction-free work
+     - Low-power displays
+     - Accessibility
+
+   ============================================ */

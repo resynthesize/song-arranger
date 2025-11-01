@@ -1,0 +1,24 @@
+/**
+ * Cyclone Design Tokens - Index
+ * Central import file for all design tokens
+ *
+ * Import this file to get all design tokens in the correct order:
+ *   1. Colors (referenced by other tokens)
+ *   2. Typography (referenced by component tokens)
+ *   3. Spacing (referenced by component tokens)
+ *   4. Effects (may reference colors, spacing)
+ *   5. Z-Index (independent)
+ *
+ * Usage:
+ *   import '@/styles/tokens/index.css';
+ *
+ * Or import specific token files:
+ *   import '@/styles/tokens/colors.css';
+ */
+
+/* Import token files in dependency order */
+@import './colors.css';
+@import './typography.css';
+@import './spacing.css';
+@import './effects.css';
+@import './z-index.css';

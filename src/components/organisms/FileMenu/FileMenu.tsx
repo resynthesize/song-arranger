@@ -5,52 +5,32 @@
 
 import { useCallback, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { deleteProjectById } from '@/store/slices/projectSlice';
 import {
-  newProject,
-  loadProjectById,
-  saveCurrentProject,
-  saveProjectAs,
-  deleteProjectById,
-  setCurrentProjectName,
-} from '@/store/slices/projectSlice';
-import { setPatterns } from '@/store/slices/patternsSlice';
-import { setTracks } from '@/store/slices/tracksSlice';
-import { setStatus } from '@/store/slices/statusSlice';
-import { setTheme } from '@/store/slices/themeSlice';
-import { selectAllPatterns, selectAllTracks } from '@/store/selectors';
-import {
-  saveProject,
-  loadProject,
   deleteProject as deleteProjectFromStorage,
   listProjects,
-  setTemplateProject,
   clearTemplateProject,
   type ProjectFile,
 } from '@/utils/storage';
-import { parseCKSFile, importFromCirklon, importSongCollectionFromCirklon } from '@/utils/cirklon/import';
-import { exportToCirklon, type ExportOptions } from '@/utils/cirklon/export';
+import { useProjectOperations } from '@/hooks/useProjectOperations';
+import { useImportExport } from '@/hooks/useImportExport';
+import { useThemeOperations } from '@/hooks/useThemeOperations';
 import { TerminalMenu, type TerminalMenuItem } from '../TerminalMenu';
 import ProjectSelector from '../ProjectSelector';
 import SaveAsDialog from '../SaveAsDialog';
 import CirklonExportDialog from '../CirklonExportDialog/CirklonExportDialog';
-import { first } from '@/utils/array';
 import './FileMenu.css';
 
 export interface FileMenuProps {
   onProjectsListOpen?: () => void;
+  onToggleSongDataViewer?: () => void;
 }
 
-export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
+export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen, onToggleSongDataViewer }) => {
   const dispatch = useAppDispatch();
-  const currentProjectId = useAppSelector((state) => state.project.currentProjectId);
   const currentProjectName = useAppSelector((state) => state.project.currentProjectName);
   const isDirty = useAppSelector((state) => state.project.isDirty);
   const currentTheme = useAppSelector((state) => state.theme.current);
-
-  // Get all current state for saving using selectors
-  const patterns = useAppSelector(selectAllPatterns);
-  const tracks = useAppSelector(selectAllTracks);
-  const timeline = useAppSelector((state) => state.timeline);
 
   // Dialog states
   const [showLoadDialog, setShowLoadDialog] = useState(false);
@@ -58,117 +38,37 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showExportCirklonDialog, setShowExportCirklonDialog] = useState(false);
 
-  const handleNew = useCallback(() => {
-    if (isDirty) {
-      const confirm = window.confirm(
-        'You have unsaved changes. Are you sure you want to create a new project?'
-      );
-      if (!confirm) return;
-    }
+  // Custom hooks for operations
+  const {
+    handleNew,
+    handleSave,
+    handleSaveAs: handleSaveAsDialog,
+    handleSaveAsConfirm,
+    handleLoad: handleLoadDialog,
+    handleLoadConfirm,
+    handleSetAsTemplate,
+  } = useProjectOperations({
+    onLoad: onProjectsListOpen,
+    onShowSaveAsDialog: setShowSaveAsDialog,
+    onShowLoadDialog: setShowLoadDialog,
+  });
 
-    dispatch(newProject());
-  }, [dispatch, isDirty]);
+  const {
+    handleExport,
+    handleImport,
+    handleImportCirklon,
+    handleImportCirklonCollection,
+    handleExportCirklon: handleExportCirklonDialog,
+    handleExportCirklonConfirm,
+  } = useImportExport({
+    onShowExportCirklonDialog: setShowExportCirklonDialog,
+  });
 
-  const handleSave = useCallback(() => {
-    try {
-      const projectId = saveProject({
-        id: currentProjectId || undefined,
-        name: currentProjectName,
-        patterns,
-        tracks,
-        timeline,
-      });
-
-      if (!currentProjectId) {
-        // First time save
-        dispatch(saveProjectAs({ projectId, projectName: currentProjectName }));
-      } else {
-        // Update existing
-        dispatch(saveCurrentProject());
-      }
-    } catch (error) {
-      alert(`Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [currentProjectId, currentProjectName, patterns, tracks, timeline, dispatch]);
-
-  const handleSaveAs = useCallback(() => {
-    setShowSaveAsDialog(true);
-  }, []);
-
-  const handleSaveAsConfirm = useCallback((name: string) => {
-    try {
-      const projectId = saveProject({
-        name,
-        patterns,
-        tracks,
-        timeline,
-      });
-
-      dispatch(saveProjectAs({ projectId, projectName: name }));
-      setShowSaveAsDialog(false);
-    } catch (error) {
-      alert(`Failed to save project: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [patterns, tracks, timeline, dispatch]);
-
-  const handleLoad = useCallback(() => {
-    if (isDirty) {
-      const confirm = window.confirm(
-        'You have unsaved changes. Are you sure you want to load a different project?'
-      );
-      if (!confirm) return;
-    }
-
-    const projects = listProjects();
-    if (projects.length === 0) {
-      alert('No saved projects found.');
-      return;
-    }
-
-    setShowLoadDialog(true);
-  }, [isDirty]);
-
-  const handleLoadConfirm = useCallback((project: ProjectFile) => {
-    const loadedProject = loadProject(project.id);
-    if (!loadedProject) {
-      alert('Failed to load project.');
-      return;
-    }
-
-    // Load project metadata
-    dispatch(loadProjectById({ projectId: loadedProject.id, projectName: loadedProject.name }));
-
-    // Load patterns data
-    dispatch(setPatterns(loadedProject.data.patterns));
-
-    // Load tracks data
-    dispatch(setTracks(loadedProject.data.tracks));
-
-    // Load timeline data (merge with existing viewport to preserve current view)
-    dispatch({ type: 'timeline/loadTimeline', payload: loadedProject.data.timeline });
-
-    setShowLoadDialog(false);
-
-    // Notify parent if callback provided
-    onProjectsListOpen?.();
-  }, [dispatch, onProjectsListOpen]);
-
-  const handleSetAsTemplate = useCallback(() => {
-    if (!currentProjectId) {
-      alert('Please save the project first before setting it as a template.');
-      return;
-    }
-
-    // Save current state first
-    handleSave();
-
-    try {
-      setTemplateProject(currentProjectId);
-      alert(`"${currentProjectName}" has been set as the template project.`);
-    } catch (error) {
-      alert(`Failed to set template: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [currentProjectId, currentProjectName, handleSave]);
+  const {
+    handleSetThemeModern,
+    handleSetThemeRetro,
+    handleSetThemeMinimalist,
+  } = useThemeOperations();
 
   const handleDelete = useCallback(() => {
     const projects = listProjects();
@@ -203,286 +103,6 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     }
   }, [dispatch]);
 
-  const handleExport = useCallback(() => {
-    try {
-      // Create export data with current project state
-      const exportData = {
-        name: currentProjectName,
-        patterns,
-        tracks,
-        timeline: {
-          tempo: timeline.tempo,
-          snapValue: timeline.snapValue,
-          snapMode: timeline.snapMode,
-          verticalZoom: timeline.verticalZoom,
-          minimapVisible: timeline.minimapVisible,
-          playheadPosition: timeline.playheadPosition,
-        },
-        version: '1.0',
-        exportedAt: new Date().toISOString(),
-      };
-
-      // Create JSON blob
-      const jsonString = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-
-      // Create download link
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${currentProjectName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
-      document.body.appendChild(a);
-      a.click();
-
-      // Cleanup
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      alert(`Failed to export project: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [currentProjectName, patterns, tracks, timeline]);
-
-  const handleImport = useCallback(() => {
-    if (isDirty) {
-      const confirm = window.confirm(
-        'You have unsaved changes. Are you sure you want to import a project?'
-      );
-      if (!confirm) return;
-    }
-
-    // Create file input element
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json,application/json';
-
-    input.onchange = (e) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (!files) return;
-
-      const file = first(Array.from(files));
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const jsonString = event.target?.result as string;
-          const importData = JSON.parse(jsonString);
-
-          // Validate import data
-          if (!importData.patterns || !importData.tracks) {
-            throw new Error('Invalid project file: missing patterns or tracks data');
-          }
-
-          // Load imported data into Redux
-          dispatch(newProject()); // Clear current project first
-
-          // Set project name
-          if (importData.name) {
-            dispatch(setCurrentProjectName(importData.name));
-          }
-
-          // Load patterns
-          dispatch(setPatterns(importData.patterns));
-
-          // Load tracks
-          dispatch(setTracks(importData.tracks));
-
-          // Load timeline settings (if present)
-          if (importData.timeline) {
-            dispatch({ type: 'timeline/loadTimeline', payload: importData.timeline });
-          }
-
-          alert(`Successfully imported "${importData.name || 'project'}"`);
-        } catch (error) {
-          alert(`Failed to import project: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-      };
-
-      reader.readAsText(file);
-    };
-
-    input.click();
-  }, [dispatch, isDirty]);
-
-  const handleImportCirklon = useCallback(() => {
-    if (isDirty) {
-      const confirm = window.confirm(
-        'You have unsaved changes. Are you sure you want to import a Cirklon file?'
-      );
-      if (!confirm) return;
-    }
-
-    // Create file input element
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.cks,.CKS,application/json';
-
-    input.onchange = (e) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (!files) return;
-
-      const file = first(Array.from(files));
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const jsonString = event.target?.result as string;
-
-          // Parse CKS file
-          const cksData = parseCKSFile(jsonString);
-
-          // Import to Cyclone format
-          const importResult = importFromCirklon(cksData);
-
-          // Load imported data into Redux
-          dispatch(newProject()); // Clear current project first
-
-          // Set project name from song name
-          dispatch(setCurrentProjectName(importResult.songName));
-
-          // Load tracks
-          dispatch(setTracks(importResult.tracks));
-
-          // Load patterns
-          dispatch(setPatterns(importResult.patterns));
-
-          // Load scenes
-          dispatch({ type: 'scenes/setScenes', payload: importResult.scenes });
-
-          // Set tempo
-          dispatch({ type: 'timeline/setTempo', payload: importResult.tempo });
-
-          // Show success message in status line
-          dispatch(setStatus({
-            message: `Successfully imported "${importResult.songName}" (${importResult.tracks.length} tracks, ${importResult.patterns.length} patterns, ${importResult.scenes.length} scenes)`,
-            type: 'success',
-          }));
-        } catch (error) {
-          dispatch(setStatus({
-            message: `Failed to import Cirklon file: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            type: 'error',
-          }));
-        }
-      };
-
-      reader.readAsText(file);
-    };
-
-    input.click();
-  }, [dispatch, isDirty]);
-
-  const handleImportCirklonCollection = useCallback(() => {
-    // Create file input element
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.cks,.CKS,application/json';
-
-    input.onchange = (e) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (!files) return;
-
-      const file = first(Array.from(files));
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const jsonString = event.target?.result as string;
-
-          // Parse CKS file
-          const cksData = parseCKSFile(jsonString);
-
-          // Count songs
-          const songCount = Object.keys(cksData.song_data).length;
-
-          if (songCount === 0) {
-            dispatch(setStatus({
-              message: 'No songs found in collection file',
-              type: 'error',
-            }));
-            return;
-          }
-
-          // Import collection and save each song to localStorage
-          const result = importSongCollectionFromCirklon(cksData, 4, saveProject);
-
-          // Show results in status bar
-          if (result.successCount > 0) {
-            if (result.failureCount > 0) {
-              const errorDetails = result.errors.map(e => `${e.songName}: ${e.error}`).join('; ');
-              dispatch(setStatus({
-                message: `Imported ${result.successCount} song${result.successCount > 1 ? 's' : ''}, failed ${result.failureCount}: ${errorDetails}`,
-                type: 'success',
-              }));
-            } else {
-              dispatch(setStatus({
-                message: `Successfully imported ${result.successCount} song${result.successCount > 1 ? 's' : ''}: ${result.songNames.join(', ')}`,
-                type: 'success',
-              }));
-            }
-          } else {
-            const errorDetails = result.errors.map(e => `${e.songName}: ${e.error}`).join('; ');
-            dispatch(setStatus({
-              message: `Failed to import all songs: ${errorDetails}`,
-              type: 'error',
-            }));
-          }
-        } catch (error) {
-          dispatch(setStatus({
-            message: `Failed to import Cirklon collection: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            type: 'error',
-          }));
-        }
-      };
-
-      reader.readAsText(file);
-    };
-
-    input.click();
-  }, [dispatch]);
-
-  const handleExportCirklon = useCallback(() => {
-    setShowExportCirklonDialog(true);
-  }, []);
-
-  const handleExportCirklonConfirm = useCallback((options: ExportOptions) => {
-    try {
-      // Export to Cirklon format
-      const cirklonData = exportToCirklon(tracks, patterns, options);
-
-      // Create JSON blob
-      const jsonString = JSON.stringify(cirklonData, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-
-      // Create download link
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${options.songName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.CKS`;
-      document.body.appendChild(a);
-      a.click();
-
-      // Cleanup
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      setShowExportCirklonDialog(false);
-
-      alert(`Successfully exported "${options.songName}" to Cirklon format`);
-    } catch (error) {
-      alert(`Failed to export Cirklon file: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [tracks, patterns]);
-
-  const handleSetThemeModern = useCallback(() => {
-    dispatch(setTheme('modern'));
-  }, [dispatch]);
-
-  const handleSetThemeRetro = useCallback(() => {
-    dispatch(setTheme('retro'));
-  }, [dispatch]);
-
   const menuItems: TerminalMenuItem[] = [
     { id: 'new', label: 'New' },
     { id: 'open', label: 'Open...' },
@@ -497,9 +117,12 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
     { id: 'separator-2', separator: true },
     { id: 'template', label: 'Set as Template' },
     { id: 'separator-3', separator: true },
-    { id: 'theme-modern', label: currentTheme === 'modern' ? '✓ Modern Theme' : 'Modern Theme' },
-    { id: 'theme-retro', label: currentTheme === 'retro' ? '✓ Retro Theme' : 'Retro Theme' },
+    { id: 'song-data-viewer', label: 'Song Data Viewer' },
     { id: 'separator-4', separator: true },
+    { id: 'theme-retro', label: currentTheme === 'retro' ? '✓ Retro Theme' : 'Retro Theme' },
+    { id: 'theme-modern', label: currentTheme === 'modern' ? '✓ Modern Theme' : 'Modern Theme' },
+    { id: 'theme-minimalist', label: currentTheme === 'minimalist' ? '✓ Minimalist Theme' : 'Minimalist Theme' },
+    { id: 'separator-5', separator: true },
     { id: 'delete', label: 'Delete...' },
   ];
 
@@ -510,13 +133,13 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           handleNew();
           break;
         case 'open':
-          handleLoad();
+          handleLoadDialog();
           break;
         case 'save':
           handleSave();
           break;
         case 'save-as':
-          handleSaveAs();
+          handleSaveAsDialog();
           break;
         case 'import':
           handleImport();
@@ -531,10 +154,13 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
           handleExport();
           break;
         case 'export-cirklon':
-          handleExportCirklon();
+          handleExportCirklonDialog();
           break;
         case 'template':
           handleSetAsTemplate();
+          break;
+        case 'song-data-viewer':
+          onToggleSongDataViewer?.();
           break;
         case 'theme-modern':
           handleSetThemeModern();
@@ -542,12 +168,15 @@ export const FileMenu: React.FC<FileMenuProps> = ({ onProjectsListOpen }) => {
         case 'theme-retro':
           handleSetThemeRetro();
           break;
+        case 'theme-minimalist':
+          handleSetThemeMinimalist();
+          break;
         case 'delete':
           handleDelete();
           break;
       }
     },
-    [handleNew, handleLoad, handleSave, handleSaveAs, handleImport, handleImportCirklon, handleImportCirklonCollection, handleExport, handleExportCirklon, handleSetAsTemplate, handleSetThemeModern, handleSetThemeRetro, handleDelete]
+    [handleNew, handleLoadDialog, handleSave, handleSaveAsDialog, handleImport, handleImportCirklon, handleImportCirklonCollection, handleExport, handleExportCirklonDialog, handleSetAsTemplate, onToggleSongDataViewer, handleSetThemeModern, handleSetThemeRetro, handleSetThemeMinimalist, handleDelete]
   );
 
   return (

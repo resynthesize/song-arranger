@@ -5,7 +5,13 @@
 
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { addTrack, removeTrack, moveTrackUp, moveTrackDown, setMovingTrack, clearMovingTrack } from '@/store/slices/tracksSlice';
+import {
+  addTrackInTimeline,
+  removeTrackInTimeline,
+  moveTrackUpInTimeline,
+  moveTrackDownInTimeline
+} from '@/store/slices/songSlice/slice';
+import { setMovingTrack, clearMovingTrack } from '@/store/slices/tracksSlice';
 import { logger } from '@/utils/debug';
 
 export interface LaneShortcutHandlers {
@@ -13,22 +19,28 @@ export interface LaneShortcutHandlers {
   deleteTrack: () => void;
   moveTrackUp: () => void;
   moveTrackDown: () => void;
+  openTrackSettings: () => void;
+}
+
+export interface TrackShortcutsOptions {
+  setShowTrackSettings: (show: boolean) => void;
 }
 
 /**
  * Hook for track manipulation keyboard shortcuts
  */
-export const useTrackShortcuts = (): LaneShortcutHandlers => {
+export const useTrackShortcuts = (options: TrackShortcutsOptions): LaneShortcutHandlers => {
+  const { setShowTrackSettings } = options;
   const dispatch = useAppDispatch();
   const currentTrackId = useAppSelector((state) => state.selection.currentTrackId);
 
   const handleAddTrack = useCallback(() => {
-    dispatch(addTrack({}));
+    dispatch(addTrackInTimeline({}));
   }, [dispatch]);
 
   const handleDeleteTrack = useCallback(() => {
     if (currentTrackId) {
-      dispatch(removeTrack(currentTrackId));
+      dispatch(removeTrackInTimeline({ trackReactId: currentTrackId }));
     }
   }, [dispatch, currentTrackId]);
 
@@ -36,7 +48,7 @@ export const useTrackShortcuts = (): LaneShortcutHandlers => {
     if (currentTrackId) {
       logger.log('moveTrackUp: Setting moving track', currentTrackId);
       dispatch(setMovingTrack(currentTrackId));
-      dispatch(moveTrackUp(currentTrackId));
+      dispatch(moveTrackUpInTimeline({ trackReactId: currentTrackId }));
       setTimeout(() => {
         logger.log('moveTrackUp: Clearing moving track');
         dispatch(clearMovingTrack());
@@ -50,7 +62,7 @@ export const useTrackShortcuts = (): LaneShortcutHandlers => {
     if (currentTrackId) {
       logger.log('moveTrackDown: Setting moving track', currentTrackId);
       dispatch(setMovingTrack(currentTrackId));
-      dispatch(moveTrackDown(currentTrackId));
+      dispatch(moveTrackDownInTimeline({ trackReactId: currentTrackId }));
       setTimeout(() => {
         logger.log('moveTrackDown: Clearing moving track');
         dispatch(clearMovingTrack());
@@ -60,10 +72,19 @@ export const useTrackShortcuts = (): LaneShortcutHandlers => {
     }
   }, [dispatch, currentTrackId]);
 
+  const handleOpenTrackSettings = useCallback(() => {
+    if (currentTrackId) {
+      setShowTrackSettings(true);
+    } else {
+      logger.log('openTrackSettings: No current track ID');
+    }
+  }, [currentTrackId, setShowTrackSettings]);
+
   return {
     addTrack: handleAddTrack,
     deleteTrack: handleDeleteTrack,
     moveTrackUp: handleMoveTrackUp,
     moveTrackDown: handleMoveTrackDown,
+    openTrackSettings: handleOpenTrackSettings,
   };
 };

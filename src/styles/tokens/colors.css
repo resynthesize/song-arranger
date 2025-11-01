@@ -1,0 +1,244 @@
+/**
+ * Cyclone Design Tokens - Colors
+ * Primitive and semantic color definitions for both themes
+ *
+ * Token Hierarchy:
+ *   Primitive Tokens → Semantic Tokens → Component Usage
+ *   (raw values)       (context)          (in components)
+ *
+ * Usage: Always use semantic tokens in components, never primitives directly
+ */
+
+/* ============================================
+   PRIMITIVE COLORS
+   Raw color values - DO NOT use directly in components
+   These are the foundation that semantic tokens reference
+   ============================================ */
+
+:root {
+  /* Green Palette (Retro Theme) */
+  --primitive-green-50: #ccffcc;
+  --primitive-green-100: #66ff66;
+  --primitive-green-300: #00ff00;
+  --primitive-green-500: #00ff00;
+  --primitive-green-700: #008800;
+  --primitive-green-800: #006600;
+  --primitive-green-850: #004400;
+  --primitive-green-900: #003300;
+  --primitive-green-920: #002200;
+  --primitive-green-940: #001100;
+  --primitive-green-950: #000a00;
+
+  /* Gray Palette (Modern Theme) */
+  --primitive-gray-50: #ffffff;
+  --primitive-gray-100: #e0e0e0;
+  --primitive-gray-200: #b3b3b3;
+  --primitive-gray-300: #999999;
+  --primitive-gray-400: #808080;
+  --primitive-gray-600: #666666;
+  --primitive-gray-700: #404040;
+  --primitive-gray-800: #333333;
+  --primitive-gray-850: #2a2a2a;
+  --primitive-gray-900: #1c1c1c;
+  --primitive-gray-950: #000000;
+
+  /* Blue Palette (Modern Theme Accents) */
+  --primitive-blue-300: #5aafff;
+  --primitive-blue-400: #4a9eff;
+  --primitive-blue-500: #3a8eef;
+
+  /* Semantic Palette (Shared) */
+  --primitive-red-400: #ff6b6b;
+  --primitive-red-500: #ff0000;
+  --primitive-yellow-500: #ffff00;
+  --primitive-orange-500: #ffa500;
+  --primitive-cyan-500: #00ff88;
+
+  /* Special Values */
+  --primitive-black: #000000;
+  --primitive-white: #ffffff;
+  --primitive-transparent: transparent;
+}
+
+/* ============================================
+   SEMANTIC COLORS - RETRO THEME (DEFAULT)
+   Context-specific tokens that reference primitives
+   Use these in components, not the primitives above
+   ============================================ */
+
+:root {
+  /* Background Colors */
+  --color-bg: var(--primitive-black);
+  --color-bg-elevated: var(--primitive-green-940);
+  --color-bg-hover: var(--primitive-green-920);
+  --color-bg-active: var(--primitive-green-920);
+
+  /* Text Colors */
+  --color-primary: var(--primitive-green-500);       /* Main text, borders */
+  --color-secondary: var(--primitive-green-700);     /* Secondary text, muted */
+  --color-tertiary: var(--primitive-green-800);      /* Tertiary text (use sparingly - lower contrast) */
+  --color-highlight: var(--primitive-green-100);     /* Highlights, selections, focus */
+  --color-accent: var(--primitive-cyan-500);         /* Special accents */
+
+  /* UI Element Colors */
+  --color-grid: var(--primitive-green-900);          /* Grid lines, subtle dividers */
+  --color-border: var(--primitive-green-700);        /* Default border color */
+  --color-border-subtle: var(--primitive-green-900); /* Subtle borders */
+  --color-divider: var(--primitive-green-900);       /* Section dividers */
+
+  /* State Colors */
+  --color-dim: var(--primitive-green-850);           /* Dimmed elements */
+  --color-disabled: var(--primitive-green-920);      /* Disabled state */
+  --color-hover: var(--primitive-green-100);         /* Hover state */
+  --color-active: var(--primitive-green-100);        /* Active state */
+  --color-focus: var(--primitive-green-100);         /* Focus indicator */
+
+  /* Semantic Colors */
+  --color-error: var(--primitive-red-500);           /* Error states, destructive actions */
+  --color-error-bg: rgba(255, 0, 0, 0.1);            /* Error background tint */
+  --color-warning: var(--primitive-yellow-500);      /* Warning states */
+  --color-warning-bg: rgba(255, 255, 0, 0.1);        /* Warning background tint */
+  --color-success: var(--primitive-green-100);       /* Success states */
+  --color-success-bg: rgba(102, 255, 102, 0.1);      /* Success background tint */
+  --color-info: var(--primitive-cyan-500);           /* Informational states */
+  --color-info-bg: rgba(0, 255, 136, 0.1);           /* Info background tint */
+
+  /* Overlay Colors */
+  --color-overlay: rgba(0, 0, 0, 0.8);               /* Modal backdrop */
+  --color-overlay-light: rgba(0, 0, 0, 0.5);         /* Lighter overlay */
+  --color-scrim: rgba(0, 17, 0, 0.9);                /* Scrim for dialogs */
+}
+
+/* ============================================
+   SEMANTIC COLORS - MODERN THEME
+   Modern minimalist overrides
+   ============================================ */
+
+.app.theme-modern {
+  /* Background Colors */
+  --color-bg: var(--primitive-gray-900);
+  --color-bg-elevated: var(--primitive-gray-850);
+  --color-bg-hover: var(--primitive-gray-800);
+  --color-bg-active: var(--primitive-gray-800);
+
+  /* Text Colors */
+  --color-primary: var(--primitive-gray-50);         /* Main text */
+  --color-secondary: var(--primitive-gray-200);      /* Secondary text */
+  --color-tertiary: var(--primitive-gray-400);       /* Tertiary text */
+  --color-highlight: var(--primitive-blue-400);      /* Highlights, selections, focus */
+  --color-accent: var(--primitive-blue-300);         /* Special accents */
+
+  /* UI Element Colors */
+  --color-grid: var(--primitive-gray-800);           /* Grid lines */
+  --color-border: var(--primitive-gray-200);         /* Default border */
+  --color-border-subtle: var(--primitive-gray-800);  /* Subtle borders */
+  --color-divider: var(--primitive-gray-800);        /* Dividers */
+
+  /* State Colors */
+  --color-dim: var(--primitive-gray-600);            /* Dimmed elements */
+  --color-disabled: var(--primitive-gray-700);       /* Disabled state */
+  --color-hover: var(--primitive-blue-400);          /* Hover state */
+  --color-active: var(--primitive-blue-400);         /* Active state */
+  --color-focus: var(--primitive-blue-400);          /* Focus indicator */
+
+  /* Semantic Colors */
+  --color-error: var(--primitive-red-400);           /* Errors (softer red) */
+  --color-error-bg: rgba(255, 107, 107, 0.1);        /* Error background */
+  --color-warning: var(--primitive-orange-500);      /* Warnings */
+  --color-warning-bg: rgba(255, 165, 0, 0.1);        /* Warning background */
+  --color-success: var(--primitive-blue-400);        /* Success (blue) */
+  --color-success-bg: rgba(74, 158, 255, 0.1);       /* Success background */
+  --color-info: var(--primitive-blue-300);           /* Info */
+  --color-info-bg: rgba(90, 175, 255, 0.1);          /* Info background */
+
+  /* Overlay Colors */
+  --color-overlay: rgba(0, 0, 0, 0.85);              /* Modal backdrop */
+  --color-overlay-light: rgba(0, 0, 0, 0.6);         /* Lighter overlay */
+  --color-scrim: rgba(28, 28, 28, 0.95);             /* Scrim for dialogs */
+}
+
+/* ============================================
+   SEMANTIC COLORS - MINIMALIST THEME
+   Ultra-clean monochromatic palette for distraction-free work
+   ============================================ */
+
+.app.theme-minimalist {
+  /* Background Colors */
+  --color-bg: var(--primitive-white);                /* Pure white background */
+  --color-bg-elevated: #fafafa;                      /* Slightly off-white for elevation */
+  --color-bg-hover: #f5f5f5;                         /* Light gray on hover */
+  --color-bg-active: #f0f0f0;                        /* Slightly darker on active */
+  --color-bg-tertiary: #fafafa;                      /* Alternative bg */
+
+  /* Text Colors */
+  --color-primary: #1a1a1a;                          /* Near-black for main text */
+  --color-secondary: #666666;                        /* Medium gray for secondary text */
+  --color-tertiary: #999999;                         /* Light gray for tertiary text */
+  --color-highlight: #1a1a1a;                        /* Same as primary (no highlight color) */
+  --color-accent: #4a4a4a;                           /* Dark gray for minimal accent */
+
+  /* UI Element Colors */
+  --color-grid: #e8e8e8;                             /* Very light gray for grids */
+  --color-border: #cccccc;                           /* Medium-light gray for borders */
+  --color-border-subtle: #e8e8e8;                    /* Subtle borders */
+  --color-divider: #e0e0e0;                          /* Dividers */
+
+  /* State Colors */
+  --color-dim: #b3b3b3;                              /* Dimmed elements */
+  --color-disabled: #d0d0d0;                         /* Disabled state */
+  --color-hover: #1a1a1a;                            /* Hover state */
+  --color-active: #000000;                           /* Active state (true black) */
+  --color-focus: #1a1a1a;                            /* Focus indicator */
+
+  /* Semantic Colors - Only for critical states */
+  --color-error: #d32f2f;                            /* Red for errors (only splash of color) */
+  --color-error-bg: #ffebee;                         /* Light red background */
+  --color-warning: #f57c00;                          /* Orange for warnings */
+  --color-warning-bg: #fff3e0;                       /* Light orange background */
+  --color-success: #388e3c;                          /* Green for success */
+  --color-success-bg: #e8f5e9;                       /* Light green background */
+  --color-info: #1976d2;                             /* Blue for info */
+  --color-info-bg: #e3f2fd;                          /* Light blue background */
+
+  /* Text Colors (Additional) */
+  --color-text: #1a1a1a;                             /* Primary text */
+  --color-text-primary: #1a1a1a;                     /* Primary text */
+  --color-text-secondary: #666666;                   /* Secondary text */
+
+  /* Border Colors (Additional) */
+  --color-border-hover: #999999;                     /* Border on hover */
+
+  /* Overlay Colors */
+  --color-overlay: rgba(255, 255, 255, 0.90);        /* White overlay */
+  --color-overlay-light: rgba(255, 255, 255, 0.75);  /* Lighter white overlay */
+  --color-scrim: rgba(250, 250, 250, 0.98);          /* Almost white scrim */
+}
+
+/* ============================================
+   USAGE EXAMPLES
+   ============================================
+
+   Basic usage:
+   .my-component {
+     background: var(--color-bg-elevated);
+     color: var(--color-primary);
+     border: 1px solid var(--color-border);
+   }
+
+   Hover state:
+   .my-component:hover {
+     border-color: var(--color-highlight);
+   }
+
+   Error state:
+   .my-component--error {
+     color: var(--color-error);
+     background: var(--color-error-bg);
+   }
+
+   With fallback:
+   .my-component {
+     color: var(--color-primary);
+   }
+
+   ============================================ */

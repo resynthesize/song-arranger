@@ -1,0 +1,183 @@
+/**
+ * Cyclone - BottomPane Styles
+ * Reusable bottom panel container for editors and settings
+ */
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-secondary, var(--color-bg-elevated));
+  border-top: var(--border-width-thin) solid var(--color-border, var(--color-grid));
+  color: var(--color-text, var(--color-text-primary));
+  overflow: hidden;
+  position: relative;
+  z-index: var(--z-editor);
+}
+
+/* Resize handle for bottom edge */
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  cursor: row-resize;
+  background: transparent;
+  transition: background var(--transition-fast);
+  z-index: 10;
+}
+
+.resizeHandle:hover {
+  background: var(--color-accent, var(--color-highlight));
+  opacity: 0.3;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-tertiary, var(--color-bg-hover));
+  border-bottom: var(--border-width-thin) solid var(--color-border, var(--color-grid));
+  flex-shrink: 0;
+  gap: var(--spacing-md);
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0; /* Allow text to truncate */
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text, var(--color-text-primary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary, var(--color-secondary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+.closeButton {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-primary, var(--color-bg));
+  color: var(--color-text, var(--color-text-primary));
+  border: var(--border-width-thin) solid var(--color-border, var(--color-grid));
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.closeButton:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover, var(--color-secondary));
+}
+
+.closeButton:active {
+  background: var(--color-bg-active);
+  transform: translateY(1px);
+}
+
+.closeButton:focus-visible {
+  outline: var(--border-width-thick) solid var(--color-accent, var(--color-highlight));
+  outline-offset: var(--spacing-xs);
+}
+
+/* Content area */
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* CRT theme overrides */
+:global(.theme-crt) .pane {
+  background: var(--primitive-black);
+  border-top-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+:global(.theme-crt) .header {
+  background: var(--primitive-green-950);
+  border-bottom-color: var(--color-primary);
+}
+
+:global(.theme-crt) .title {
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-sm);
+}
+
+:global(.theme-crt) .subtitle {
+  color: var(--color-secondary);
+}
+
+:global(.theme-crt) .closeButton {
+  background: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  text-shadow: var(--phosphor-glow-xs);
+}
+
+:global(.theme-crt) .closeButton:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  box-shadow: var(--phosphor-glow-sm);
+}
+
+:global(.theme-crt) .resizeHandle:hover {
+  background: var(--color-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .headerLeft {
+    width: 100%;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .closeButton {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
+  }
+}

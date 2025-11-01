@@ -24,6 +24,7 @@ interface UsePatternDragReturn {
   isDragging: boolean;
   isCopying: boolean;
   verticalDragDeltaY: number;
+  horizontalDragDeltaX: number;
   handleDragStart: (e: MouseEvent) => void;
 }
 
@@ -45,20 +46,34 @@ export const usePatternDrag = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [verticalDragDeltaY, setVerticalDragDeltaY] = useState(0);
+  const [horizontalDragDeltaX, setHorizontalDragDeltaX] = useState(0);
 
   const dragStartX = useRef(0);
   const dragStartY = useRef(0);
   const dragStartPosition = useRef(0);
   const dragStartTrackId = useRef<ID>('');
   const verticalDragDeltaYRef = useRef(0); // Store actual value for mouseup handler
+  const horizontalDragDeltaXRef = useRef(0); // Store actual value for mouseup handler
+  const hasDragStarted = useRef(false); // Track if we've actually started dragging (moved > threshold)
 
   /**
    * Handle drag start on pattern content
    */
   const handleDragStart = useCallback(
     (e: MouseEvent) => {
+      console.log(`[usePatternDrag] handleDragStart called`, {
+        id,
+        button: e.button,
+        target: (e.target as HTMLElement).className,
+        currentTarget: (e.currentTarget as HTMLElement).className,
+        clientX: e.clientX,
+        clientY: e.clientY
+      });
+
       if (e.button !== 0) return;
-      e.stopPropagation();
+
+      // Don't stop propagation here - let double-click events work
+      // We'll handle event propagation in mousemove if actually dragging
 
       // Always select on mousedown (before starting potential drag)
       const isMultiSelect = e.altKey;
@@ -70,11 +85,16 @@ export const usePatternDrag = ({
         onCopy(id);
       }
 
-      setIsDragging(true);
+      console.log(`[usePatternDrag] Starting drag`, { id });
+      // Don't set isDragging yet - wait for mousemove threshold
+      // This allows double-click to work properly
       dragStartX.current = e.clientX;
       dragStartY.current = e.clientY;
       dragStartPosition.current = position;
       dragStartTrackId.current = trackId; // Track starting track
+
+      // Add listeners immediately to detect movement
+      setIsDragging(true);
     },
     [id, trackId, position, onSelect, onCopy]
   );
@@ -83,16 +103,27 @@ export const usePatternDrag = ({
   useEffect(() => {
     if (!isDragging) return;
 
+    const DRAG_THRESHOLD = 5; // pixels - must move this much to start drag
+
     const handleMouseMove = (e: globalThis.MouseEvent) => {
       const deltaX = e.clientX - dragStartX.current;
       const deltaY = e.clientY - dragStartY.current;
-      const deltaBeats = deltaX / viewport.zoom;
+      const totalDelta = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-      // Calculate new position and snap it
-      const rawNewPosition = dragStartPosition.current + deltaBeats;
-      const snappedPosition = snapToGrid(rawNewPosition, snapValue);
-      const positionDelta = snappedPosition - dragStartPosition.current;
-      onMove(id, snappedPosition, positionDelta);
+      // Only start actual drag if we've moved beyond threshold
+      if (!hasDragStarted.current && totalDelta < DRAG_THRESHOLD) {
+        return; // Not enough movement yet - don't start drag
+      }
+
+      // Mark that we've started dragging
+      if (!hasDragStarted.current) {
+        hasDragStarted.current = true;
+      }
+
+      // Store horizontal drag deltaX for CSS transform (smooth visual movement)
+      // Don't update Redux until mouseup to allow smooth dragging across multiple scenes
+      horizontalDragDeltaXRef.current = deltaX;
+      setHorizontalDragDeltaX(deltaX);
 
       // Handle vertical track dragging - store deltaY for CSS transform
       // Don't update Redux until mouseup to prevent unmount/remount
@@ -108,17 +139,33 @@ export const usePatternDrag = ({
     };
 
     const handleMouseUp = () => {
+      const wasDraggingHorizontally = horizontalDragDeltaXRef.current !== 0;
       const wasDraggingVertically = verticalDragDeltaYRef.current !== 0;
+      const horizontalDelta = horizontalDragDeltaXRef.current;
       const verticalDelta = verticalDragDeltaYRef.current;
 
-      // Clear states first, before calling Redux update
+      // Calculate final snapped position from horizontal delta
+      if (wasDraggingHorizontally) {
+        const deltaBeats = horizontalDelta / viewport.zoom;
+        const rawNewPosition = dragStartPosition.current + deltaBeats;
+        const snappedPosition = snapToGrid(rawNewPosition, snapValue);
+        const positionDelta = snappedPosition - dragStartPosition.current;
+
+        // Update Redux with final snapped position
+        onMove(id, snappedPosition, positionDelta);
+      }
+
+      // Clear states first, before calling vertical Redux update
       // This prevents the pattern from showing transform when it remounts in new track
       setIsDragging(false);
       setIsCopying(false);
       setVerticalDragDeltaY(0);
+      setHorizontalDragDeltaX(0);
       verticalDragDeltaYRef.current = 0;
+      horizontalDragDeltaXRef.current = 0;
+      hasDragStarted.current = false; // Reset for next drag
 
-      // Now update Redux (may cause unmount/remount in new track)
+      // Now update Redux for vertical movement (may cause unmount/remount in new track)
       if (wasDraggingVertically && onVerticalDrag) {
         onVerticalDrag(id, dragStartTrackId.current, verticalDelta);
       }
@@ -137,6 +184,7 @@ export const usePatternDrag = ({
     isDragging,
     isCopying,
     verticalDragDeltaY,
+    horizontalDragDeltaX,
     handleDragStart,
   };
 };

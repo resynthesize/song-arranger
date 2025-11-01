@@ -1,5 +1,55 @@
 /**
  * PatternHandle Molecule Styles
- * Note: Main handle styles are defined in Pattern.css
- * This file is kept for future extensions if needed
+ * Resize handles for pattern edges
  */
+
+.pattern__handle {
+  /* Absolutely positioned so handles don't take up space in layout */
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Dynamic width: larger patterns get wider handles, small patterns get minimal handles */
+  width: min(var(--spacing-lg), max(var(--spacing-xs), var(--spacing-sm)));
+  cursor: ew-resize;
+  background: transparent;
+  z-index: 20; /* Ensure handles stay above all visual indicators */
+  transition:
+    background-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+/* Extended hit area using pseudo-element for better grab at all sizes */
+.pattern__handle::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--spacing-xs));
+  bottom: calc(-1 * var(--spacing-xs));
+  /* Extend hit area outward for easier grabbing */
+  width: calc(100% + var(--spacing-lg));
+  cursor: inherit;
+}
+
+.pattern__handle--left::before {
+  left: calc(-1 * var(--spacing-sm));
+  right: 0;
+}
+
+.pattern__handle--right::before {
+  left: 0;
+  right: calc(-1 * var(--spacing-sm));
+}
+
+.pattern__handle:hover {
+  background: var(--color-primary);
+  opacity: 0.5;
+}
+
+.pattern__handle--left {
+  left: 0;
+  cursor: w-resize;
+}
+
+.pattern__handle--right {
+  right: 0;
+  cursor: e-resize;
+}

@@ -10,6 +10,7 @@ import { barsToBeats, calculateSceneDuration } from './conversion';
 import { MODERN_TRACK_COLORS } from '@/constants';
 import { isValidP3Bar } from '@/types/patternData';
 import { generateId } from '@/utils/id';
+import { ensureMetadata } from './metadata';
 
 /**
  * Result of importing a Cirklon file
@@ -23,9 +24,9 @@ export interface ImportResult {
 }
 
 /**
- * Parse CKS file JSON string
+ * Parse CKS file JSON string and ensure it has proper metadata
  * @param jsonString Raw JSON string from .CKS file
- * @returns Parsed CirklonSongData
+ * @returns Parsed CirklonSongData with _cyclone_metadata
  * @throws Error if JSON is invalid or doesn't match expected format
  */
 export function parseCKSFile(jsonString: string): CirklonSongData {
@@ -42,7 +43,10 @@ export function parseCKSFile(jsonString: string): CirklonSongData {
     throw new Error('Invalid CKS file format: missing song_data');
   }
 
-  return parsed as CirklonSongData;
+  const cksData = parsed as CirklonSongData;
+
+  // Ensure metadata exists (generates if missing, validates if present)
+  return ensureMetadata(cksData);
 }
 
 /**

@@ -16,34 +16,34 @@
 /* Bar number in top third (0-16px) */
 .ruler-tick__bar-number {
   position: absolute;
-  top: 2px;
-  color: var(--color-primary, #00ff00);
-  font-weight: bold;
-  font-size: 14px;
-  padding: 2px 4px;
+  top: var(--spacing-xs);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) 0; /* Remove left padding for exact beat alignment */
   cursor: pointer;
   user-select: none;
   line-height: 1;
 }
 
 .ruler-tick__bar-number:hover {
-  background: rgba(0, 255, 0, 0.1);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 /* Timestamp in middle third (17-33px) */
 .ruler-tick__time-marker {
   position: absolute;
-  top: 19px;
-  color: var(--color-secondary, #008800);
-  font-size: 10px;
-  padding: 1px 4px;
+  top: 1.1875rem; /* 19px @ 16px base */
+  color: var(--color-secondary);
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) 0; /* Remove left padding for alignment with bar numbers */
   cursor: pointer;
   user-select: none;
   line-height: 1;
-  opacity: 0.7;
+  opacity: var(--opacity-muted);
 }
 
 .ruler-tick__time-marker:hover {
-  background: rgba(0, 255, 0, 0.05);
-  opacity: 1;
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+  opacity: var(--opacity-full);
 }

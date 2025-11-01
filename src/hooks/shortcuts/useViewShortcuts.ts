@@ -32,6 +32,7 @@ export interface ViewShortcutHandlers {
   help: () => void;
   settings: () => void;
   commandPalette: () => void;
+  toggleSongDataViewer: () => void;
 }
 
 export interface ViewShortcutState {
@@ -41,6 +42,8 @@ export interface ViewShortcutState {
   setShowSettings: (show: boolean) => void;
   showCommandPalette: boolean;
   setShowCommandPalette: (show: boolean) => void;
+  showSongDataViewer: boolean;
+  setShowSongDataViewer: (show: boolean) => void;
 }
 
 /**
@@ -113,14 +116,20 @@ export const useViewShortcuts = (
   }, [dispatch]);
 
   const handleUndo = useCallback(() => {
-    // TODO: Implement undo functionality
-    logger.log('Undo action (not yet implemented)');
-  }, []);
+    logger.log('Undo action triggered');
+    // Import UndoActionCreators dynamically to avoid circular dependencies
+    import('@/store/store').then(({ UndoActionCreators }) => {
+      dispatch(UndoActionCreators.undo());
+    });
+  }, [dispatch]);
 
   const handleRedo = useCallback(() => {
-    // TODO: Implement redo functionality
-    logger.log('Redo action (not yet implemented)');
-  }, []);
+    logger.log('Redo action triggered');
+    // Import UndoActionCreators dynamically to avoid circular dependencies
+    import('@/store/store').then(({ UndoActionCreators }) => {
+      dispatch(UndoActionCreators.redo());
+    });
+  }, [dispatch]);
 
   const handleHelp = useCallback(() => {
     state.setShowHelp(true);
@@ -132,6 +141,10 @@ export const useViewShortcuts = (
 
   const handleCommandPalette = useCallback(() => {
     state.setShowCommandPalette(true);
+  }, [state]);
+
+  const handleToggleSongDataViewer = useCallback(() => {
+    state.setShowSongDataViewer(!state.showSongDataViewer);
   }, [state]);
 
   return {
@@ -148,5 +161,6 @@ export const useViewShortcuts = (
     help: handleHelp,
     settings: handleSettings,
     commandPalette: handleCommandPalette,
+    toggleSongDataViewer: handleToggleSongDataViewer,
   };
 };

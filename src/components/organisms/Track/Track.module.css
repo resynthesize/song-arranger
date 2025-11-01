@@ -5,10 +5,11 @@
 
 .track {
   display: flex;
+  position: relative; /* For absolute positioning of resize handle */
   border-bottom: var(--border-width-thin) solid var(--color-grid);
   min-height: 0; /* Override flex default min-height: auto to allow shrinking */
-  /* height is set dynamically via inline style based on verticalZoom */
-  transition: transform 300ms ease-out, opacity 300ms ease-out;
+  /* height is set dynamically via inline style based on verticalZoom or custom height */
+  transition: transform var(--duration-slow) var(--ease-out), opacity var(--duration-slow) var(--ease-out);
 }
 
 .track:last-child {
@@ -19,45 +20,45 @@
 @keyframes track-swap {
   0% {
     transform: translateX(0) scaleY(1);
-    filter: brightness(1) drop-shadow(0 0 0 rgba(0, 255, 0, 0));
+    filter: brightness(1) drop-shadow(0 0 0 color-mix(in srgb, var(--primitive-green-500) 0%, transparent));
   }
   15% {
-    transform: translateX(-8px) scaleY(0.98);
-    filter: brightness(1.5) saturate(1.5) drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+    transform: translateX(calc(-1 * var(--spacing-sm))) scaleY(0.98);
+    filter: brightness(1.5) saturate(1.5) drop-shadow(0 0 var(--glow-intensity-md) color-mix(in srgb, var(--primitive-green-500) 80%, transparent));
   }
   30% {
-    transform: translateX(8px) scaleY(1.02);
-    filter: brightness(1.3) saturate(1.3) drop-shadow(0 0 8px rgba(0, 255, 0, 0.6));
+    transform: translateX(var(--spacing-sm)) scaleY(1.02);
+    filter: brightness(1.3) saturate(1.3) drop-shadow(0 0 var(--glow-intensity-sm) color-mix(in srgb, var(--primitive-green-500) 60%, transparent));
   }
   50% {
     transform: translateX(0) scaleY(1);
-    filter: brightness(1.2) drop-shadow(0 0 5px rgba(0, 255, 0, 0.4));
+    filter: brightness(1.2) drop-shadow(0 0 var(--glow-intensity-xs) color-mix(in srgb, var(--primitive-green-500) 40%, transparent));
   }
   100% {
     transform: translateX(0) scaleY(1);
-    filter: brightness(1) drop-shadow(0 0 0 rgba(0, 255, 0, 0));
+    filter: brightness(1) drop-shadow(0 0 0 color-mix(in srgb, var(--primitive-green-500) 0%, transparent));
   }
 }
 
 .moving {
-  animation: track-swap 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+  animation: track-swap var(--duration-slower) cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
   position: relative;
-  background: rgba(0, 255, 0, 0.15) !important;
-  outline: 2px solid rgba(0, 255, 0, 0.8) !important;
-  outline-offset: -2px;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent) !important;
+  outline: var(--border-width-thick) solid color-mix(in srgb, var(--color-primary) 80%, transparent) !important;
+  outline-offset: calc(-1 * var(--spacing-xs));
 }
 
 /* Current track (for keyboard navigation) */
 .current {
-  box-shadow: inset 3px 0 0 var(--color-primary);
+  box-shadow: inset var(--spacing-xs) 0 0 var(--color-primary);
 }
 
 .current .header {
-  background: rgba(0, 255, 0, 0.05);
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
 }
 
 .current .content {
-  background: rgba(0, 255, 0, 0.02);
+  background: color-mix(in srgb, var(--color-primary) 2%, transparent);
 }
 
 /* Track Header (Name) */
@@ -86,11 +87,11 @@
 
 @keyframes pulse-indicator {
   0%, 100% {
-    opacity: 1;
+    opacity: var(--opacity-full);
     text-shadow: var(--phosphor-glow-md);
   }
   50% {
-    opacity: 0.6;
+    opacity: var(--opacity-semi);
     text-shadow: var(--phosphor-glow-sm);
   }
 }
@@ -108,7 +109,7 @@
 }
 
 .colorSwatch:hover {
-  filter: brightness(1.3) drop-shadow(0 0 4px currentColor);
+  filter: brightness(1.3) drop-shadow(0 0 var(--glow-intensity-sm) currentColor);
 }
 
 .name {
@@ -154,7 +155,7 @@
 }
 
 .content:hover {
-  background: #000a00; /* Subtle highlight on hover */
+  background: color-mix(in srgb, var(--color-primary) 3%, var(--color-bg)); /* Subtle highlight on hover */
 }
 
 /* Grid canvas for dynamic grid lines */
@@ -170,27 +171,27 @@
 
 /* Ghost pattern preview during drag-to-create */
 .ghostPattern {
-  background: rgba(0, 255, 0, 0.15);
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
   border: var(--border-width-thin) dashed var(--color-primary);
   box-shadow:
-    inset 0 0 10px rgba(0, 255, 0, 0.2),
-    0 0 8px rgba(0, 255, 0, 0.3);
-  z-index: 10;
-  animation: ghost-pulse 0.8s ease-in-out infinite;
+    inset 0 0 var(--glow-intensity-md) color-mix(in srgb, var(--color-primary) 20%, transparent),
+    0 0 var(--glow-intensity-sm) color-mix(in srgb, var(--color-primary) 30%, transparent);
+  z-index: var(--z-controls);
+  animation: ghost-pulse 800ms ease-in-out infinite;
 }
 
 @keyframes ghost-pulse {
   0%, 100% {
-    opacity: 0.6;
+    opacity: var(--opacity-semi);
     box-shadow:
-      inset 0 0 10px rgba(0, 255, 0, 0.2),
-      0 0 8px rgba(0, 255, 0, 0.3);
+      inset 0 0 var(--glow-intensity-md) color-mix(in srgb, var(--color-primary) 20%, transparent),
+      0 0 var(--glow-intensity-sm) color-mix(in srgb, var(--color-primary) 30%, transparent);
   }
   50% {
     opacity: 0.8;
     box-shadow:
-      inset 0 0 15px rgba(0, 255, 0, 0.3),
-      0 0 12px rgba(0, 255, 0, 0.5);
+      inset 0 0 var(--glow-intensity-lg) color-mix(in srgb, var(--color-primary) 30%, transparent),
+      0 0 var(--glow-intensity-md) color-mix(in srgb, var(--color-primary) 50%, transparent);
   }
 }
 
@@ -202,6 +203,6 @@
 
   .ghostPattern {
     animation: none;
-    opacity: 0.6;
+    opacity: var(--opacity-semi);
   }
 }

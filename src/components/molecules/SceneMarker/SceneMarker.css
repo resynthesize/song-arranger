@@ -1,79 +1,122 @@
 /**
  * Scene Marker Styles
- * Terminal-styled scene markers for the ruler
- * Ruler divided into 3 vertical zones: bar numbers (top), timestamps (middle), scenes (bottom)
+ * Block-spanning scene markers displayed in the ruler's scene row
  */
 
 .scene-marker {
   position: absolute;
-  top: 0;
-  height: 100%;
+  height: 28px;
+  /* width set inline based on duration * zoom */
+  background: color-mix(in srgb, var(--color-highlight) 5%, var(--color-bg));
+  border: var(--border-width-base) solid var(--color-highlight);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
   display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Left-align contents */
+  align-items: center;
+  overflow: hidden;
   pointer-events: auto;
-  z-index: 5; /* Above ruler ticks but below patterns */
+  z-index: 100;
 }
 
-/* Vertical line marking the scene position */
+.scene-marker:hover {
+  background: color-mix(in srgb, var(--color-highlight) 10%, var(--color-bg));
+  border-color: var(--color-primary);
+}
+
+/* Vertical accent line at left edge */
 .scene-marker__line {
-  width: 2px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--border-width-thick);
   height: 100%;
   background: var(--color-highlight);
-  opacity: 0.4;
-  box-shadow: 0 0 2px rgba(102, 255, 102, 0.2);
+  box-shadow: var(--phosphor-glow-xs);
   pointer-events: none;
+  z-index: 1;
 }
 
-/* Scene name label in bottom third (34-50px), left-aligned */
+/* Scene name label positioned inside the block */
 .scene-marker__label {
   position: absolute;
-  top: 36px; /* Bottom third of 50px ruler */
-  left: 4px; /* Start to the right of the vertical line */
-  padding: 1px 3px;
+  left: 0.5rem; /* 8px - offset from left edge */
+  top: 50%;
+  transform: translateY(-50%);
   font-family: var(--font-primary);
-  font-size: var(--font-size-xs); /* Same size as time markers */
-  font-weight: normal;
+  font-size: 0.75rem; /* 12px */
+  font-weight: bold;
   color: var(--color-highlight);
-  background: var(--color-bg);
-  border: var(--border-width-thin) solid var(--color-highlight);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  text-shadow: var(--phosphor-glow-xs);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 1.5rem); /* Leave room for resize handle */
+  pointer-events: none;
   line-height: 1;
-  text-shadow: 0 0 2px rgba(102, 255, 102, 0.3);
-  opacity: 0.9;
 }
 
-.scene-marker__label:hover {
+.scene-marker:hover .scene-marker__label {
   color: var(--color-primary);
-  border-color: var(--color-primary);
   text-shadow: var(--phosphor-glow-sm);
-  background: rgba(0, 255, 0, 0.05);
 }
 
-/* Input for editing scene name - same positioning as label */
+/* Input for editing scene name */
 .scene-marker__input {
   position: absolute;
-  top: 36px; /* Bottom third of 50px ruler */
-  left: 4px; /* Start to the right of the vertical line */
-  padding: 1px 3px;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.125rem 0.25rem;
   font-family: var(--font-primary);
-  font-size: var(--font-size-xs); /* Same size as label */
-  font-weight: normal;
+  font-size: 0.75rem;
+  font-weight: bold;
   color: var(--color-primary);
   background: var(--color-bg);
-  border: var(--border-width-thin) solid var(--color-primary);
+  border: var(--border-width-base) solid var(--color-primary);
   outline: none;
-  min-width: 40px;
-  max-width: 120px;
+  min-width: 3rem;
+  max-width: calc(100% - 1.5rem);
   line-height: 1;
   text-shadow: var(--phosphor-glow-sm);
+  z-index: 10;
 }
 
 .scene-marker__input:focus {
   border-color: var(--color-highlight);
-  box-shadow: 0 0 4px rgba(0, 255, 0, 0.3);
+  box-shadow: var(--phosphor-glow-sm);
+}
+
+/* Resize handle at right edge */
+.scene-marker__resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 0.5rem; /* 8px */
+  height: 100%;
+  background: var(--color-highlight);
+  opacity: 0;
+  cursor: ew-resize;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+  z-index: 10;
+}
+
+.scene-marker:hover .scene-marker__resize-handle {
+  opacity: 0.5;
+}
+
+.scene-marker__resize-handle:hover {
+  opacity: 1 !important;
+  background: var(--color-primary);
+}
+
+.scene-marker--resizing {
+  background: color-mix(in srgb, var(--color-highlight) 15%, var(--color-bg));
+  cursor: ew-resize;
+}
+
+.scene-marker--resizing .scene-marker__resize-handle {
+  opacity: 1;
+  background: var(--color-primary);
 }
 
 /* Respect reduced motion preference */

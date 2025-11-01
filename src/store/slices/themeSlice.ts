@@ -1,11 +1,11 @@
 /**
  * Cyclone - Theme Management Slice
- * Redux slice for managing application theme (modern/retro)
+ * Redux slice for managing application theme (retro/modern/minimalist)
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export type Theme = 'modern' | 'retro';
+export type Theme = 'retro' | 'modern' | 'minimalist';
 
 export interface ThemeState {
   current: Theme;
@@ -23,7 +23,14 @@ const themeSlice = createSlice({
       state.current = action.payload;
     },
     toggleTheme: (state) => {
-      state.current = state.current === 'modern' ? 'retro' : 'modern';
+      // Cycle through themes: retro -> modern -> minimalist -> retro
+      if (state.current === 'retro') {
+        state.current = 'modern';
+      } else if (state.current === 'modern') {
+        state.current = 'minimalist';
+      } else {
+        state.current = 'retro';
+      }
     },
   },
 });

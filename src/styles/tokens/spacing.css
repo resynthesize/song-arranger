@@ -1,0 +1,240 @@
+/**
+ * Cyclone Design Tokens - Spacing
+ * Spacing scale, padding, margin, and gap values
+ *
+ * Grid System:
+ *   - Retro: 8px base grid (original design)
+ *   - Modern: 4px base grid for precision
+ *
+ * All spacing values are multiples of the base grid
+ */
+
+/* ============================================
+   SPACING SCALE - RETRO THEME (DEFAULT)
+   8px base grid system
+   ============================================ */
+
+:root {
+  /* Base Grid Unit */
+  --grid-unit: 8px;
+
+  /* Spacing Scale */
+  --spacing-xs: 4px;     /* 0.5 grid units - Tight gaps, icon spacing */
+  --spacing-sm: 8px;     /* 1 grid unit - Button vertical padding, small gaps */
+  --spacing-md: 16px;    /* 2 grid units - Button horizontal padding, panel padding */
+  --spacing-lg: 24px;    /* 3 grid units - Section gaps, card padding */
+  --spacing-xl: 32px;    /* 4 grid units - Major section separation */
+  --spacing-2xl: 40px;   /* 5 grid units - Page margins */
+  --spacing-3xl: 48px;   /* 6 grid units - Large layout spacing */
+  --spacing-4xl: 64px;   /* 8 grid units - Extra large spacing */
+  --spacing-5xl: 80px;   /* 10 grid units - Massive spacing */
+
+  /* Aliases for common use cases */
+  --spacing-tiny: var(--spacing-xs);
+  --spacing-small: var(--spacing-sm);
+  --spacing-medium: var(--spacing-md);
+  --spacing-large: var(--spacing-lg);
+}
+
+/* ============================================
+   SPACING SCALE - MODERN THEME
+   4px base grid for precision (tighter spacing)
+   ============================================ */
+
+.app.theme-modern {
+  /* Base Grid Unit */
+  --grid-unit: 4px;
+
+  /* Spacing Scale - Tighter values for modern aesthetic */
+  --spacing-xs: 4px;     /* 1 grid unit - Same as retro */
+  --spacing-sm: 8px;     /* 2 grid units - Same as retro */
+  --spacing-md: 12px;    /* 3 grid units - Tighter than retro (16px) */
+  --spacing-lg: 16px;    /* 4 grid units - Tighter than retro (24px) */
+  --spacing-xl: 24px;    /* 6 grid units - Tighter than retro (32px) */
+  --spacing-2xl: 32px;   /* 8 grid units - Tighter than retro (40px) */
+  --spacing-3xl: 40px;   /* 10 grid units - Tighter than retro (48px) */
+  --spacing-4xl: 56px;   /* 14 grid units */
+  --spacing-5xl: 72px;   /* 18 grid units */
+
+  /* Aliases point to the same tokens */
+  --spacing-tiny: var(--spacing-xs);
+  --spacing-small: var(--spacing-sm);
+  --spacing-medium: var(--spacing-md);
+  --spacing-large: var(--spacing-lg);
+}
+
+/* ============================================
+   COMPONENT-SPECIFIC SPACING
+   Semantic spacing tokens for common components
+   ============================================ */
+
+:root {
+  /* Button Spacing */
+  --button-padding-x: var(--spacing-md);
+  --button-padding-y: var(--spacing-sm);
+  --button-gap: var(--spacing-xs);
+
+  /* Input Spacing */
+  --input-padding-x: var(--spacing-sm);
+  --input-padding-y: var(--spacing-xs);
+
+  /* Panel Spacing */
+  --panel-padding: var(--spacing-md);
+  --panel-gap: var(--spacing-sm);
+
+  /* Card Spacing */
+  --card-padding: var(--spacing-lg);
+  --card-gap: var(--spacing-md);
+
+  /* List Spacing */
+  --list-gap: var(--spacing-xs);
+  --list-item-padding: var(--spacing-sm);
+
+  /* Section Spacing */
+  --section-gap: var(--spacing-xl);
+  --section-padding: var(--spacing-lg);
+
+  /* Page Spacing */
+  --page-margin: var(--spacing-2xl);
+  --page-padding: var(--spacing-xl);
+}
+
+/* ============================================
+   BORDER RADIUS
+   ============================================ */
+
+:root {
+  --border-radius-none: 0;
+  --border-radius-sm: 2px;
+  --border-radius-md: 4px;
+  --border-radius-lg: 6px;
+  --border-radius-xl: 8px;
+  --border-radius-2xl: 12px;
+  --border-radius-full: 9999px;  /* Fully rounded (pills, circles) */
+
+  /* Aliases */
+  --border-radius-round: var(--border-radius-full);
+}
+
+.app.theme-modern {
+  /* Slightly more rounded in modern theme */
+  --border-radius-sm: 3px;
+  --border-radius-md: 4px;
+  --border-radius-lg: 6px;
+  --border-radius-xl: 8px;
+}
+
+/* ============================================
+   BORDER WIDTHS
+   ============================================ */
+
+:root {
+  --border-width-thin: 1px;
+  --border-width-base: 2px;     /* Retro: thicker borders */
+  --border-width-thick: 3px;
+  --border-width-thicker: 4px;
+
+  /* Aliases */
+  --border-width-default: var(--border-width-base);
+}
+
+.app.theme-modern {
+  --border-width-base: 1px;     /* Modern: thinner borders */
+  --border-width-thick: 2px;
+  --border-width-thicker: 3px;
+}
+
+/* ============================================
+   LAYOUT DIMENSIONS
+   Common layout dimensions
+   ============================================ */
+
+:root {
+  /* Header Heights */
+  --header-height: 60px;        /* Retro: taller header */
+  --footer-height: 50px;
+
+  /* Sidebar Widths */
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 60px;
+
+  /* Track Header */
+  --track-header-width: 200px;
+  --track-header-min-width: 120px;
+  --track-header-max-width: 400px;
+
+  /* Content Widths */
+  --content-max-width: 1400px;
+  --content-narrow-width: 800px;
+
+  /* Control Sizes */
+  --control-height-sm: 24px;
+  --control-height-md: 32px;
+  --control-height-lg: 40px;
+
+  /* Icon Sizes */
+  --icon-size-xs: 12px;
+  --icon-size-sm: 16px;
+  --icon-size-md: 20px;
+  --icon-size-lg: 24px;
+  --icon-size-xl: 32px;
+}
+
+.app.theme-modern {
+  /* Modern: compact dimensions */
+  --header-height: 50px;
+  --footer-height: 40px;
+
+  --sidebar-width: 220px;
+  --sidebar-width-collapsed: 56px;
+
+  --track-header-width: 180px;
+
+  --control-height-sm: 22px;
+  --control-height-md: 28px;
+  --control-height-lg: 36px;
+
+  --icon-size-xs: 10px;
+  --icon-size-sm: 14px;
+  --icon-size-md: 18px;
+  --icon-size-lg: 22px;
+  --icon-size-xl: 28px;
+}
+
+/* ============================================
+   USAGE EXAMPLES
+   ============================================
+
+   Basic spacing:
+   .my-component {
+     padding: var(--spacing-md);
+     margin-bottom: var(--spacing-lg);
+     gap: var(--spacing-sm);
+   }
+
+   Button with semantic spacing:
+   .button {
+     padding: var(--button-padding-y) var(--button-padding-x);
+     gap: var(--button-gap);
+     border-radius: var(--border-radius-md);
+   }
+
+   Panel with borders:
+   .panel {
+     padding: var(--panel-padding);
+     border: var(--border-width-base) solid var(--color-border);
+     border-radius: var(--border-radius-lg);
+   }
+
+   Section layout:
+   .section {
+     padding: var(--section-padding);
+     margin-bottom: var(--section-gap);
+   }
+
+   Responsive with fallback:
+   .component {
+     padding: var(--spacing-md, 16px);
+   }
+
+   ============================================ */

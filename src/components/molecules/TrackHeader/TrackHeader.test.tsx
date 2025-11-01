@@ -9,14 +9,12 @@ describe('TrackHeader', () => {
   const defaultProps = {
     id: 'track-1',
     name: 'Test Lane',
-    color: '#00ff00',
     isCurrent: false,
     isEditing: false,
     headerPadding: 16,
     onNameChange: jest.fn(),
     onStartEditing: jest.fn(),
     onStopEditing: jest.fn(),
-    onColorSwatchClick: jest.fn(),
   };
 
   it('should render lane name', () => {
@@ -24,30 +22,16 @@ describe('TrackHeader', () => {
     expect(screen.getByText('Test Lane')).toBeInTheDocument();
   });
 
-  it('should render current indicator when isCurrent is true', () => {
+  it('should apply current styling when isCurrent is true', () => {
     render(<TrackHeader {...defaultProps} isCurrent={true} />);
-    expect(screen.getByText('>')).toBeInTheDocument();
+    const header = screen.getByTestId('track-track-1-header');
+    expect(header).toHaveClass('track-header--current');
   });
 
-  it('should not render current indicator when isCurrent is false', () => {
+  it('should not apply current styling when isCurrent is false', () => {
     render(<TrackHeader {...defaultProps} isCurrent={false} />);
-    expect(screen.queryByText('>')).not.toBeInTheDocument();
-  });
-
-  it('should render color swatch with correct color', () => {
-    render(<TrackHeader {...defaultProps} color="#ff0000" />);
-    const swatch = screen.getByTestId('track-track-1-color-swatch');
-    expect(swatch).toHaveStyle({ color: '#ff0000' });
-  });
-
-  it('should call onColorSwatchClick when color swatch is clicked', () => {
-    const onColorSwatchClick = jest.fn();
-    render(<TrackHeader {...defaultProps} onColorSwatchClick={onColorSwatchClick} />);
-
-    const swatch = screen.getByTestId('track-track-1-color-swatch');
-    fireEvent.click(swatch);
-
-    expect(onColorSwatchClick).toHaveBeenCalled();
+    const header = screen.getByTestId('track-track-1-header');
+    expect(header).not.toHaveClass('track-header--current');
   });
 
   it('should call onTrackSelect when header is clicked', () => {

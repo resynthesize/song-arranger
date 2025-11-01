@@ -6,6 +6,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { PatternEditorState, ID, PatternRow } from '@/types';
 import { logger } from '@/utils/debug';
+import { openScene } from './sceneEditorSlice';
 
 const MIN_EDITOR_HEIGHT = 100; // Minimum editor pane height in pixels
 
@@ -17,6 +18,28 @@ const initialState: PatternEditorState = {
   editorHeight: 400, // Default 400px
   clipboardSteps: null,
   viewMode: 'parameters',
+  // All rows visible by default
+  visibleRows: {
+    note: true,
+    velocity: true,
+    length: true,
+    delay: true,
+    auxA: true,
+    auxB: true,
+    auxC: true,
+    auxD: true,
+  },
+  // No rows collapsed by default
+  collapsedRows: {
+    note: false,
+    velocity: false,
+    length: false,
+    delay: false,
+    auxA: false,
+    auxB: false,
+    auxC: false,
+    auxD: false,
+  },
 };
 
 const patternEditorSlice = createSlice({
@@ -25,17 +48,15 @@ const patternEditorSlice = createSlice({
   reducers: {
     /**
      * Open pattern editor for a pattern
-     * Resets editing state but preserves height and clipboard
+     * Resets pattern-specific state but preserves UI preferences (view mode, selected row, height, clipboard)
      */
     openPattern: (state, action: PayloadAction<ID>) => {
       logger.log('[openPattern] Opening pattern', { patternId: action.payload });
       state.openPatternId = action.payload;
-      // Reset editing state when opening pattern
-      state.selectedRow = 'note';
+      // Reset pattern-specific state when opening pattern
       state.selectedSteps = [];
       state.currentBarIndex = 0;
-      state.viewMode = 'parameters';
-      // Preserve editorHeight and clipboardSteps
+      // Preserve viewMode, selectedRow, editorHeight, and clipboardSteps
     },
 
     /**
@@ -141,14 +162,68 @@ const patternEditorSlice = createSlice({
     },
 
     /**
-     * Toggle view mode between parameters and aux
+     * Toggle view mode between parameters, aux, and bar
+     * Cycles through: parameters -> aux -> bar -> parameters
      * Resets selectedRow to first row of new view
      */
     toggleViewMode: (state) => {
-      state.viewMode = state.viewMode === 'parameters' ? 'aux' : 'parameters';
-      // Reset selected row to first row of new view
-      state.selectedRow = state.viewMode === 'parameters' ? 'note' : 'auxA';
+      // Cycle through modes
+      if (state.viewMode === 'parameters') {
+        state.viewMode = 'aux';
+        state.selectedRow = 'auxA';
+      } else if (state.viewMode === 'aux') {
+        state.viewMode = 'bar';
+        state.selectedRow = 'note'; // Bar mode doesn't use row selection
+      } else {
+        state.viewMode = 'parameters';
+        state.selectedRow = 'note';
+      }
     },
+
+    /**
+     * Toggle row visibility
+     */
+    toggleRowVisibility: (state, action: PayloadAction<PatternRow>) => {
+      const row = action.payload;
+      state.visibleRows[row] = !state.visibleRows[row];
+    },
+
+    /**
+     * Set row visibility
+     */
+    setRowVisibility: (state, action: PayloadAction<{ row: PatternRow; visible: boolean }>) => {
+      const { row, visible } = action.payload;
+      state.visibleRows[row] = visible;
+    },
+
+    /**
+     * Toggle row collapsed state
+     */
+    toggleRowCollapsed: (state, action: PayloadAction<PatternRow>) => {
+      const row = action.payload;
+      state.collapsedRows[row] = !state.collapsedRows[row];
+    },
+
+    /**
+     * Set row collapsed state
+     */
+    setRowCollapsed: (state, action: PayloadAction<{ row: PatternRow; collapsed: boolean }>) => {
+      const { row, collapsed } = action.payload;
+      state.collapsedRows[row] = collapsed;
+    },
+  },
+  extraReducers: (builder) => {
+    // Close pattern editor when scene editor opens (mutual exclusion)
+    builder.addCase(openScene, (state) => {
+      if (state.openPatternId) {
+        logger.log('[patternEditor] Closing pattern editor due to scene editor opening');
+        state.openPatternId = null;
+        state.selectedRow = 'note';
+        state.selectedSteps = [];
+        state.currentBarIndex = 0;
+        state.viewMode = 'parameters';
+      }
+    });
   },
 });
 
@@ -164,6 +239,10 @@ export const {
   copySteps,
   clearClipboard,
   toggleViewMode,
+  toggleRowVisibility,
+  setRowVisibility,
+  toggleRowCollapsed,
+  setRowCollapsed,
 } = patternEditorSlice.actions;
 
 export default patternEditorSlice.reducer;

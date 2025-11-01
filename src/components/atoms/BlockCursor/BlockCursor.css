@@ -53,21 +53,21 @@
   width: 0.5em;
   height: 1em;
   font-size: var(--font-size-sm);
-  padding: 0 2px;
+  padding: 0 var(--spacing-xs);
 }
 
 .block-cursor--md {
   width: 0.6em;
   height: 1em;
   font-size: var(--font-size-base);
-  padding: 0 2px;
+  padding: 0 var(--spacing-xs);
 }
 
 .block-cursor--lg {
   width: 0.7em;
   height: 1.2em;
   font-size: var(--font-size-md);
-  padding: 0 3px;
+  padding: 0 var(--spacing-xs);
 }
 
 /* Reduced Motion */

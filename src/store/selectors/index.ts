@@ -1,33 +1,43 @@
 /**
  * Cyclone - Selector Barrel Export
  * Central export point for all selectors
+ *
+ * DATA SELECTORS: From song.ts (CKS-native format)
+ * UI STATE SELECTORS: From tracks.ts and patterns.ts
  */
 
-// Pattern selectors
+// Song selectors (CKS-native format - DATA)
 export {
-  selectAllPatterns,
-  selectEditingPatternId,
-  selectPatternsByTrack,
-  selectSelectedPatterns,
-  selectPatternEndPosition,
-  selectTimelineEndPosition,
-  selectPatternById,
-  selectIsPatternSelected,
-  selectPatternCount,
-} from './patterns';
+  selectSongState,
+  selectMetadata,
+  selectCurrentSongName,
+  selectCurrentSong,
+  selectAllScenes,
+  selectAvailableInstruments,
+  selectTrackSettingsById,
+  selectAllTracks,        // DATA from CKS
+  selectTrackById,        // DATA from CKS
+  selectTrackCount,       // DATA from CKS
+  selectTrackIndexById,   // DATA from CKS
+  selectAllPatterns,      // DATA from CKS
+  selectPatternsByTrack,  // DATA from CKS
+  selectSelectedPatterns, // DATA from CKS
+  selectPatternById,      // DATA from CKS
+  selectIsPatternSelected,// DATA from CKS
+  selectPatternCount,     // DATA from CKS
+  selectTimelineEndPosition, // DATA from CKS
+} from './song';
 
-// Track selectors
+// Track UI state selectors (editing/moving state only)
 export {
-  selectAllTracks,
   selectEditingTrackId,
   selectMovingTrackId,
-  selectTrackById,
-  selectTrackOrder,
-  selectTrackCount,
-  selectTrackIndexById,
-  selectIsTrackEditing,
-  selectIsTrackMoving,
 } from './tracks';
+
+// Pattern UI state selectors (editing state only)
+export {
+  selectEditingPatternId,
+} from './patterns';
 
 // Selection selectors
 export {

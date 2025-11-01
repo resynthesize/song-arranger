@@ -1,0 +1,232 @@
+/**
+ * Cyclone Theme - Modern Minimal
+ * Additional styling and overrides for the modern minimalist theme
+ *
+ * Token values are defined in ../tokens/*.css under .app.theme-modern
+ * This file contains theme-specific component overrides and global styles
+ */
+
+/* ============================================
+   MODERN THEME GLOBAL STYLES
+   Applied when .app.theme-modern class is present
+   ============================================ */
+
+.app.theme-modern {
+  /* Ensure JetBrains Mono is used everywhere */
+  font-family: var(--font-family-primary) !important;
+  font-weight: var(--font-weight-normal);
+
+  /* Base colors */
+  background-color: var(--color-bg);
+  color: var(--color-primary);
+
+  /* Modern uses default (auto) cursor, not custom */
+  cursor: auto !important;
+}
+
+/* Force modern font on all elements */
+.app.theme-modern *,
+.app.theme-modern button,
+.app.theme-modern input,
+.app.theme-modern select,
+.app.theme-modern textarea {
+  font-family: var(--font-family-primary) !important;
+}
+
+/* ============================================
+   DISABLE ALL RETRO EFFECTS IN MODERN THEME
+   ============================================ */
+
+/* No text shadows or glows */
+.app.theme-modern h1,
+.app.theme-modern h2,
+.app.theme-modern h3,
+.app.theme-modern h4,
+.app.theme-modern h5,
+.app.theme-modern h6,
+.app.theme-modern a,
+.app.theme-modern button,
+.app.theme-modern span,
+.app.theme-modern div,
+.app.theme-modern p {
+  text-shadow: none !important;
+}
+
+/* No box shadows/glows on most elements (only where explicitly needed) */
+.app.theme-modern button,
+.app.theme-modern input {
+  box-shadow: none !important;
+}
+
+/* ============================================
+   MODERN LINK STYLES
+   ============================================ */
+
+.app.theme-modern a {
+  color: var(--color-highlight);
+  text-shadow: none;
+  transition: color var(--transition-fast);
+}
+
+.app.theme-modern a:hover,
+.app.theme-modern a:focus {
+  color: var(--color-primary);
+  text-shadow: none;
+}
+
+/* ============================================
+   MODERN SELECTION COLOR
+   ============================================ */
+
+.app.theme-modern ::selection {
+  background-color: rgba(74, 158, 255, 0.3);
+  color: var(--color-primary);
+}
+
+/* ============================================
+   MODERN SCROLLBAR STYLING
+   ============================================ */
+
+.app.theme-modern ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.app.theme-modern ::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+.app.theme-modern ::-webkit-scrollbar-thumb {
+  background: var(--color-secondary);
+  border-radius: 5px;
+  border: 2px solid var(--color-bg);
+}
+
+.app.theme-modern ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-highlight);
+}
+
+/* ============================================
+   MODERN FOCUS STYLES
+   ============================================ */
+
+.app.theme-modern :focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ============================================
+   MODERN BUTTON STYLING
+   Clean, minimal approach
+   ============================================ */
+
+.app.theme-modern button {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--button-padding-y) var(--button-padding-x);
+  transition: var(--transition-colors);
+}
+
+.app.theme-modern button:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+  border-color: var(--color-highlight);
+}
+
+.app.theme-modern button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.app.theme-modern button:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* ============================================
+   MODERN INPUT STYLING
+   ============================================ */
+
+.app.theme-modern input,
+.app.theme-modern textarea,
+.app.theme-modern select {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  color: var(--color-primary);
+  transition: var(--transition-border);
+}
+
+.app.theme-modern input:focus,
+.app.theme-modern textarea:focus,
+.app.theme-modern select:focus {
+  border-color: var(--color-highlight);
+  outline: none;
+}
+
+.app.theme-modern input:disabled,
+.app.theme-modern textarea:disabled,
+.app.theme-modern select:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* ============================================
+   HIDE CRT EFFECTS IN MODERN THEME
+   ============================================ */
+
+.app.theme-modern .crt-effects,
+.app.theme-modern .terminal-noise,
+.app.theme-modern .scanlines {
+  display: none !important;
+}
+
+/* ============================================
+   MODERN PANEL/CARD STYLING
+   ============================================ */
+
+.app.theme-modern .panel,
+.app.theme-modern .card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   MODERN MENU/DROPDOWN STYLING
+   ============================================ */
+
+.app.theme-modern .menu,
+.app.theme-modern .dropdown {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ============================================
+   NOTES ON MODERN THEME
+   ============================================
+
+   The modern theme overrides are primarily defined in token files
+   under .app.theme-modern selectors.
+
+   This file contains:
+     - Global element styling (fonts, colors)
+     - Effect disabling (no glows, no CRT effects)
+     - Component base styles (buttons, inputs)
+     - Browser-specific styling (scrollbars, selection)
+
+   Key differences from retro:
+     - No phosphor glow effects
+     - No scanlines or CRT effects
+     - JetBrains Mono font (smaller sizes)
+     - Thinner borders
+     - Subtle shadows instead of glows
+     - Faster transitions
+     - Blue highlights instead of green
+
+   ============================================ */

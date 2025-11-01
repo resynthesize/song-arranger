@@ -30,11 +30,11 @@
 }
 
 .hud__border--top {
-  margin-top: 2px;
+  margin-top: var(--spacing-xs);
 }
 
 .hud__border--bottom {
-  margin-bottom: 2px;
+  margin-bottom: var(--spacing-xs);
 }
 
 /* Main content area */

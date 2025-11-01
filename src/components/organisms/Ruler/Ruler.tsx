@@ -6,7 +6,10 @@
 import { useMemo, useState, useRef, useEffect, MouseEvent } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { setZoomFocused, setViewportOffset } from '@/store/slices/timelineSlice';
-import { updateSceneName, setEditingScene, clearEditingScene } from '@/store/slices/scenesSlice';
+import { setEditingScene, clearEditingScene } from '@/store/slices/scenesSlice';
+import { openScene } from '@/store/slices/sceneEditorSlice';
+import { renameScene } from '@/store/slices/songSlice/slice';
+import { selectAllScenes } from '@/store/selectors';
 import { RulerTick } from '../../molecules/RulerTick';
 import { SceneMarker } from '../../molecules/SceneMarker';
 import type { ViewportState, ID } from '@/types';
@@ -32,7 +35,7 @@ const beatsToTimeString = (beats: number, tempo: number): string => {
 const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps) => {
   const dispatch = useAppDispatch();
   const tempo = useAppSelector((state) => state.timeline.tempo);
-  const scenes = useAppSelector((state) => state.scenes.scenes);
+  const scenes = useAppSelector(selectAllScenes); // Get scenes from CKS data
   const editingSceneId = useAppSelector((state) => state.scenes.editingSceneId);
 
   // Drag state for zoom and scroll
@@ -104,12 +107,13 @@ const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps)
 
   // Handle scene marker editing
   const handleSceneDoubleClick = (sceneId: ID) => {
-    dispatch(setEditingScene(sceneId));
+    // Open scene editor in bottom pane instead of inline name editing
+    dispatch(openScene(sceneId));
   };
 
   const handleSceneNameChange = (sceneId: ID, newName: string) => {
     if (newName.trim()) {
-      dispatch(updateSceneName({ sceneId, name: newName.trim() }));
+      dispatch(renameScene({ sceneId, newName: newName.trim() }));
     }
   };
 
@@ -215,50 +219,57 @@ const Ruler = ({ viewport, snapValue: _snapValue, onPositionClick }: RulerProps)
       {/* Header space to align with lane headers */}
       <div className="ruler__header" />
 
-      {/* Content area with bar numbers and grid markers */}
-      <div
-        className={`ruler__content ${isDragging ? 'ruler__content--dragging' : ''}`}
-        onMouseDown={handleMouseDown}
-      >
-        {/* Scene markers */}
-        {scenes.map((scene) => {
-          const scenePosition = beatsToViewportPx(scene.position, viewport);
-          return (
-            <SceneMarker
-              key={scene.id}
-              id={scene.id}
-              name={scene.name}
-              position={scenePosition}
-              isEditing={editingSceneId === scene.id}
-              onDoubleClick={() => { handleSceneDoubleClick(scene.id); }}
-              onNameChange={(newName) => { handleSceneNameChange(scene.id, newName); }}
-              onStopEditing={handleSceneStopEditing}
+      {/* Content area split into two rows */}
+      <div className="ruler__content">
+        {/* Bar row - contains bar numbers, time markers, and grid */}
+        <div
+          className={`ruler__bar-row ${isDragging ? 'ruler__bar-row--dragging' : ''}`}
+          onMouseDown={handleMouseDown}
+        >
+          {/* Bar numbers and time markers */}
+          {bars.map(({ barNumber, position, beats }) => (
+            <RulerTick
+              key={`bar-${barNumber.toString()}`}
+              barNumber={barNumber}
+              position={position}
+              timeString={beatsToTimeString(beats, tempo)}
+              onClick={handleClick}
             />
-          );
-        })}
+          ))}
 
-        {/* Bar numbers and time markers */}
-        {bars.map(({ barNumber, position, beats }) => (
-          <RulerTick
-            key={`bar-${barNumber.toString()}`}
-            barNumber={barNumber}
-            position={position}
-            timeString={beatsToTimeString(beats, tempo)}
-            onClick={handleClick}
-          />
-        ))}
+          {/* Grid markers - always 4 divisions between bar numbers */}
+          {gridLines.map(({ position }, index) => (
+            <div
+              key={`grid-${index.toString()}`}
+              className="ruler__grid-tick"
+              style={{ left: `${position.toString()}px` }}
+              onClick={() => { handleClick(position); }}
+            >
+              │
+            </div>
+          ))}
+        </div>
 
-        {/* Grid markers - always 4 divisions between bar numbers */}
-        {gridLines.map(({ position }, index) => (
-          <div
-            key={`grid-${index.toString()}`}
-            className="ruler__grid-tick"
-            style={{ left: `${position.toString()}px` }}
-            onClick={() => { handleClick(position); }}
-          >
-            │
-          </div>
-        ))}
+        {/* Scene row - contains scene markers as blocks */}
+        <div className="ruler__scene-row">
+          {scenes.map((scene) => {
+            const scenePosition = beatsToViewportPx(scene.position, viewport);
+            return (
+              <SceneMarker
+                key={scene.id}
+                id={scene.id}
+                name={scene.name}
+                position={scenePosition}
+                duration={scene.duration}
+                viewport={viewport}
+                isEditing={editingSceneId === scene.id}
+                onDoubleClick={() => { handleSceneDoubleClick(scene.id); }}
+                onNameChange={(newName) => { handleSceneNameChange(scene.id, newName); }}
+                onStopEditing={handleSceneStopEditing}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );

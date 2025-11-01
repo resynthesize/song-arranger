@@ -78,3 +78,13 @@ export const MINIMAP_EMBEDDED_PADDING = 2;
  * Minimap overlay width in pixels (floating window mode)
  */
 export const MINIMAP_OVERLAY_WIDTH = 400;
+
+/**
+ * Track collapsed height in pixels (minimal height when track is folded)
+ */
+export const TRACK_COLLAPSED_HEIGHT = 30;
+
+/**
+ * Minimum track height in pixels (cannot resize smaller than this)
+ */
+export const MIN_TRACK_HEIGHT = TRACK_COLLAPSED_HEIGHT;

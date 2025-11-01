@@ -1,16 +1,16 @@
 /* Container */
 .container {
   position: relative;
-  width: 32px;
+  width: 1.125rem; /* 18px @ 16px base */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  transition: transform 0.15s ease;
+  gap: var(--spacing-xs);
+  transition: transform var(--transition-fast);
 }
 
 .container:hover {
-  transform: translateY(-1px);
+  transform: translateY(-0.0625rem); /* -1px */
 }
 
 .clickable {
@@ -18,140 +18,148 @@
 }
 
 .clickable:focus {
-  outline: 2px solid var(--color-primary, #00ff00);
-  outline-offset: 2px;
+  outline: var(--border-width-base) solid var(--color-primary);
+  outline-offset: var(--spacing-xs);
 }
 
 /* Label */
 .label {
-  font-size: 10px;
-  font-family: 'VT323', 'Share Tech Mono', 'Courier', monospace;
-  color: var(--color-text, #e0e0e0);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-primary);
+  color: var(--color-text);
   text-align: center;
   white-space: nowrap;
-  opacity: 0.9;
+  opacity: var(--opacity-full);
 }
 
 /* Bar Container and Fill */
 .barContainer {
   flex: 1;
-  width: 24px;
+  width: 0.625rem; /* 10px @ 16px base */
   position: relative;
-  border: 1px solid var(--color-border, #444);
-  background: var(--color-bg-tertiary, #2a2a2a);
+  border: var(--border-width-thin) solid var(--color-border);
+  background: var(--color-bg-tertiary);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .container:hover .barContainer {
-  border-color: var(--color-accent, #00ff88);
-  background: rgba(0, 255, 136, 0.05);
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
 }
 
 .barFill {
   width: 100%;
-  background: var(--color-accent, #00ff88);
-  transition: height 0.2s ease, background-color 0.15s ease;
-  box-shadow: 0 0 2px rgba(0, 255, 136, 0.3);
+  background: var(--bar-color, var(--color-accent));
+  transition: height var(--transition-base), background-color var(--transition-fast);
+  box-shadow: var(--phosphor-glow-xs);
 }
 
 /* Active State */
 .active .barFill {
-  background: var(--color-accent, #00ff88);
-  box-shadow: 0 0 4px rgba(0, 255, 136, 0.4);
+  background: var(--bar-color, var(--color-accent));
+  box-shadow: var(--phosphor-glow-sm);
 }
 
 .active .barContainer {
-  border-color: var(--color-border, #555);
-  background: var(--color-bg-tertiary, #2a2a2a);
+  border-color: var(--color-border);
+  background: var(--color-bg-tertiary);
 }
 
-/* Inactive State */
+/* Inactive State (Gate Off) */
+.container:not(.active) {
+  opacity: var(--opacity-muted);
+}
+
 .container:not(.active) .barFill {
-  background: rgba(136, 136, 136, 0.3);
+  background: color-mix(in srgb, var(--color-dim) 30%, transparent);
   box-shadow: none;
 }
 
 .container:not(.active) .barContainer {
-  border-color: rgba(68, 68, 68, 0.5);
-  background: rgba(42, 42, 42, 0.5);
+  border-color: color-mix(in srgb, var(--color-border) 50%, transparent);
+  background: color-mix(in srgb, var(--color-bg-tertiary) 50%, transparent);
+}
+
+.container:not(.active) .label {
+  opacity: var(--opacity-semi);
 }
 
 /* Selected State */
 .selected .barContainer {
-  border-color: var(--color-accent, #00ff88);
-  border-width: 2px;
-  background: rgba(0, 255, 136, 0.15);
-  box-shadow: 0 0 6px rgba(0, 255, 136, 0.3);
+  border-color: var(--color-accent);
+  border-width: var(--border-width-base);
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  box-shadow: var(--phosphor-glow-md);
 }
 
 .selected .barFill {
-  box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+  box-shadow: var(--phosphor-glow-lg);
 }
 
 .selected .label {
-  color: var(--color-accent, #00ff88);
-  font-weight: bold;
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
 }
 
 /* Skipped State */
 .skipped .barContainer {
   background: repeating-linear-gradient(
     45deg,
-    rgba(42, 42, 42, 0.5),
-    rgba(42, 42, 42, 0.5) 4px,
-    rgba(136, 0, 0, 0.2) 4px,
-    rgba(136, 0, 0, 0.2) 8px
+    color-mix(in srgb, var(--color-bg-tertiary) 50%, transparent),
+    color-mix(in srgb, var(--color-bg-tertiary) 50%, transparent) var(--spacing-xs),
+    color-mix(in srgb, var(--primitive-red-600) 20%, transparent) var(--spacing-xs),
+    color-mix(in srgb, var(--primitive-red-600) 20%, transparent) var(--spacing-sm)
   );
-  opacity: 0.5;
+  opacity: var(--opacity-semi);
 }
 
 .skipped .barFill {
-  opacity: 0.5;
+  opacity: var(--opacity-semi);
 }
 
 .skipped .label {
-  opacity: 0.5;
+  opacity: var(--opacity-semi);
   text-decoration: line-through;
 }
 
 /* Tie Indicator */
 .tieIndicator {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 6px;
-  height: 6px;
-  border: 1px dashed var(--color-accent, #00ff88);
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  width: var(--spacing-xs);
+  height: var(--spacing-xs);
+  border: var(--border-width-thin) dashed var(--color-accent);
   border-radius: 50%;
-  background: rgba(0, 255, 136, 0.2);
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
   pointer-events: none;
 }
 
 /* Last Step Indicator */
 .lastStep .barContainer {
-  border-right: 3px solid var(--color-accent, #00ff88);
-  box-shadow: 2px 0 4px rgba(0, 255, 136, 0.3);
+  border-right: var(--border-width-thick) solid var(--color-accent);
+  box-shadow: var(--phosphor-glow-sm);
 }
 
 /* Beyond Last Step State */
 .beyondLast {
-  opacity: 0.3;
+  opacity: var(--opacity-muted);
 }
 
 .beyondLast .barContainer {
-  border-color: rgba(68, 68, 68, 0.3);
-  background: rgba(42, 42, 42, 0.3);
+  border-color: color-mix(in srgb, var(--color-border) 30%, transparent);
+  background: color-mix(in srgb, var(--color-bg-tertiary) 30%, transparent);
 }
 
 .beyondLast .barFill {
-  background: rgba(136, 136, 136, 0.2);
+  background: color-mix(in srgb, var(--color-dim) 20%, transparent);
 }
 
 .beyondLast .label {
-  opacity: 0.5;
+  opacity: var(--opacity-semi);
 }
 
 /* Responsive adjustments for accessibility */

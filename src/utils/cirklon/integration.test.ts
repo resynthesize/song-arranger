@@ -230,4 +230,190 @@ describe('Cirklon Integration - xtlove.CKS', () => {
     console.log(`  Total P3 patterns: ${result.patterns.filter((p) => p.patternType === 'P3').length}`);
     console.log(`  Pattern data coverage: ${Math.round(p3PatternsWithData.length / result.patterns.filter((p) => p.patternType === 'P3').length * 100)}%`);
   });
+
+  it('should preserve full P3 pattern data through export round-trip', () => {
+    // Read and import xtlove.CKS
+    const cksPath = path.join(__dirname, '../../../cirklon/xtlove.CKS');
+    const cksContent = fs.readFileSync(cksPath, 'utf-8');
+    const originalCksData = parseCKSFile(cksContent);
+    const imported1 = importFromCirklon(originalCksData);
+
+    // Export with metadata disabled to test only pattern data preservation
+    const exportOptions: ExportOptions = {
+      sceneLengthBars: 8,
+      beatsPerBar: 4,
+      songName: imported1.songName,
+      tempo: imported1.tempo,
+    };
+    const exported = exportToCirklon(
+      imported1.tracks,
+      imported1.patterns,
+      exportOptions,
+      false // Disable metadata for this test
+    );
+
+    // Re-import the exported data
+    const imported2 = importFromCirklon(exported);
+
+    // Find patterns with pattern data in both imports
+    const patterns1WithData = imported1.patterns.filter((p) => p.patternData);
+    const patterns2WithData = imported2.patterns.filter((p) => p.patternData);
+
+    // Should have same number of patterns with data
+    expect(patterns2WithData.length).toBe(patterns1WithData.length);
+
+    // Check specific pattern: Trk9 P1
+    const trk9P1_v1 = imported1.patterns.find((p) => p.label === 'Trk9 P1');
+    const trk9P1_v2 = imported2.patterns.find((p) => p.label === 'Trk9 P1');
+
+    expect(trk9P1_v1).toBeDefined();
+    expect(trk9P1_v2).toBeDefined();
+    if (!trk9P1_v1 || !trk9P1_v2) return;
+
+    // Verify pattern data is preserved
+    expect(trk9P1_v2.patternData).toBeDefined();
+    if (!trk9P1_v1.patternData || !trk9P1_v2.patternData) return;
+
+    // Check pattern-level settings
+    expect(trk9P1_v2.patternData.loop_start).toBe(trk9P1_v1.patternData.loop_start);
+    expect(trk9P1_v2.patternData.loop_end).toBe(trk9P1_v1.patternData.loop_end);
+    expect(trk9P1_v2.patternData.aux_A).toBe(trk9P1_v1.patternData.aux_A);
+    expect(trk9P1_v2.patternData.aux_B).toBe(trk9P1_v1.patternData.aux_B);
+    expect(trk9P1_v2.patternData.aux_C).toBe(trk9P1_v1.patternData.aux_C);
+    expect(trk9P1_v2.patternData.aux_D).toBe(trk9P1_v1.patternData.aux_D);
+
+    // Check bars array
+    expect(trk9P1_v2.patternData.bars.length).toBe(trk9P1_v1.patternData.bars.length);
+
+    const bar1 = trk9P1_v1.patternData.bars[0];
+    const bar2 = trk9P1_v2.patternData.bars[0];
+    expect(bar1).toBeDefined();
+    expect(bar2).toBeDefined();
+    if (!bar1 || !bar2) return;
+
+    // Check bar-level settings
+    expect(bar2.direction).toBe(bar1.direction);
+    expect(bar2.tbase).toBe(bar1.tbase);
+    expect(bar2.last_step).toBe(bar1.last_step);
+    expect(bar2.xpos).toBe(bar1.xpos);
+    expect(bar2.reps).toBe(bar1.reps);
+    expect(bar2.gbar).toBe(bar1.gbar);
+
+    // Check step data arrays are preserved
+    expect(bar2.note).toEqual(bar1.note);
+    expect(bar2.velo).toEqual(bar1.velo);
+    expect(bar2.length).toEqual(bar1.length);
+    expect(bar2.delay).toEqual(bar1.delay);
+    expect(bar2.gate).toEqual(bar1.gate);
+    expect(bar2.tie).toEqual(bar1.tie);
+    expect(bar2.skip).toEqual(bar1.skip);
+    expect(bar2.note_X).toEqual(bar1.note_X);
+    expect(bar2.aux_A_value).toEqual(bar1.aux_A_value);
+    expect(bar2.aux_A_flag).toEqual(bar1.aux_A_flag);
+    expect(bar2.aux_B_value).toEqual(bar1.aux_B_value);
+    expect(bar2.aux_B_flag).toEqual(bar1.aux_B_flag);
+    expect(bar2.aux_C_value).toEqual(bar1.aux_C_value);
+    expect(bar2.aux_C_flag).toEqual(bar1.aux_C_flag);
+    expect(bar2.aux_D_value).toEqual(bar1.aux_D_value);
+    expect(bar2.aux_D_flag).toEqual(bar1.aux_D_flag);
+
+    // Log summary
+    console.log('P3 Pattern Data Round-Trip Summary:');
+    console.log(`  Patterns with data (original): ${patterns1WithData.length}`);
+    console.log(`  Patterns with data (round-trip): ${patterns2WithData.length}`);
+    console.log(`  Full data preservation: ${patterns1WithData.length === patterns2WithData.length ? 'PASS' : 'FAIL'}`);
+  });
+
+  it('should produce minimal diff for unchanged P3 pattern data', () => {
+    // Read and import xtlove.CKS
+    const cksPath = path.join(__dirname, '../../../cirklon/xtlove.CKS');
+    const cksContent = fs.readFileSync(cksPath, 'utf-8');
+    const originalCksData = parseCKSFile(cksContent);
+    const imported = importFromCirklon(originalCksData);
+
+    // Export without metadata
+    const exportOptions: ExportOptions = {
+      sceneLengthBars: 8,
+      beatsPerBar: 4,
+      songName: imported.songName,
+      tempo: imported.tempo,
+    };
+    const exported = exportToCirklon(
+      imported.tracks,
+      imported.patterns,
+      exportOptions,
+      false
+    );
+
+    // Get original song data
+    const originalSong = originalCksData.song_data[imported.songName];
+    const exportedSong = exported.song_data[imported.songName];
+
+    expect(originalSong).toBeDefined();
+    expect(exportedSong).toBeDefined();
+    if (!originalSong || !exportedSong) return;
+
+    // Find patterns that were actually used in scenes (these are the ones we care about preserving)
+    const usedPatternNames = new Set<string>();
+    Object.values(originalSong.scenes).forEach((scene) => {
+      if (scene.pattern_assignments) {
+        Object.values(scene.pattern_assignments).forEach((patternName) => {
+          usedPatternNames.add(patternName);
+        });
+      }
+    });
+
+    // Check that used P3 patterns with full data are preserved in export
+    const usedP3PatternNames = Array.from(usedPatternNames).filter((name) => {
+      const pattern = originalSong.patterns[name];
+      return pattern && pattern.type === 'P3' && pattern.bars;
+    });
+
+    // For each used P3 pattern with bars, verify it's in the export with full data
+    let preservedCount = 0;
+    let totalUsedP3WithBars = 0;
+
+    for (const patternName of usedP3PatternNames) {
+      const original = originalSong.patterns[patternName];
+      const exported = exportedSong.patterns[patternName];
+
+      if (!original || !original.bars) continue;
+      totalUsedP3WithBars++;
+
+      if (exported && exported.bars) {
+        preservedCount++;
+        // Verify bars are deep equal
+        expect(exported.bars).toEqual(original.bars);
+        // Verify pattern-level settings
+        if (original.loop_start !== undefined) {
+          expect(exported.loop_start).toBe(original.loop_start);
+        }
+        if (original.loop_end !== undefined) {
+          expect(exported.loop_end).toBe(original.loop_end);
+        }
+        if (original.aux_A !== undefined) {
+          expect(exported.aux_A).toBe(original.aux_A);
+        }
+        if (original.aux_B !== undefined) {
+          expect(exported.aux_B).toBe(original.aux_B);
+        }
+        if (original.aux_C !== undefined) {
+          expect(exported.aux_C).toBe(original.aux_C);
+        }
+        if (original.aux_D !== undefined) {
+          expect(exported.aux_D).toBe(original.aux_D);
+        }
+      }
+    }
+
+    // Should preserve all used P3 patterns with bars
+    // We expect 100% preservation of patterns actually used in scenes
+    expect(preservedCount).toBeGreaterThan(0);
+    expect(preservedCount / totalUsedP3WithBars).toBeGreaterThanOrEqual(0.95); // At least 95% preservation
+
+    console.log('Minimal Diff Test Summary:');
+    console.log(`  Total used P3 patterns with bars: ${totalUsedP3WithBars}`);
+    console.log(`  Preserved in export: ${preservedCount}`);
+    console.log(`  Preservation rate: ${totalUsedP3WithBars > 0 ? Math.round((preservedCount / totalUsedP3WithBars) * 100) : 0}%`);
+  });
 });

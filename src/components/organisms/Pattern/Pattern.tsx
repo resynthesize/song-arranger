@@ -6,11 +6,12 @@
 import { useState, useRef, useEffect, useMemo, MouseEvent, KeyboardEvent, memo } from 'react';
 import ContextMenu, { type MenuItem } from '../ContextMenu';
 import { PatternHandle } from '../../molecules/PatternHandle';
-import type { ID, Position, Duration, ViewportState } from '@/types';
+import type { ID, Position, Duration, ViewportState, P3PatternData } from '@/types';
 import { beatsToViewportPx } from '@/utils/viewport';
 import { logger } from '@/utils/debug';
 import { usePatternDrag } from '@/hooks/usePatternDrag';
 import { usePatternResize } from '@/hooks/usePatternResize';
+import { extractVelocityGraph, extractDensityHeatmap } from '@/utils/patternVisualization';
 import styles from './Pattern.module.css';
 
 interface PatternProps {
@@ -28,6 +29,7 @@ interface PatternProps {
   color?: string;
   muted?: boolean;
   patternType?: 'P3' | 'CK';
+  patternData?: P3PatternData; // Full P3 pattern data (for gate visualization)
   externalVerticalDragDeltaY?: number;
   onSelect: (patternId: ID, isMultiSelect: boolean) => void;
   onMove: (patternId: ID, newPosition: Position, delta: number) => void;
@@ -57,6 +59,7 @@ const Pattern = ({
   color,
   muted = false,
   patternType = 'P3',
+  patternData,
   externalVerticalDragDeltaY,
   onSelect,
   onMove,
@@ -76,7 +79,7 @@ const Pattern = ({
   const patternRef = useRef<HTMLDivElement>(null);
 
   // Use custom hooks for drag and resize
-  const { isDragging, isCopying, verticalDragDeltaY, handleDragStart } = usePatternDrag({
+  const { isDragging, isCopying, verticalDragDeltaY, horizontalDragDeltaX, handleDragStart } = usePatternDrag({
     id,
     trackId,
     position,
@@ -109,17 +112,30 @@ const Pattern = ({
   // Convert beats to viewport-relative pixels (memoized for performance)
   const leftPx = useMemo(() => beatsToViewportPx(position, viewport), [position, viewport]);
 
-  // Use sceneDuration for display width if available (for loop visualization)
-  // Otherwise use the actual pattern duration (memoized for performance)
-  const displayDuration = useMemo(
-    () => (sceneDuration && sceneDuration > duration ? sceneDuration : duration),
-    [sceneDuration, duration]
-  );
+  // Duration from props already accounts for bar repetitions (calculated by selector)
+  // Visual width handling:
+  // - If pattern > scene: clamp to scene boundary
+  // - If pattern < scene: extend to scene boundary (show looping)
+  // - If no scene: use pattern duration
+  const displayDuration = useMemo(() => {
+    if (!sceneDuration) {
+      // No scene boundary defined - use actual pattern duration
+      return duration;
+    }
+    // Always use scene duration to fill the scene (whether looping or clamping)
+    return sceneDuration;
+  }, [duration, sceneDuration]);
 
   const widthPx = useMemo(() => displayDuration * viewport.zoom, [displayDuration, viewport.zoom]);
   const originalWidthPx = useMemo(() => duration * viewport.zoom, [duration, viewport.zoom]);
 
-  // Calculate if pattern loops (sceneDuration > duration) (memoized for performance)
+  // Calculate if pattern exceeds scene boundary (duration > sceneDuration)
+  const exceedsSceneBoundary = useMemo(
+    () => sceneDuration !== undefined && duration > sceneDuration,
+    [sceneDuration, duration]
+  );
+
+  // Calculate if pattern loops within scene (sceneDuration > duration)
   const hasLoopVisualization = useMemo(
     () => sceneDuration !== undefined && sceneDuration > duration,
     [sceneDuration, duration]
@@ -131,6 +147,17 @@ const Pattern = ({
   );
 
   const handleMouseDown = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    console.log(`[Pattern] handleMouseDown on pattern`, {
+      id,
+      button: e.button,
+      targetClass: target.className,
+      targetTag: target.tagName,
+      isHandle: target.classList.contains('pattern__handle'),
+      clientX: e.clientX,
+      clientY: e.clientY
+    });
+
     if (e.button !== 0) return; // Only left click
 
     // Prevent text selection during drag and stop event from bubbling to Timeline
@@ -139,7 +166,8 @@ const Pattern = ({
 
     // Selection is handled in handleDragStart (on content area) or here (on handles)
     // Only select here if clicking on handles, not content
-    if ((e.target as HTMLElement).classList.contains('pattern__handle')) {
+    if (target.classList.contains('pattern__handle')) {
+      console.log(`[Pattern] Clicking on handle, selecting pattern ${id}`);
       const isMultiSelect = e.altKey;
       onSelect(id, isMultiSelect);
     }
@@ -247,8 +275,23 @@ const Pattern = ({
     }
   }, [effectiveVerticalDragDeltaY, isDragging, id]);
 
-  // Show type badge if pattern is wide enough (> 20px) (memoized for performance)
-  const showTypeBadge = useMemo(() => widthPx > 20, [widthPx]);
+  // Extract velocity bars from pattern data (memoized for performance)
+  const velocityBars = useMemo(() => extractVelocityGraph(patternData), [patternData]);
+
+  // Extract density heatmap for small patterns (memoized for performance)
+  const densityRegions = useMemo(() => extractDensityHeatmap(patternData, 8), [patternData]);
+
+  // Determine which visualization to show based on pattern width
+  // < 40px: No visualization (too small)
+  // 40-100px: Density heatmap (abstract regions)
+  // > 100px: Full velocity graph
+  const visualizationType = useMemo(() => {
+    if (widthPx < 40) return 'none';
+    if (widthPx < 100) return 'density';
+    return 'velocity';
+  }, [widthPx]);
+
+  const showVisualization = useMemo(() => visualizationType !== 'none', [visualizationType]);
 
   return (
     <div
@@ -264,8 +307,10 @@ const Pattern = ({
       style={{
         left: `${leftPx.toString()}px`,
         width: `${widthPx.toString()}px`,
-        transform: effectiveVerticalDragDeltaY !== 0 ? `translateY(${effectiveVerticalDragDeltaY}px)` : undefined,
-        zIndex: (isDragging || isResizing || effectiveVerticalDragDeltaY !== 0) ? 1000 : undefined,
+        transform: (effectiveVerticalDragDeltaY !== 0 || horizontalDragDeltaX !== 0)
+          ? `translate(${horizontalDragDeltaX}px, ${effectiveVerticalDragDeltaY}px)`
+          : undefined,
+        zIndex: (isDragging || isResizing || effectiveVerticalDragDeltaY !== 0 || horizontalDragDeltaX !== 0) ? 1000 : undefined,
         ...(color ? { '--pattern-color': color } as React.CSSProperties : {}),
         ...(hasLoopVisualization ? { '--pattern-original-width-percent': `${originalWidthPercentage}%` } as React.CSSProperties : {}),
       }}
@@ -281,18 +326,64 @@ const Pattern = ({
           }}
         />
       )}
+      {exceedsSceneBoundary && (
+        <div
+          className={styles.overflowIndicator}
+          title={`Pattern duration (${duration} beats) exceeds scene boundary (${sceneDuration} beats)`}
+        />
+      )}
+      {/* Info Bar - Top section with mute status, name, and type - spans full width */}
+      {widthPx > 20 && (
+        <div
+          className={styles.infoBar}
+          onMouseDown={handleDragStart}
+          onDoubleClick={handleDoubleClick}
+        >
+          {muted && <span className={styles.muteIcon}>🔇</span>}
+          {displayLabel && <span className={styles.infoName}>{displayLabel}</span>}
+          <span className={styles.infoType} data-testid={`pattern-${id}-type-badge`}>{patternType}</span>
+        </div>
+      )}
       <PatternHandle patternId={id} edge="left" onResizeStart={handleResizeStart} />
-      <div
-        className={styles.content}
-        onMouseDown={handleDragStart}
-        onDoubleClick={handleDoubleClick}
-      >
-        {showTypeBadge && (
-          <div className={styles.typeBadge} data-testid={`pattern-${id}-type-badge`}>
-            {patternType}
+      <div className={styles.patternBody}>
+        <div
+          className={styles.content}
+          onMouseDown={handleDragStart}
+          onDoubleClick={handleDoubleClick}
+        >
+        {showVisualization && visualizationType === 'velocity' && velocityBars.length > 0 && (
+          <div className={styles.velocityVisualization} data-testid={`pattern-${id}-velocity`}>
+            {velocityBars.map((bar, index) => (
+              bar.isActive && (
+                <div
+                  key={`${bar.barIndex}-${bar.stepIndex}-${index}`}
+                  className={styles.velocityBar}
+                  style={{
+                    left: `${bar.position}%`,
+                    height: `${bar.height}%`,
+                  }}
+                />
+              )
+            ))}
           </div>
         )}
-        {isEditing ? (
+        {showVisualization && visualizationType === 'density' && densityRegions.length > 0 && (
+          <div className={styles.densityVisualization} data-testid={`pattern-${id}-density`}>
+            {densityRegions.map((region, index) => (
+              <div
+                key={`region-${index}`}
+                className={styles.densityRegion}
+                style={{
+                  left: `${region.startPercent}%`,
+                  width: `${region.endPercent - region.startPercent}%`,
+                  opacity: 0.4 + (region.density * 0.5), // Scale density to opacity (40-90%)
+                }}
+              />
+            ))}
+          </div>
+        )}
+        {/* Label editing input - shown over content when editing */}
+        {isEditing && (
           <input
             ref={inputRef}
             className={`${styles.labelInput} terminal-input`}
@@ -304,13 +395,8 @@ const Pattern = ({
             }}
             data-testid={`pattern-${id}-label-input`}
           />
-        ) : (
-          displayLabel && (
-            <div className={styles.label} data-testid={`pattern-${id}-label`}>
-              {displayLabel}
-            </div>
-          )
         )}
+        </div>
       </div>
       <PatternHandle patternId={id} edge="right" onResizeStart={handleResizeStart} />
       {contextMenu && (
